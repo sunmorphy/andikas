@@ -102,7 +102,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                             <motion.div
                                 initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
                                 whileInView={{ clipPath: "inset(0% 0% 0% 0%)" }}
-                                viewport={{ once: true, margin: "-100px" }}
+                                viewport={{ once: true, margin: "-20px" }}
                                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                 className="relative w-full aspect-[16/9] overflow-hidden"
                             >
@@ -110,7 +110,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                     className="relative w-full h-full"
                                     initial={{ scale: 1.12 }}
                                     whileInView={{ scale: 1 }}
-                                    viewport={{ once: true, margin: "-100px" }}
+                                    viewport={{ once: true, margin: "-20px" }}
                                     transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
                                 >
                                     <Image
@@ -130,7 +130,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                 className="prose prose-neutral max-w-none text-neutral-600 leading-relaxed text-base md:text-lg"
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-80px" }}
+                                viewport={{ once: true, margin: "-20px" }}
                                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             >
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.content}</ReactMarkdown>
@@ -144,7 +144,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                         key={idx}
                                         initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
                                         whileInView={{ clipPath: "inset(0% 0% 0% 0%)" }}
-                                        viewport={{ once: true, margin: "-80px" }}
+                                        viewport={{ once: true, margin: "-20px" }}
                                         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                         className="relative w-full aspect-[16/9] overflow-hidden"
                                     >
@@ -152,7 +152,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                             className="relative w-full h-full"
                                             initial={{ scale: 1.15 }}
                                             whileInView={{ scale: 1 }}
-                                            viewport={{ once: true, margin: "-80px" }}
+                                            viewport={{ once: true, margin: "-20px" }}
                                             transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
                                         >
                                             <Image
