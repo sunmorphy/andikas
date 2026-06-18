@@ -1,0 +1,48 @@
+{
+    "home": {
+        "viewWork": "View My Work",
+        "journey": "My Journey",
+        "academic": "Academic Roots",
+        "professional": "Professional Path",
+        "selectedWorks": "Selected Works",
+        "seeAllWorks": "See All Works",
+        "letsTalk": "Let's talk.",
+        "freelance": "I'm currently open to projects and collaborations.",
+        "skills": "Skills",
+        "showMore": "Show more",
+        "showLess": "Show less",
+        "contact": "Contact",
+        "hireMe": "Hire Me",
+        "downloadResume": "Resume"
+    },
+    "projects": {
+        "allWorks": "All Works",
+        "noProjects": "No projects match your search criteria.",
+        "project": "PROJECT",
+        "uiDesign": "UI DESIGN",
+        "frontend": "FRONTEND",
+        "backToProjects": "Back to projects",
+        "type": "Type",
+        "personalProject": "Personal Project",
+        "groupProject": "Group Project",
+        "tags": "Tags",
+        "year": "Year",
+        "noCoverImage": "No cover image available.",
+        "content": "Content",
+        "interestedTitle": "Interested in working together?",
+        "letsTalk": "Let's Talk"
+    },
+    "footer": {
+        "rights": "Andikas. All rights reserved."
+    },
+    "notFound": {
+        "heading": "Page not found.",
+        "description": "The page you're looking for doesn't exist or has been moved.",
+        "goHome": "Go back home"
+    },
+    "profile": {
+        "role": "Software Engineer",
+        "location": "Surabaya, Indonesia",
+        "description": "Experienced software engineer specializing in cross-platform mobile development for fintech and banking, with a broadening foundation in backend systems, cloud infrastructure, and scalable API design."
+    }
+}

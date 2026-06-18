@@ -1,0 +1,48 @@
+{
+    "home": {
+        "viewWork": "Lihat Karya Saya",
+        "journey": "Perjalanan Saya",
+        "academic": "Akar Akademis",
+        "professional": "Jalur Profesional",
+        "selectedWorks": "Karya Pilihan",
+        "seeAllWorks": "Lihat Semua Karya",
+        "letsTalk": "Mari Berbincang.",
+        "freelance": "Saya saat ini terbuka untuk proyek dan kolaborasi.",
+        "skills": "Keahlian",
+        "showMore": "Tampilkan lebih",
+        "showLess": "Tampilkan lebih sedikit",
+        "contact": "Kontak",
+        "hireMe": "Rekrut Saya",
+        "downloadResume": "CV"
+    },
+    "projects": {
+        "allWorks": "Semua Karya",
+        "noProjects": "Tidak ada proyek yang cocok dengan kriteria pencarian Anda.",
+        "project": "PROYEK",
+        "uiDesign": "DESAIN UI",
+        "frontend": "FRONTEND",
+        "backToProjects": "Kembali ke proyek",
+        "type": "Tipe",
+        "personalProject": "Proyek Pribadi",
+        "groupProject": "Proyek Kelompok",
+        "tags": "Tag",
+        "year": "Tahun",
+        "noCoverImage": "Gambar sampul tidak tersedia.",
+        "content": "Konten",
+        "interestedTitle": "Tertarik untuk bekerja sama?",
+        "letsTalk": "Mari Berbincang"
+    },
+    "footer": {
+        "rights": "Andikas. Seluruh hak cipta dilindungi."
+    },
+    "notFound": {
+        "heading": "Halaman tidak ditemukan.",
+        "description": "Halaman yang Anda cari tidak ada atau telah dipindahkan.",
+        "goHome": "Kembali ke beranda"
+    },
+    "profile": {
+        "role": "Software Engineer",
+        "location": "Surabaya, Indonesia",
+        "description": "Software engineer berpengalaman yang berspesialisasi dalam pengembangan mobile lintas platform untuk fintech dan perbankan, dengan fondasi yang terus berkembang dalam sistem backend, infrastruktur cloud, dan desain API yang skalabel."
+    }
+}

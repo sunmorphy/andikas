@@ -1,0 +1,48 @@
+{
+    "home": {
+        "viewWork": "Bekijk Mijn Werk",
+        "journey": "Mijn Reis",
+        "academic": "Academische Wortels",
+        "professional": "Professionele Weg",
+        "selectedWorks": "Geselecteerde Werken",
+        "seeAllWorks": "Bekijk Alle Werken",
+        "letsTalk": "Laten we praten.",
+        "freelance": "Ik sta momenteel open voor projecten en samenwerkingen.",
+        "skills": "Vaardigheden",
+        "showMore": "Meer tonen",
+        "showLess": "Minder tonen",
+        "contact": "Contact",
+        "hireMe": "Huur mij in",
+        "downloadResume": "CV"
+    },
+    "projects": {
+        "allWorks": "Alle Werken",
+        "noProjects": "Geen projecten komen overeen met uw zoekcriteria.",
+        "project": "PROJECT",
+        "uiDesign": "UI-ONTWERP",
+        "frontend": "FRONTEND",
+        "backToProjects": "Terug naar projecten",
+        "type": "Type",
+        "personalProject": "Persoonlijk Project",
+        "groupProject": "Groepsproject",
+        "tags": "Tags",
+        "year": "Jaar",
+        "noCoverImage": "Geen omslagafbeelding beschikbaar.",
+        "content": "Inhoud",
+        "interestedTitle": "Interesse in samenwerken?",
+        "letsTalk": "Laten we praten"
+    },
+    "footer": {
+        "rights": "Andikas. Alle rechten voorbehouden."
+    },
+    "notFound": {
+        "heading": "Pagina niet gevonden.",
+        "description": "De pagina die u zoekt bestaat niet of is verplaatst.",
+        "goHome": "Terug naar home"
+    },
+    "profile": {
+        "role": "Software Engineer",
+        "location": "Surabaya, Indonesia",
+        "description": "Ervaren software-engineer gespecialiseerd in cross-platform mobiele ontwikkeling voor fintech en banking, met een groeiende basis in backendsystemen, cloudinfrastructuur en schaalbaar API-ontwerp."
+    }
+}

@@ -1,0 +1,48 @@
+{
+    "home": {
+        "viewWork": "作品を見る",
+        "journey": "私の道のり",
+        "academic": "学歴",
+        "professional": "職歴",
+        "selectedWorks": "厳選された作品",
+        "seeAllWorks": "すべての作品を見る",
+        "letsTalk": "話しましょう。",
+        "freelance": "現在、プロジェクトやコラボレーションを歓迎しています。",
+        "skills": "スキル",
+        "showMore": "もっと見る",
+        "showLess": "折りたたむ",
+        "contact": "お問い合わせ",
+        "hireMe": "採用する",
+        "downloadResume": "履歴書"
+    },
+    "projects": {
+        "allWorks": "すべての作品",
+        "noProjects": "検索条件に一致するプロジェクトはありません。",
+        "project": "プロジェクト",
+        "uiDesign": "UIデザイン",
+        "frontend": "フロントエンド",
+        "backToProjects": "プロジェクト一覧へ",
+        "type": "種別",
+        "personalProject": "個人プロジェクト",
+        "groupProject": "グループプロジェクト",
+        "tags": "タグ",
+        "year": "年",
+        "noCoverImage": "カバー画像はありません。",
+        "content": "コンテンツ",
+        "interestedTitle": "一緒に仕事をしませんか？",
+        "letsTalk": "話しましょう"
+    },
+    "footer": {
+        "rights": "Andikas. 無断転載を禁じます。"
+    },
+    "notFound": {
+        "heading": "ページが見つかりません。",
+        "description": "お探しのページは存在しないか、移動された可能性があります。",
+        "goHome": "ホームに戻る"
+    },
+    "profile": {
+        "role": "ソフトウェアエンジニア",
+        "location": "Surabaya, Indonesia",
+        "description": "フィンテックおよびバンキング向けのクロスプラットフォームモバイル開発を専門とする経験豊富なソフトウェアエンジニア。バックエンドシステム、クラウドインフラ、スケーラブルなAPI設計においても知識を深めています。"
+    }
+}

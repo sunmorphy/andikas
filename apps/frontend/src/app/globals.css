@@ -1,0 +1,147 @@
+@import "tailwindcss";
+/* @import "@phosphor-icons/web/regular"; */
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-neutral-50: #FCFCFC;
+  --color-neutral-100: #F6F5F2;
+  --color-neutral-250: #E7E6E2;
+  --color-neutral-200: #E2E1DD;
+  --color-neutral-300: #CECDC9;
+  --color-neutral-400: #9E9D99;
+  --color-neutral-550: #50504D;
+  --color-neutral-500: #787773;
+  --color-neutral-600: #5D5C58;
+  --color-neutral-700: #42413E;
+  --color-neutral-800: #21201E;
+  --color-neutral-900: #0C0C0B;
+
+  --color-surface: #F2F1ED;
+  --color-surface-dark: #F2F1ED;
+
+  --color-card: #FAF9F6;
+  --color-card-dark: #FAF9F6;
+
+  --color-ink: #000000;
+  --color-ink-dark: #000000;
+  --color-ink-muted: #5A5A57;
+  --color-ink-muted-dark: #5A5A57;
+
+  --color-brand-100: #FFEAE8;
+  --color-brand-900: #E52521;
+
+  --font-sans: "Neue Haas Grotesk Text Pro", "Neue Haas Grotesk Disp Pro", "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    letter-spacing: -0.04em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+}
+
+@layer utilities {
+
+  .shadow-neo-sm,
+  .shadow-neo,
+  .shadow-neo-lg,
+  .shadow-neo-xl,
+  .hover\:shadow-neo-sm:hover,
+  .hover\:shadow-neo:hover,
+  .hover\:shadow-neo-lg:hover,
+  .hover\:shadow-neo-xl:hover,
+  .fixed-shadow-neo-sm,
+  .fixed-shadow-neo,
+  .fixed-shadow-neo-lg,
+  .fixed-shadow-neo-xl {
+    box-shadow: none !important;
+  }
+
+  /* Text stroke for outline typography headings */
+  .text-stroke-outlined {
+    -webkit-text-stroke: 1px currentColor;
+    color: transparent;
+  }
+}
+
+@media print {
+
+  /* Hide typical web-chrome elements */
+  header,
+  footer,
+  nav,
+  button,
+  .no-print,
+  .theme-toggle {
+    display: none !important;
+  }
+
+  /* Reset document flow for paper printing */
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Layout constraints for page layouts */
+  @page {
+    size: landscape;
+    margin: 0 !important;
+    /* Hides browser URL and date headers/footers */
+  }
+
+  /* Avoid page break splits mid-card */
+  .print-avoid-break {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Enforce headers to stay with content */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Preserve background colors/borders exactly as styled */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Make sure images aren't cut in half */
+  img {
+    max-width: 100% !important;
+    break-inside: avoid !important;
+  }
+
+  /* Force page break after this element during print */
+  .print-break-after-page {
+    break-after: page !important;
+    page-break-after: always !important;
+  }
+}
+
+/* Hide scrollbar globally across all browsers while keeping scrollability */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+}

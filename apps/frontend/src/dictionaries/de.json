@@ -1,0 +1,48 @@
+{
+    "home": {
+        "viewWork": "Meine Arbeit ansehen",
+        "journey": "Mein Weg",
+        "academic": "Akademische Wurzeln",
+        "professional": "Beruflicher Werdegang",
+        "selectedWorks": "Ausgewählte Werke",
+        "seeAllWorks": "Alle Werke ansehen",
+        "letsTalk": "Lass uns reden.",
+        "freelance": "Ich bin derzeit offen für Projekte und Kooperationen.",
+        "skills": "Fähigkeiten",
+        "showMore": "Mehr anzeigen",
+        "showLess": "Weniger anzeigen",
+        "contact": "Kontakt",
+        "hireMe": "Engagiere mich",
+        "downloadResume": "Lebenslauf"
+    },
+    "projects": {
+        "allWorks": "Alle Werke",
+        "noProjects": "Keine Projekte entsprechen Ihren Suchkriterien.",
+        "project": "PROJEKT",
+        "uiDesign": "UI-DESIGN",
+        "frontend": "FRONTEND",
+        "backToProjects": "Zurück zu Projekten",
+        "type": "Typ",
+        "personalProject": "Persönliches Projekt",
+        "groupProject": "Gruppenprojekt",
+        "tags": "Tags",
+        "year": "Jahr",
+        "noCoverImage": "Kein Titelbild verfügbar.",
+        "content": "Inhalt",
+        "interestedTitle": "Interesse an einer Zusammenarbeit?",
+        "letsTalk": "Lass uns reden"
+    },
+    "footer": {
+        "rights": "Andikas. Alle Rechte vorbehalten."
+    },
+    "notFound": {
+        "heading": "Seite nicht gefunden.",
+        "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+        "goHome": "Zurück zur Startseite"
+    },
+    "profile": {
+        "role": "Softwareentwickler",
+        "location": "Surabaya, Indonesia",
+        "description": "Erfahrener Software-Engineer mit Spezialisierung auf plattformübergreifende Mobile-Entwicklung im Fintech- und Bankensektor, mit wachsender Expertise in Backend-Systemen, Cloud-Infrastruktur und skalierbarem API-Design."
+    }
+}

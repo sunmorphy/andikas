@@ -1,0 +1,64 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import "../globals.css";
+import { cn } from "@/lib/utils";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Locale } from "@/i18n-config";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import HashScroller from "@/components/HashScroller";
+import ThemeProvider from "@/components/ThemeProvider";
+
+import { i18n } from "@/i18n-config";
+
+export const metadata: Metadata = {
+  title: "Andika Sultanrafli - Portfolio",
+  description: "Independent product designer and full-stack engineer building digital experiences.",
+};
+
+export async function generateStaticParams() {
+  return i18n.locales.map((locale) => ({ lang: locale }));
+}
+
+export default async function RootLayout({
+  children,
+  params,
+}: Readonly<{
+  children: React.ReactNode;
+  params: Promise<{ lang: string }>;
+}>) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang as Locale;
+
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  let preconnectUrl = "http://localhost:3000";
+  try {
+    preconnectUrl = new URL(backendUrl).origin;
+  } catch (e) {
+    preconnectUrl = backendUrl;
+  }
+
+  return (
+    <html lang={lang} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href={preconnectUrl} crossOrigin="anonymous" />
+      </head>
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-surface text-ink font-sans selection:bg-brand-900 selection:text-neutral-50"
+      >
+        <ThemeProvider>
+          <Header lang={lang} />
+          <main className="min-h-[calc(100vh-160px)]">{children}</main>
+          <Footer lang={lang} />
+          <Analytics />
+          <SpeedInsights />
+          <Suspense fallback={null}>
+            <HashScroller />
+          </Suspense>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
