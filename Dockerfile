@@ -15,8 +15,8 @@ RUN bun install --frozen-lockfile
 # Copy the rest of the workspace source code
 COPY . .
 
-# Build the types package and the backend app (skips frontend and CMS)
-RUN bun --filter @andikas/types build && bun --filter andikas-be build
+# Build the backend app (which compiles the typescript code)
+RUN bun --filter andikas-be build
 
 # Stage 2: Production runner
 FROM oven/bun:1-slim AS runner
