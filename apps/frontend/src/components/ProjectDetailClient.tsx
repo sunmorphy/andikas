@@ -28,7 +28,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
     const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
     return (
-        <article ref={containerRef} className="w-4/5 mx-auto px-6 pt-24 pb-32 relative pl-6 md:pl-0">
+        <article ref={containerRef} className="w-full md:w-4/5 mx-auto px-6 pt-24 pb-32 relative">
             <div className="w-full relative z-10">
                 <Link href={`/${lang}/projects`} className="inline-flex items-center gap-2 text-xs font-bold text-neutral-400 hover:text-brand-900 transition-colors mb-12 md:mb-32 uppercase tracking-widest cursor-pointer">
                     <ArrowLeft className="w-3.5 h-3.5" /> {dict.projects.backToProjects}
@@ -41,7 +41,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                         style={{ scaleY }}
                     />
 
-                    <aside className="col-span-12 md:col-span-4 md:sticky md:top-28 self-start flex flex-col gap-8 w-full pr-0 md:pr-12 pl-6 md:pl-0">
+                    <aside className="col-span-12 md:col-span-4 md:sticky md:top-28 self-start flex flex-col gap-8 w-full pr-0 md:pr-12 pl-0">
                         <div className="flex flex-col gap-5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                             <div className="mb-8 pb-6 md:mb-16 md:pb-12 w-full">
                                 <div className="overflow-hidden">
@@ -87,7 +87,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                         </div>
                     </aside>
 
-                    <div className="col-span-12 md:col-span-8 flex flex-col gap-16 w-full pl-6 md:pl-12">
+                    <div className="col-span-12 md:col-span-8 flex flex-col gap-16 w-full pl-0 md:pl-12">
 
                         <motion.div
                             className="text-lg md:text-xl text-neutral-600 font-normal leading-relaxed"
