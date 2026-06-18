@@ -27,27 +27,37 @@ const PORT = process.env.PORT || 3000;
 // Security Middleware
 app.use(helmet());
 
-const allowedOrigins = [
-    'https://andikas-cms.vercel.app',
-    'https://andikas-dev.vercel.app',
-    'https://andikas.dev',
-    // Localhost for development
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:3001'
-];
-
 app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
+        try {
+            const url = new URL(origin);
+            const isAllowedSubdomain = url.hostname === 'andikas.dev' || url.hostname.endsWith('.andikas.dev');
+            const isLocalhost = url.hostname === 'localhost' || url.hostname.endsWith('.localhost');
+
+            if (isAllowedSubdomain || isLocalhost) {
+                return callback(null, true);
+            }
+        } catch (e) {
+            // Ignore URL parsing errors
         }
-        return callback(null, true);
+
+        // Fallback to allowed origins env variable if set
+        const envOrigins = process.env.ALLOWED_ORIGINS
+            ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+            : [
+                'https://andikas-cms.vercel.app',
+                'https://andikas-dev.vercel.app'
+            ];
+
+        if (envOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
     },
     credentials: true,
 }));
