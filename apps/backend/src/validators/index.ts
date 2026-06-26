@@ -48,6 +48,14 @@ export type UserDetailsInput = z.infer<typeof userDetailsSchema>;
 export const skillSchema = z.object({
     name: z.string().min(1, 'Name is required').max(255),
     icon: z.string().optional().nullable(),
+    order: z.preprocess((val) => {
+        if (typeof val === 'string') {
+            if (val.trim() === '') return undefined;
+            const parsed = parseInt(val, 10);
+            return isNaN(parsed) ? val : parsed;
+        }
+        return val;
+    }, z.number().int().optional().default(0)),
 });
 
 export type SkillInput = z.infer<typeof skillSchema>;

@@ -1,4 +1,4 @@
-import { fetchExperience, fetchEducation, fetchProjects, fetchSkills } from "@/lib/api";
+import { fetchUser, fetchExperience, fetchEducation, fetchProjects, fetchSkills } from "@/lib/api";
 import { getDictionary } from "@/get-dictionary";
 import { Locale } from "@/i18n-config";
 import JourneyTimeline from "@/components/JourneyTimeline";
@@ -12,8 +12,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const resolvedParams = await params;
   const lang = resolvedParams.lang as Locale;
 
-  const [dict, experiences, educations, skills, projectsRes] = await Promise.all([
+  const [dict, user, experiences, educations, skills, projectsRes] = await Promise.all([
     getDictionary(lang),
+    fetchUser(undefined, lang),
     fetchExperience(undefined, lang),
     fetchEducation(undefined, lang),
     fetchSkills(undefined),
@@ -27,10 +28,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
       {/* Hero Section (Scroll-pinned & split text) */}
       <HeroScrollSection
-        description={dict.profile.description}
-        role={dict.profile.role}
-        profilePhoto={userConfig.profilePhoto}
-        name={userConfig.name}
+        description={user?.description || dict.profile.description}
+        role={user?.role || dict.profile.role}
+        profilePhoto={user?.profilePhoto || userConfig.profilePhoto}
+        name={user?.name || userConfig.name}
+        location={user?.location || "INDONESIA"}
       />
 
       {/* Skills Section (Scroll-pinned horizontal marquee) */}

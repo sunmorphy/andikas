@@ -119,7 +119,7 @@ export default function ProjectsClient({
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                     <div>
                         <h1 className="text-6xl font-bold tracking-tight uppercase text-neutral-900 leading-none">
-                            ALL PROJECTS<span className="text-brand-900">.</span>
+                            PROJECTS<span className="text-brand-900">.</span>
                         </h1>
                     </div>
                 </div>

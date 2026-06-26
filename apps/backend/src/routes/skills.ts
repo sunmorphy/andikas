@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, asc, sql } from 'drizzle-orm';
 import multer from 'multer';
 import sharp from 'sharp';
 import { db } from '../db/index.js';
@@ -32,7 +32,7 @@ router.get('/', asyncHandler(async (req, res) => {
     const userId = req.user?.userId;
 
     const allSkills = userId
-        ? await db.select().from(skills).where(eq(skills.userId, userId))
+        ? await db.select().from(skills).where(eq(skills.userId, userId)).orderBy(asc(skills.order))
         : [];
 
     res.json({
@@ -50,7 +50,7 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
         throw new NotFoundError('User not found');
     }
 
-    const userSkills = await db.select().from(skills).where(eq(skills.userId, user.id));
+    const userSkills = await db.select().from(skills).where(eq(skills.userId, user.id)).orderBy(asc(skills.order));
 
     res.json({
         success: true,
@@ -61,7 +61,7 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
 router.get('/userId/:userId', asyncHandler(async (req, res) => {
     const { userId } = req.params;
 
-    const userSkills = await db.select().from(skills).where(eq(skills.userId, userId!));
+    const userSkills = await db.select().from(skills).where(eq(skills.userId, userId!)).orderBy(asc(skills.order));
 
     res.json({
         success: true,
@@ -115,10 +115,17 @@ router.post('/', requireAuth, upload.single('icon'), asyncHandler(async (req, re
     const iconName = `${req.file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
     const result = await uploadToR2(iconBuffer, iconName, user.username, 'skills');
 
+    const [maxOrderResult] = await db
+        .select({ maxOrder: sql<number>`COALESCE(MAX(${skills.order}), 0)` })
+        .from(skills)
+        .where(eq(skills.userId, req.user!.userId));
+    const nextOrder = (maxOrderResult?.maxOrder ?? 0) + 1;
+
     const [newSkill] = await db.insert(skills).values({
         name: validated.name,
         icon: result.url,
         userId: req.user!.userId,
+        order: nextOrder,
     }).returning();
 
     triggerRevalidation('skills');
@@ -126,6 +133,33 @@ router.post('/', requireAuth, upload.single('icon'), asyncHandler(async (req, re
     res.status(201).json({
         success: true,
         data: newSkill,
+    });
+}));
+
+router.put('/reorder', requireAuth, asyncHandler(async (req, res) => {
+    const { ids } = req.body;
+    if (!Array.isArray(ids)) {
+        return res.status(400).json({
+            success: false,
+            error: 'ids must be an array of IDs',
+        });
+    }
+
+    const parsedIds = ids.map(id => typeof id === 'string' ? parseInt(id, 10) : id).filter(id => !isNaN(id));
+
+    await db.transaction(async (tx) => {
+        for (let i = 0; i < parsedIds.length; i++) {
+            await tx.update(skills)
+                .set({ order: i, updatedAt: new Date() })
+                .where(and(eq(skills.id, parsedIds[i]!), eq(skills.userId, req.user!.userId)));
+        }
+    });
+
+    triggerRevalidation('skills');
+
+    res.json({
+        success: true,
+        message: 'Skills reordered successfully',
     });
 }));
 
@@ -164,7 +198,12 @@ router.put('/:id', requireAuth, upload.single('icon'), asyncHandler(async (req, 
 
     const [updated] = await db
         .update(skills)
-        .set({ name: validated.name, icon: iconUrl, updatedAt: new Date() })
+        .set({ 
+            name: validated.name, 
+            icon: iconUrl, 
+            order: validated.order ?? existing.order,
+            updatedAt: new Date() 
+        })
         .where(eq(skills.id, skillId))
         .returning();
 

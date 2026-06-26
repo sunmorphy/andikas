@@ -93,7 +93,7 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
                                                         src={project.coverImage}
                                                         alt={project.title}
                                                         fill
-                                                        className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                                                        className="object-cover transition-all duration-500"
                                                         sizes="(max-width: 768px) 75vw, 400px"
                                                     />
                                                 ) : (
@@ -112,7 +112,7 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
                         </motion.div>
                     </div>
 
-                    <Link href={`/${lang}/projects`} className="inline-flex self-end items-center gap-2 text-xs font-bold tracking-widest uppercase text-neutral-900 hover:text-brand-900 transition-colors border-b-2 border-neutral-950 pb-1 mt-4 z-10">
+                    <Link href={`/${lang}/projects`} className="inline-flex self-end items-center gap-2 text-xl md:text-sm font-bold tracking-widest uppercase text-neutral-900 hover:text-brand-900 transition-colors border-b-2 border-neutral-950 pb-1 mt-4 z-10">
                         {seeAllWorksText} <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>

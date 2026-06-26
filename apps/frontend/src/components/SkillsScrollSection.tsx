@@ -33,18 +33,18 @@ export default function SkillsScrollSection({ skills, title }: Props) {
                 </motion.div>
 
                 <motion.div
-                    className="w-4/5 mx-auto px-6 relative z-10"
+                    className="w-[90%] md:w-4/5 mx-auto px-4 md:px-6 relative z-10"
                     style={{ opacity: contentOpacity, y: contentY }}
                     transition={{ ease: "linear" }}
                 >
-                    <h2 className="text-3xl md:text-5xl font-bold mb-16 tracking-tight uppercase text-neutral-900">
+                    <h2 className="text-3xl md:text-5xl font-bold mb-6 md:mb-16 tracking-tight uppercase text-neutral-900">
                         {title}<span className="text-brand-900">.</span>
                     </h2>
 
-                    <div className="w-full py-10">
-                        <div className="flex flex-wrap gap-x-8 gap-y-4 text-2xl md:text-4xl font-bold uppercase tracking-tighter text-neutral-900 leading-relaxed max-w-4xl">
+                    <div className="w-full py-4 md:py-10">
+                        <div className="flex flex-wrap gap-x-4 md:gap-x-8 gap-y-2 md:gap-y-4 text-lg sm:text-xl md:text-4xl font-bold uppercase tracking-tighter text-neutral-900 leading-relaxed max-w-4xl">
                             {skills.map((skill, sIdx) => (
-                                <span key={skill.id} className="inline-flex items-center gap-3">
+                                <span key={skill.id} className="inline-flex items-center gap-2 md:gap-3">
                                     {skill.name}
                                     {sIdx < skills.length - 1 && <span className="text-brand-900 font-normal">/</span>}
                                 </span>

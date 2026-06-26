@@ -34,6 +34,7 @@ export const skills = pgTable('skills', {
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 255 }).notNull(),
     icon: text('icon').notNull(), // URL to image hosting
+    order: integer('order').default(0).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

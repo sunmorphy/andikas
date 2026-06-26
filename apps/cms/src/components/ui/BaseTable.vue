@@ -1,13 +1,46 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   columns: { key: string; label: string }[]
   data: any[]
   loading?: boolean
+  draggable?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'reorder', payload: { from: number; to: number }): void
 }>()
 
 const hasData = computed(() => props.data && props.data.length > 0)
+
+const draggedIndex = ref<number | null>(null)
+const dragOverIndex = ref<number | null>(null)
+
+function onDragStart(event: DragEvent, index: number) {
+  draggedIndex.value = index
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', index.toString())
+  }
+}
+
+function onDragEnter(event: DragEvent, index: number) {
+  dragOverIndex.value = index
+}
+
+function onDrop(event: DragEvent, index: number) {
+  if (draggedIndex.value !== null && draggedIndex.value !== index) {
+    emit('reorder', { from: draggedIndex.value, to: index })
+  }
+  draggedIndex.value = null
+  dragOverIndex.value = null
+}
+
+function onDragEnd() {
+  draggedIndex.value = null
+  dragOverIndex.value = null
+}
 </script>
 
 <template>
@@ -20,12 +53,32 @@ const hasData = computed(() => props.data && props.data.length > 0)
     <table v-else-if="hasData" class="base-table">
       <thead>
         <tr>
+          <th v-if="draggable" class="drag-handle-col"></th>
           <th v-for="col in columns" :key="col.key">{{ col.label }}</th>
           <th v-if="$slots.actions" class="actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, index) in data" :key="row.id || index">
+        <tr 
+          v-for="(row, index) in data" 
+          :key="row.id || index"
+          :draggable="draggable"
+          @dragstart="onDragStart($event, index)"
+          @dragover.prevent
+          @dragenter="onDragEnter($event, index)"
+          @drop="onDrop($event, index)"
+          @dragend="onDragEnd"
+          :class="{ 
+            'draggable-row': draggable,
+            'is-dragging': draggedIndex === index,
+            'drag-over': dragOverIndex === index && draggedIndex !== index
+          }"
+        >
+          <td v-if="draggable" class="drag-handle-cell">
+            <svg class="drag-handle-icon" viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M8.5 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-10 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-10 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+            </svg>
+          </td>
           <td v-for="col in columns" :key="col.key">
             <slot :name="col.key" :row="row">
               {{ row[col.key] }}
@@ -104,6 +157,40 @@ const hasData = computed(() => props.data && props.data.length > 0)
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.drag-handle-col {
+  width: 40px;
+}
+
+.drag-handle-cell {
+  width: 40px;
+  text-align: center;
+  cursor: grab;
+  color: var(--color-text-tertiary);
+}
+
+.drag-handle-cell:active {
+  cursor: grabbing;
+}
+
+.drag-handle-icon {
+  opacity: 0.4;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.draggable-row:hover .drag-handle-icon {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+.is-dragging {
+  opacity: 0.4;
+  background-color: var(--color-bg-surface-hover) !important;
+}
+
+.drag-over {
+  border-top: 2px solid var(--color-primary) !important;
 }
 
 @keyframes spin {

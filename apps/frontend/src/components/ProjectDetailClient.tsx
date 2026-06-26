@@ -41,12 +41,12 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                         style={{ scaleY }}
                     />
 
-                    <aside className="col-span-12 md:col-span-4 md:sticky md:top-28 self-start flex flex-col gap-8 w-full pr-0 md:pr-12 pl-0">
+                    <aside className="col-span-12 md:col-span-4 md:sticky md:top-28 self-start flex flex-col gap-8 w-full pr-0 md:pr-6 lg:pr-12 pl-0">
                         <div className="flex flex-col gap-5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                             <div className="mb-8 pb-6 md:mb-16 md:pb-12 w-full">
                                 <div className="overflow-hidden">
                                     <motion.h1
-                                        className="text-3xl md:text-6xl font-black tracking-tighter uppercase text-neutral-900 mb-0"
+                                        className="text-3xl md:text-[clamp(1.5rem,3vw,3.75rem)] font-black tracking-tighter uppercase text-neutral-900 mb-0"
                                         initial={{ y: "100%" }}
                                         animate={{ y: 0 }}
                                         transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
@@ -90,7 +90,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                     <div className="col-span-12 md:col-span-8 flex flex-col gap-16 w-full pl-0 md:pl-12">
 
                         <motion.div
-                            className="text-lg md:text-xl text-neutral-600 font-normal leading-relaxed"
+                            className="text-xl md:text-lg text-neutral-600 font-normal leading-relaxed"
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -117,7 +117,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                         src={project.coverImage}
                                         fill
                                         alt={project.title}
-                                        className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                                        className="object-cover transition-all duration-500"
                                         sizes="(max-width: 1024px) 100vw, 1200px"
                                         priority
                                     />
@@ -127,7 +127,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
 
                         {project.content && (
                             <motion.section
-                                className="prose prose-neutral max-w-none text-neutral-600 leading-relaxed text-base md:text-lg"
+                                className="prose prose-neutral max-w-none text-neutral-600 leading-relaxed text-xl md:text-lg"
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true, margin: "-20px" }}
@@ -159,7 +159,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                                 src={img}
                                                 fill
                                                 alt={`${project.title} — gallery image ${idx + 1}`}
-                                                className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                                                className="object-cover transition-all duration-500"
                                                 sizes="(max-width: 1024px) 100vw, 1200px"
                                             />
                                         </motion.div>

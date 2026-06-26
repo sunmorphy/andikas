@@ -6,7 +6,7 @@ import { getDictionary } from "@/get-dictionary";
 import { Locale } from "@/i18n-config";
 
 export const metadata: Metadata = {
-    title: "All Projects - Andika Sultanrafli",
+    title: "Projects - Andika Sultanrafli",
     description: "A curated collection of design and development work.",
 };
 

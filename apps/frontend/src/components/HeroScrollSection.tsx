@@ -9,9 +9,10 @@ interface Props {
     role: string;
     profilePhoto: string | null;
     name: string;
+    location: string;
 }
 
-export default function HeroScrollSection({ description, role, profilePhoto, name }: Props) {
+export default function HeroScrollSection({ description, role, profilePhoto, name, location }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -33,7 +34,7 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
         <div ref={containerRef} className="w-full h-[200vh] relative">
             <div className="sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden">
                 <div className="w-[90%] md:w-4/5 mx-auto px-6 flex flex-col items-start relative">
-                    <h1 className="text-6xl md:text-[9rem] font-bold tracking-tighter leading-[0.85] uppercase text-neutral-900 w-full overflow-hidden py-2 select-none">
+                    <h1 className="text-[clamp(2.5rem,8.5vw,9rem)] font-bold tracking-tighter leading-[0.85] uppercase text-neutral-900 w-full overflow-hidden py-2 select-none">
                         <motion.span
                             className="block"
                             style={{ x: xLeft, opacity: titleOpacity }}
@@ -51,12 +52,12 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
                     </h1>
 
                     <motion.div
-                        className="grid grid-cols-2 md:grid-cols-12 gap-x-6 gap-y-4 md:gap-10 items-start mt-6 md:mt-12 w-full absolute left-6 right-6 top-[100%] md:top-auto md:relative"
+                        className="grid grid-cols-2 md:grid-cols-12 gap-x-6 gap-y-4 md:gap-10 items-start mt-6 md:mt-12 w-full absolute left-6 right-6 top-0 md:top-auto md:relative"
                         style={{ opacity: detailsOpacity, y: detailsY }}
                         transition={{ ease: "linear" }}
                     >
                         <div className="col-span-2 md:col-span-5 pr-4">
-                            <p className="text-base md:text-lg text-neutral-600 font-normal leading-relaxed">
+                            <p className="text-[1.625rem] md:text-xl text-neutral-600 font-normal leading-relaxed">
                                 {description}
                             </p>
                         </div>
@@ -68,20 +69,20 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
                             </div>
                             <div>
                                 <span className="text-neutral-400 block mb-0.5">Location</span>
-                                <span className="text-neutral-900">INDONESIA</span>
+                                <span className="text-neutral-900">{location}</span>
                             </div>
                         </div>
 
                         <div className="col-span-1 md:col-span-4 flex justify-end">
                             {profilePhoto && (
-                                <div className="relative w-full aspect-square max-w-[160px] md:max-w-[280px]">
+                                <div className="relative w-full aspect-square max-w-[240px] md:max-w-[360px]">
                                     <Image
                                         src={profilePhoto}
                                         alt={name || "Profile"}
                                         fill
-                                        className="object-cover grayscale hover:grayscale-0 transition-all duration-350"
+                                        className="object-cover transition-all duration-350"
                                         priority
-                                        sizes="(max-width: 768px) 160px, 280px"
+                                        sizes="(max-width: 768px) 240px, 360px"
                                         unoptimized={isGif}
                                     />
                                 </div>

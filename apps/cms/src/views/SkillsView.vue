@@ -57,6 +57,28 @@ onMounted(() => {
   fetchSkills()
 })
 
+async function handleReorder({ from, to }: { from: number; to: number }) {
+  const reorderedSkills = [...skills.value]
+  const [movedItem] = reorderedSkills.splice(from, 1)
+  if (!movedItem) return
+  reorderedSkills.splice(to, 0, movedItem)
+  skills.value = reorderedSkills
+
+  try {
+    const ids = reorderedSkills.map(skill => skill.id)
+    const { data } = await api.put('/skills/reorder', { ids })
+    if (data.success) {
+      showMessage('Skills reordered successfully', 'success')
+    } else {
+      showMessage(data.error || 'Failed to update skills order', 'error')
+      fetchSkills()
+    }
+  } catch (error) {
+    showMessage('Failed to save skills order', 'error')
+    fetchSkills()
+  }
+}
+
 function openCreateModal() {
   isEditing.value = false
   currentSkillId.value = ''
@@ -180,7 +202,7 @@ function formatDate(dateString: string) {
       {{ message.text }}
     </div>
 
-    <BaseTable :columns="columns" :data="skills" :loading="loading">
+    <BaseTable :columns="columns" :data="skills" :loading="loading" :draggable="true" @reorder="handleReorder">
       <template #icon="{ row }">
         <div class="skill-icon-wrap">
           <img :src="row.icon" :alt="row.name" class="skill-icon" />

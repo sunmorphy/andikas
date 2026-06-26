@@ -48,18 +48,17 @@ export default function ContactScrollSection({ dict }: Props) {
                             </motion.span>
                         </h2>
                     </div>
-
                     <motion.div
                         className="grid grid-cols-1 md:grid-cols-12 gap-10 items-end w-full relative z-20"
                         style={{ opacity: detailsOpacity, y: detailsY }}
                         transition={{ ease: "linear" }}
                     >
                         <div className="md:col-span-6">
-                            <p className="text-neutral-500 mb-10 leading-relaxed text-sm max-w-sm">
+                            <p className="text-neutral-500 mb-10 leading-relaxed text-xl md:text-base max-w-sm">
                                 {dict.home.freelance}
                             </p>
 
-                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-[10px] font-bold tracking-widest text-neutral-900 uppercase">
+                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-base md:text-xs font-bold tracking-widest text-neutral-900 uppercase">
                                 {userConfig.socialMedias.map((social, idx) => {
                                     const parts = social.split("|");
                                     const url = parts.length > 1 ? parts[1] : parts[0] || "";
@@ -81,7 +80,7 @@ export default function ContactScrollSection({ dict }: Props) {
                             </a>
 
                             {userConfig.resume && (
-                                <a href={userConfig.resume} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-neutral-500 hover:text-neutral-900 transition-colors">
+                                <a href={userConfig.resume} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-base md:text-xs font-bold uppercase tracking-widest text-neutral-500 hover:text-neutral-900 transition-colors">
                                     <span>{dict.home.downloadResume}</span>
                                     <Download className="w-3.5 h-3.5" />
                                 </a>
