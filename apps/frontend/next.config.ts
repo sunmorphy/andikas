@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       {
         // Backend image host
         protocol: "https",
-        hostname: "andikas-be.vercel.app",
+        hostname: "api.andikas.dev",
       },
       {
         // Allow any remaining CDN / object-storage URLs
@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",           // Allow all HTTPS images (covers remote skill/project icons)
-              "connect-src 'self' https://andikas-be.vercel.app",
+              "connect-src 'self' https://api.andikas.dev",
               "frame-ancestors 'self'",
             ].join("; "),
           },
