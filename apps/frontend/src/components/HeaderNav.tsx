@@ -12,6 +12,29 @@ interface Props {
 export function HeaderNav({ lang }: Props) {
     const pathname = usePathname();
     const [activeSection, setActiveSection] = useState<"home" | "work" | "about" | "contact" | "index">("home");
+    const [isFreeScroll, setIsFreeScroll] = useState(false);
+
+    useEffect(() => {
+        // Load initial state on mount
+        const saved = localStorage.getItem("free-scroll") === "true";
+        setIsFreeScroll(saved);
+        if (saved) {
+            document.documentElement.classList.add("free-scroll");
+        } else {
+            document.documentElement.classList.remove("free-scroll");
+        }
+    }, []);
+
+    const toggleScrollMode = () => {
+        const newValue = !isFreeScroll;
+        setIsFreeScroll(newValue);
+        localStorage.setItem("free-scroll", String(newValue));
+        if (newValue) {
+            document.documentElement.classList.add("free-scroll");
+        } else {
+            document.documentElement.classList.remove("free-scroll");
+        }
+    };
 
     useEffect(() => {
         // If not on the homepage, index is active for projects path, otherwise fallback to none/home
@@ -74,6 +97,12 @@ export function HeaderNav({ lang }: Props) {
             >
                 INDEX
             </Link>
+            <button 
+                onClick={toggleScrollMode}
+                className="hover:text-neutral-900 transition-colors cursor-pointer text-left border-t border-neutral-200 pt-2 mt-2 w-full text-right"
+            >
+                {isFreeScroll ? "SCROLL: FREE" : "SCROLL: SNAP"}
+            </button>
         </nav>
     );
 }

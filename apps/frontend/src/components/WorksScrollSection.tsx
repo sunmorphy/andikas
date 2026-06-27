@@ -18,6 +18,24 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
     const containerRef = useRef<HTMLDivElement>(null);
     const rowRef = useRef<HTMLDivElement>(null);
     const [maxTranslate, setMaxTranslate] = useState(0);
+    const [isFreeScroll, setIsFreeScroll] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setIsFreeScroll(document.documentElement.classList.contains("free-scroll"));
+
+            const observer = new MutationObserver(() => {
+                setIsFreeScroll(document.documentElement.classList.contains("free-scroll"));
+            });
+
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ["class"],
+            });
+
+            return () => observer.disconnect();
+        }
+    }, []);
 
     useEffect(() => {
         const updateDimensions = () => {
@@ -41,11 +59,18 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
-        offset: ["start start", "end end"],
+        offset: isFreeScroll ? ["start end", "end start"] : ["start start", "end end"],
     });
 
     // Translate the horizontal gallery from left to right as the user scrolls
     const x = useTransform(scrollYProgress, [0.05, 0.95], [0, -maxTranslate]);
+
+    // If free scroll mode is on, we fade the section in as it enters, and out as it leaves the viewport.
+    const worksOpacity = useTransform(
+        scrollYProgress,
+        isFreeScroll ? [0.15, 0.35, 0.75, 0.95] : [0, 1],
+        isFreeScroll ? [0, 1, 1, 0] : [1, 1]
+    );
 
     // Configuration for Swiss asymmetrical layouts
     const projectLayouts = [
@@ -58,17 +83,25 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
 
     return (
         <div ref={containerRef} id="selected-works" className="w-full h-[250vh] relative">
-            <div className="sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden">
+            <motion.div
+                id="works-scroll-inner"
+                className="sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden"
+                style={isFreeScroll ? undefined : { opacity: worksOpacity }}
+                initial={isFreeScroll ? { opacity: 0, y: 30 } : undefined}
+                whileInView={isFreeScroll ? { opacity: 1, y: 0 } : undefined}
+                viewport={isFreeScroll ? { once: true, margin: "-100px" } : undefined}
+                transition={isFreeScroll ? { duration: 0.8, ease: [0.16, 1, 0.3, 1] } : undefined}
+            >
                 <div className="w-4/5 mx-auto px-6 flex flex-col items-start w-full">
                     <h2 className="text-3xl md:text-5xl font-bold mb-16 tracking-tight uppercase text-neutral-900">
                         {title}<span className="text-brand-900">.</span>
                     </h2>
 
-                    <div className="w-full overflow-hidden mb-12 relative">
+                    <div className={`w-full mb-12 relative ${isFreeScroll ? "overflow-x-auto pointer-events-auto" : "overflow-hidden"}`}>
                         <motion.div
                             ref={rowRef}
                             className="flex flex-row flex-nowrap gap-6 md:gap-16 pb-8 items-end select-none"
-                            style={{ x }}
+                            style={isFreeScroll ? undefined : { x }}
                         >
                             {projects.map((project, idx) => {
                                 const layout = projectLayouts[idx % projectLayouts.length] || projectLayouts[0]!;
@@ -116,7 +149,7 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
                         {seeAllWorksText} <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

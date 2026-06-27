@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Download } from "iconoir-react";
 import { userConfig } from "@/lib/userConfig";
 
@@ -11,26 +11,69 @@ interface Props {
 
 export default function ContactScrollSection({ dict }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
+    const [isFreeScroll, setIsFreeScroll] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setIsFreeScroll(document.documentElement.classList.contains("free-scroll"));
+
+            const observer = new MutationObserver(() => {
+                setIsFreeScroll(document.documentElement.classList.contains("free-scroll"));
+            });
+
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ["class"],
+            });
+
+            return () => observer.disconnect();
+        }
+    }, []);
+
     const { scrollYProgress } = useScroll({
         target: containerRef,
-        offset: ["start start", "end end"],
+        offset: isFreeScroll ? ["start end", "end start"] : ["start start", "end end"],
     });
 
     // Animate title parts converging
-    const xLeft = useTransform(scrollYProgress, [0, 0.45], ["-30%", "0%"]);
-    const xRight = useTransform(scrollYProgress, [0, 0.45], ["30%", "0%"]);
+    const xLeftRaw = useTransform(scrollYProgress, [0, 0.45], ["-30%", "0%"]);
+    const xRightRaw = useTransform(scrollYProgress, [0, 0.45], ["30%", "0%"]);
+
+    const xLeft = isFreeScroll ? "0%" : xLeftRaw;
+    const xRight = isFreeScroll ? "0%" : xRightRaw;
 
     // Scale the red period massively, then fade it out
-    const dotScale = useTransform(scrollYProgress, [0.45, 0.65, 0.8], [1, 120, 0]);
-    const dotOpacity = useTransform(scrollYProgress, [0.75, 0.8], [1, 0]);
+    const dotScaleRaw = useTransform(scrollYProgress, [0.45, 0.65, 0.8], [1, 120, 0]);
+    const dotOpacityRaw = useTransform(scrollYProgress, [0.75, 0.8], [1, 0]);
+
+    const dotScale = isFreeScroll ? 1 : dotScaleRaw;
+    const dotOpacity = isFreeScroll ? 1 : dotOpacityRaw;
 
     // Fade and translate the contact details grid
-    const detailsOpacity = useTransform(scrollYProgress, [0.65, 0.8], [0, 1]);
-    const detailsY = useTransform(scrollYProgress, [0.65, 0.8], [60, 0]);
+    const detailsOpacityRaw = useTransform(scrollYProgress, [0.65, 0.8], [0, 1]);
+    const detailsYRaw = useTransform(scrollYProgress, [0.65, 0.8], [60, 0]);
+
+    const detailsOpacity = isFreeScroll ? 1 : detailsOpacityRaw;
+    const detailsY = isFreeScroll ? 0 : detailsYRaw;
+
+    // In free scroll mode, we fade the entire section in as it enters the viewport.
+    const contactOpacity = useTransform(
+        scrollYProgress,
+        isFreeScroll ? [0.2, 0.45] : [0, 1],
+        isFreeScroll ? [0, 1] : [1, 1]
+    );
 
     return (
         <div ref={containerRef} id="contact" className="w-full h-[150vh] relative">
-            <div className="sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden">
+            <motion.div
+                id="contact-scroll-inner"
+                className="sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden"
+                style={isFreeScroll ? undefined : { opacity: contactOpacity }}
+                initial={isFreeScroll ? { opacity: 0, y: 30 } : undefined}
+                whileInView={isFreeScroll ? { opacity: 1, y: 0 } : undefined}
+                viewport={isFreeScroll ? { once: true, margin: "-100px" } : undefined}
+                transition={isFreeScroll ? { duration: 0.8, ease: [0.16, 1, 0.3, 1] } : undefined}
+            >
                 <div className="w-4/5 mx-auto px-6 relative flex flex-col justify-center min-h-[500px]">
                     <div className="relative mb-16 select-none z-10">
                         <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase leading-[0.85] text-neutral-900">
@@ -88,7 +131,7 @@ export default function ContactScrollSection({ dict }: Props) {
                         </div>
                     </motion.div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

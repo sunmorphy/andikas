@@ -179,3 +179,60 @@
   -ms-overflow-style: none;
   /* IE and Edge */
 }
+
+/* Scroll Snap / Locking mode overrides (Free Scroll) */
+.free-scroll #hero-scroll-container {
+  height: auto !important;
+  min-height: 100vh;
+}
+.free-scroll #hero-scroll-inner {
+  position: relative !important;
+  height: auto !important;
+  min-height: 100vh;
+  padding: 8rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.free-scroll #skills {
+  height: auto !important;
+  min-height: 100vh;
+}
+.free-scroll #skills-scroll-inner {
+  position: relative !important;
+  height: auto !important;
+  min-height: 100vh;
+  padding: 8rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.free-scroll #selected-works {
+  height: auto !important;
+  min-height: 100vh;
+}
+.free-scroll #works-scroll-inner {
+  position: relative !important;
+  height: auto !important;
+  min-height: 100vh;
+  padding: 8rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.free-scroll #contact {
+  height: auto !important;
+  min-height: 100vh;
+}
+.free-scroll #contact-scroll-inner {
+  position: relative !important;
+  height: auto !important;
+  min-height: 100vh;
+  padding: 8rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
