@@ -6,8 +6,19 @@ import { getDictionary } from "@/get-dictionary";
 import { Locale } from "@/i18n-config";
 
 export const metadata: Metadata = {
-    title: "Projects - Andika Sultanrafli",
-    description: "A curated collection of design and development work.",
+    title: "Projects",
+    description: "A curated collection of product design, mobile development, and full-stack engineering work by Andika Sultanrafli.",
+    openGraph: {
+        title: "Projects - Andika Sultanrafli",
+        description: "A curated collection of product design, mobile development, and full-stack engineering work by Andika Sultanrafli.",
+        url: "https://andikas.dev/projects",
+        type: "website",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Projects - Andika Sultanrafli",
+        description: "A curated collection of product design, mobile development, and full-stack engineering work by Andika Sultanrafli.",
+    },
 };
 
 export default async function ProjectsPage({

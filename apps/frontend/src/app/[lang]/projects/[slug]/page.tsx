@@ -28,9 +28,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const project = await fetchProjectBySlug(slug, undefined, lang);
     if (!project) return { title: "Project Not Found" };
 
+    const title = `${project.title} - Andika Sultanrafli`;
+    const description = project.description;
+    const url = `https://andikas.dev/projects/${slug}`;
+
     return {
-        title: `${project.title} - Andika Sultanrafli`,
-        description: project.description,
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            url,
+            type: "article",
+            images: project.coverImage ? [{ 
+                url: project.coverImage,
+                width: 1200,
+                height: 630,
+                alt: project.title 
+            }] : undefined,
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: project.coverImage ? [project.coverImage] : undefined,
+        },
     };
 }
 

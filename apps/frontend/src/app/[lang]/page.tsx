@@ -23,8 +23,26 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
   const highlightedProjects = projectsRes.data;
 
+  const socialUrls = userConfig.socialMedias.map(sm => sm.split('|')[1]);
+
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": user?.name || userConfig.name,
+    "email": userConfig.email,
+    "jobTitle": user?.role || dict.profile.role,
+    "description": user?.description || dict.profile.description,
+    "url": `https://andikas.dev/${lang}`,
+    "image": user?.profilePhoto || userConfig.profilePhoto,
+    "sameAs": socialUrls,
+  };
+
   return (
     <div className="flex flex-col items-center w-full">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
 
       {/* Hero Section (Scroll-pinned & split text) */}
       <HeroScrollSection

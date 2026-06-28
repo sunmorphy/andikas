@@ -27,6 +27,18 @@ const PORT = process.env.PORT || 3000;
 // Security Middleware
 app.use(helmet());
 
+// Prevent any search engine from indexing API responses or resources
+app.use((req, res, next) => {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    next();
+});
+
+// Serve a flat robots.txt on the API domain to disallow crawler crawling
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.send('User-agent: *\nDisallow: /\n');
+});
+
 app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps or curl requests)
