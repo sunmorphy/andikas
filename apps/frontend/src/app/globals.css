@@ -30,7 +30,7 @@
   --color-brand-100: #FFEAE8;
   --color-brand-900: #E52521;
 
-  --font-sans: "Neue Haas Grotesk Text Pro", "Neue Haas Grotesk Disp Pro", "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-haas), "Neue Haas Grotesk Text Pro", "Neue Haas Grotesk Disp Pro", "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 @layer base {

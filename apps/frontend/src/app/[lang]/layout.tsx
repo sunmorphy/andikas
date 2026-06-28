@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import localFont from "next/font/local";
 import "../globals.css";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
@@ -11,6 +12,42 @@ import HashScroller from "@/components/HashScroller";
 import ThemeProvider from "@/components/ThemeProvider";
 
 import { i18n } from "@/i18n-config";
+
+const haasGrotesk = localFont({
+  src: [
+    {
+      path: "../fonts/HaasGrotText-55Roman.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/HaasGrotText-56Italic.woff2",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../fonts/HaasGrotText-65Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../fonts/HaasGrotText-66MediumItalic.woff2",
+      weight: "500",
+      style: "italic",
+    },
+    {
+      path: "../fonts/HaasGrotText-75Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../fonts/HaasGrotText-76BoldItalic.woff2",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-haas",
+});
 
 export const metadata: Metadata = {
   title: "Andika Sultanrafli - Portfolio",
@@ -46,7 +83,7 @@ export default async function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-screen bg-surface text-ink font-sans selection:bg-brand-900 selection:text-neutral-50"
+        className={`${haasGrotesk.variable} min-h-screen bg-surface text-ink font-sans selection:bg-brand-900 selection:text-neutral-50`}
       >
         <ThemeProvider>
           <Header lang={lang} />
