@@ -18,7 +18,7 @@ function getLocale(request: NextRequest): string {
     return preferred;
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname
 
     // Check if there is any supported locale in the pathname
@@ -39,6 +39,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-    // Matcher ignoring `/_next/` and `/api/`
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+    // Matcher ignoring `/api/`, `/_next/`, static files, favicon, robots.txt, and sitemap.xml
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)'],
 }
