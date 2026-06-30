@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '../utils/api'
+import api, { translateText } from '../utils/api'
 import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
@@ -55,6 +55,7 @@ const modalLoading = ref(false)
 const isEditing = ref(false)
 const currentId = ref('')
 const currentLang = ref(defaultLang)
+const translating = ref(false)
 
 // Form state
 const formTitle = ref('')
@@ -346,6 +347,58 @@ async function handleDelete() {
   }
 }
 
+async function handleAutoTranslate() {
+  if (translating.value) return
+  
+  const hasEnDesc = formDescription.value.en?.trim()
+  const hasEnContent = formContent.value.en?.trim()
+  
+  if (!hasEnDesc && !hasEnContent) {
+    showMessage('Please fill out at least one field (Description or Content) in English before translating.', 'error')
+    return
+  }
+  
+  translating.value = true
+  showMessage('Translating all fields from English...', 'info')
+  try {
+    const promises: Promise<any>[] = []
+    const fieldsToUpdate: string[] = []
+    
+    if (hasEnDesc) {
+      promises.push(translateText(formDescription.value.en))
+      fieldsToUpdate.push('description')
+    }
+    if (hasEnContent) {
+      promises.push(translateText(formContent.value.en))
+      fieldsToUpdate.push('content')
+    }
+    
+    const results = await Promise.all(promises)
+    
+    results.forEach((translatedMap, index) => {
+      const field = fieldsToUpdate[index]
+      if (field === 'description') {
+        formDescription.value = {
+          ...formDescription.value,
+          ...translatedMap
+        }
+      } else if (field === 'content') {
+        formContent.value = {
+          ...formContent.value,
+          ...translatedMap
+        }
+      }
+    })
+    
+    showMessage('Successfully translated all fields!', 'success')
+  } catch (error: any) {
+    console.error('Translation failed:', error)
+    showMessage(error.message || 'Failed to translate fields', 'error')
+  } finally {
+    translating.value = false
+  }
+}
+
 function showMessage(text: string, type: string) {
   message.value = { text, type }
   setTimeout(() => {
@@ -446,7 +499,7 @@ function formatDate(dateString: string) {
           </div>
         </div>
 
-        <LanguageSelector v-model="currentLang" />
+        <LanguageSelector v-model="currentLang" :translating="translating" @translate="handleAutoTranslate" />
 
         <div class="form-grid mt-4">
           <BaseInput id="title" label="Title" v-model="formTitle" @input="handleTitleChange" required />

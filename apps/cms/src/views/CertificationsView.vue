@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '../utils/api'
+import api, { translateText } from '../utils/api'
 import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
@@ -38,6 +38,7 @@ const modalLoading = ref(false)
 const isEditing = ref(false)
 const currentId = ref('')
 const currentLang = ref(defaultLang)
+const translating = ref(false)
 
 const form = ref({
   name: getEmptyLocalized(),
@@ -181,6 +182,56 @@ async function handleDelete() {
   }
 }
 
+async function handleAutoTranslate() {
+  if (translating.value) return
+  
+  const hasEnName = form.value.name.en?.trim()
+  const hasEnOrganization = form.value.issuingOrganization.en?.trim()
+  const hasEnDesc = form.value.description.en?.trim()
+  
+  if (!hasEnName && !hasEnOrganization && !hasEnDesc) {
+    showMessage('Please fill out at least one field in English before translating.', 'error')
+    return
+  }
+  
+  translating.value = true
+  showMessage('Translating all fields from English...', 'info')
+  try {
+    const promises: Promise<any>[] = []
+    const fieldsToUpdate: string[] = []
+    
+    if (hasEnName) {
+      promises.push(translateText(form.value.name.en))
+      fieldsToUpdate.push('name')
+    }
+    if (hasEnOrganization) {
+      promises.push(translateText(form.value.issuingOrganization.en))
+      fieldsToUpdate.push('issuingOrganization')
+    }
+    if (hasEnDesc) {
+      promises.push(translateText(form.value.description.en))
+      fieldsToUpdate.push('description')
+    }
+    
+    const results = await Promise.all(promises)
+    
+    results.forEach((translatedMap, index) => {
+      const field = fieldsToUpdate[index] as keyof typeof form.value
+      (form.value as any)[field] = {
+        ...(form.value as any)[field],
+        ...translatedMap
+      }
+    })
+    
+    showMessage('Successfully translated all fields!', 'success')
+  } catch (error: any) {
+    console.error('Translation failed:', error)
+    showMessage(error.message || 'Failed to translate fields', 'error')
+  } finally {
+    translating.value = false
+  }
+}
+
 function showMessage(text: string, type: string) {
   message.value = { text, type }
   setTimeout(() => {
@@ -246,7 +297,7 @@ function showMessage(text: string, type: string) {
       @confirm="handleSave"
     >
       <div class="form-container">
-        <LanguageSelector v-model="currentLang" />
+        <LanguageSelector v-model="currentLang" :translating="translating" @translate="handleAutoTranslate" />
         <BaseInput id="name" label="Certification Name" v-model="form.name[currentLang]" :required="currentLang === defaultLang" />
         <BaseInput id="org" label="Issuing Organization" v-model="form.issuingOrganization[currentLang]" :required="currentLang === defaultLang" />
         

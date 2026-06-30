@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '../utils/api'
+import api, { translateText } from '../utils/api'
 import BaseInput from '../components/ui/BaseInput.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import LanguageSelector from '../components/ui/LanguageSelector.vue'
@@ -10,6 +10,7 @@ import { PDFDocument } from 'pdf-lib'
 
 const loading = ref(true)
 const saving = ref(false)
+const translating = ref(false)
 const message = ref({ text: '', type: '' })
 const currentLang = ref(defaultLang)
 
@@ -67,6 +68,61 @@ function addSocial() {
 
 function removeSocial(index: number) {
   form.value.socialMedias.splice(index, 1)
+}
+
+async function handleAutoTranslate() {
+  if (translating.value || saving.value) return
+  
+  const hasEnName = form.value.name.en?.trim()
+  const hasEnRole = form.value.role.en?.trim()
+  const hasEnLoc = form.value.location.en?.trim()
+  const hasEnDesc = form.value.description.en?.trim()
+  
+  if (!hasEnName && !hasEnRole && !hasEnLoc && !hasEnDesc) {
+    showMessage('Please fill out at least one field in English before translating.', 'error')
+    return
+  }
+  
+  translating.value = true
+  showMessage('Translating all fields from English...', 'info')
+  try {
+    const promises: Promise<any>[] = []
+    const fieldsToUpdate: string[] = []
+    
+    if (hasEnName) {
+      promises.push(translateText(form.value.name.en))
+      fieldsToUpdate.push('name')
+    }
+    if (hasEnRole) {
+      promises.push(translateText(form.value.role.en))
+      fieldsToUpdate.push('role')
+    }
+    if (hasEnLoc) {
+      promises.push(translateText(form.value.location.en))
+      fieldsToUpdate.push('location')
+    }
+    if (hasEnDesc) {
+      promises.push(translateText(form.value.description.en))
+      fieldsToUpdate.push('description')
+    }
+    
+    const results = await Promise.all(promises)
+    
+    results.forEach((translatedMap, index) => {
+      const field = fieldsToUpdate[index] as keyof typeof form.value
+      (form.value as any)[field] = {
+        ...(form.value as any)[field],
+        ...translatedMap
+      }
+    })
+    
+    showMessage('Successfully translated all fields!', 'success')
+  } catch (error: any) {
+    console.error('Translation failed:', error)
+    showMessage(error.message || 'Failed to translate fields', 'error')
+  } finally {
+    translating.value = false
+  }
 }
 
 function handleFileSelect(event: Event) {
@@ -204,7 +260,7 @@ function showMessage(text: string, type: string) {
           </div>
         </div>
 
-        <LanguageSelector v-model="currentLang" />
+        <LanguageSelector v-model="currentLang" :translating="translating" @translate="handleAutoTranslate" />
 
         <div class="form-grid mt-4">
           <BaseInput id="name" label="Name" v-model="form.name[currentLang]" :required="currentLang === defaultLang" />

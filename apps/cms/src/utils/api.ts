@@ -7,7 +7,6 @@ const api = axios.create({
   }
 })
 
-// Add a request interceptor to add authorization token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('cms_token')
@@ -20,5 +19,14 @@ api.interceptors.request.use(
     return Promise.reject(error)
   }
 )
+
+export async function translateText(text: string, targetLangs?: string[]): Promise<Record<string, string>> {
+  if (!text || text.trim() === '') return {}
+  const res = await api.post('/translate', { text, targetLangs })
+  if (res.data.success) {
+    return res.data.translations
+  }
+  throw new Error(res.data.error || 'Translation failed')
+}
 
 export default api

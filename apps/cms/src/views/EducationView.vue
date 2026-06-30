@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '../utils/api'
+import api, { translateText } from '../utils/api'
 import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
@@ -28,6 +28,7 @@ const modalLoading = ref(false)
 const isEditing = ref(false)
 const currentId = ref('')
 const currentLang = ref(defaultLang)
+const translating = ref(false)
 
 const form = ref({
   year: '',
@@ -146,6 +147,56 @@ async function handleDelete() {
   }
 }
 
+async function handleAutoTranslate() {
+  if (translating.value) return
+  
+  const hasEnInst = form.value.institutionName.en?.trim()
+  const hasEnDegree = form.value.degree.en?.trim()
+  const hasEnDesc = form.value.description.en?.trim()
+  
+  if (!hasEnInst && !hasEnDegree && !hasEnDesc) {
+    showMessage('Please fill out at least one field in English before translating.', 'error')
+    return
+  }
+  
+  translating.value = true
+  showMessage('Translating all fields from English...', 'info')
+  try {
+    const promises: Promise<any>[] = []
+    const fieldsToUpdate: string[] = []
+    
+    if (hasEnInst) {
+      promises.push(translateText(form.value.institutionName.en))
+      fieldsToUpdate.push('institutionName')
+    }
+    if (hasEnDegree) {
+      promises.push(translateText(form.value.degree.en))
+      fieldsToUpdate.push('degree')
+    }
+    if (hasEnDesc) {
+      promises.push(translateText(form.value.description.en))
+      fieldsToUpdate.push('description')
+    }
+    
+    const results = await Promise.all(promises)
+    
+    results.forEach((translatedMap, index) => {
+      const field = fieldsToUpdate[index] as keyof typeof form.value
+      (form.value as any)[field] = {
+        ...(form.value as any)[field],
+        ...translatedMap
+      }
+    })
+    
+    showMessage('Successfully translated all fields!', 'success')
+  } catch (error: any) {
+    console.error('Translation failed:', error)
+    showMessage(error.message || 'Failed to translate fields', 'error')
+  } finally {
+    translating.value = false
+  }
+}
+
 function showMessage(text: string, type: string) {
   message.value = { text, type }
   setTimeout(() => {
@@ -197,7 +248,7 @@ function showMessage(text: string, type: string) {
       @confirm="handleSave"
     >
       <div class="form-container">
-        <LanguageSelector v-model="currentLang" />
+        <LanguageSelector v-model="currentLang" :translating="translating" @translate="handleAutoTranslate" />
         <BaseInput id="institutionName" label="Institution Name" v-model="form.institutionName[currentLang]" :required="currentLang === defaultLang" />
         <BaseInput id="degree" label="Degree / Program" v-model="form.degree[currentLang]" :required="currentLang === defaultLang" />
         <BaseInput id="year" label="Year (e.g. 2015-2019)" v-model="form.year" required />
