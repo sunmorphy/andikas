@@ -42,8 +42,28 @@ const haasGrotesk = localFont({
       style: "normal",
     },
     {
+      path: "../fonts/HaasGrotText-75Bold.woff2",
+      weight: "800",
+      style: "normal",
+    },
+    {
+      path: "../fonts/HaasGrotText-75Bold.woff2",
+      weight: "900",
+      style: "normal",
+    },
+    {
       path: "../fonts/HaasGrotText-76BoldItalic.woff2",
       weight: "700",
+      style: "italic",
+    },
+    {
+      path: "../fonts/HaasGrotText-76BoldItalic.woff2",
+      weight: "800",
+      style: "italic",
+    },
+    {
+      path: "../fonts/HaasGrotText-76BoldItalic.woff2",
+      weight: "900",
       style: "italic",
     },
   ],
