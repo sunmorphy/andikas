@@ -22,6 +22,7 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
 
     useEffect(() => {
         if (typeof window !== "undefined") {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsFreeScroll(document.documentElement.classList.contains("free-scroll"));
 
             const observer = new MutationObserver(() => {

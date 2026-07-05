@@ -26,8 +26,9 @@ export async function POST(request: NextRequest) {
         // Default: revalidate everything
         revalidatePath("/", "layout");
         return NextResponse.json({ revalidated: true, all: true, now: Date.now() });
-    } catch (err: any) {
-        return NextResponse.json({ message: "Revalidation failed", error: err?.message }, { status: 500 });
+    } catch (err) {
+        const error = err as Error;
+        return NextResponse.json({ message: "Revalidation failed", error: error.message }, { status: 500 });
     }
 }
 

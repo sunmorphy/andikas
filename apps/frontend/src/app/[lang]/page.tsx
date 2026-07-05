@@ -1,7 +1,6 @@
-import { fetchUser, fetchExperience, fetchEducation, fetchProjects, fetchSkills } from "@/lib/api";
+import { fetchUser, fetchProjects, fetchSkills } from "@/lib/api";
 import { getDictionary } from "@/get-dictionary";
 import { Locale } from "@/i18n-config";
-import JourneyTimeline from "@/components/JourneyTimeline";
 import HeroScrollSection from "@/components/HeroScrollSection";
 import SkillsScrollSection from "@/components/SkillsScrollSection";
 import WorksScrollSection from "@/components/WorksScrollSection";
@@ -12,11 +11,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const resolvedParams = await params;
   const lang = resolvedParams.lang as Locale;
 
-  const [dict, user, experiences, educations, skills, projectsRes] = await Promise.all([
+  const [dict, user, skills, projectsRes] = await Promise.all([
     getDictionary(lang),
     fetchUser(undefined, lang),
-    fetchExperience(undefined, lang),
-    fetchEducation(undefined, lang),
     fetchSkills(undefined),
     fetchProjects(undefined, { highlighted: true, limit: 5 }, lang),
   ]);

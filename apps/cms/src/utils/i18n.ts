@@ -30,7 +30,7 @@ export function parseLocal(val: any): LocalizedString {
     if (typeof parsed === 'object' && parsed !== null) {
       return { ...defaultObj, ...parsed }
     }
-  } catch (e) {
+  } catch {
     // Legacy plain string fallback
     return { ...defaultObj, [defaultLang]: String(val) }
   }
@@ -70,7 +70,7 @@ export function getDisplayLocal(val: any, preferredLang: string = defaultLang): 
     if (typeof parsed === 'object' && parsed !== null) {
       return parsed[preferredLang] || parsed[defaultLang] || Object.values(parsed)[0] || ''
     }
-  } catch (e) {
+  } catch {
     return String(val)
   }
   return String(val)

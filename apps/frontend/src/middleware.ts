@@ -4,7 +4,7 @@ import { i18n } from './i18n-config'
 
 function getLocale(request: NextRequest): string {
     const acceptLanguage = request.headers.get('accept-language');
-    let preferred = i18n.defaultLocale;
+    const preferred = i18n.defaultLocale;
 
     if (acceptLanguage) {
         const langs = acceptLanguage.split(',');

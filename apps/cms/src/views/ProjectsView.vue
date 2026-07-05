@@ -147,11 +147,11 @@ function openCreateModal() {
   formTagIds.value = []
   formPublished.value = false
   formHighlighted.value = false
-  
+
   selectedCover.value = null
   previewCover.value = null
   if (coverInput.value) coverInput.value.value = ''
-  
+
   newContentImages.value = []
   existingContentImages.value = []
   if (contentImagesInput.value) contentImagesInput.value.value = ''
@@ -168,13 +168,13 @@ function openEditModal(proj: Project) {
   formDescription.value = parseLocal(proj.description)
   formType.value = proj.type || 'individual'
   formContent.value = parseLocal(proj.content)
-  
+
   // Handle datetime local string format
   const pubDate = new Date(proj.publishedAt)
   const offset = pubDate.getTimezoneOffset() * 60000
   const localIso = new Date(pubDate.getTime() - offset).toISOString().slice(0, 16)
   formPublishedAt.value = localIso
-  
+
   formYear.value = proj.year || null
   formGithubUrl.value = proj.githubUrl || ''
   formLiveUrl.value = proj.liveUrl || ''
@@ -183,11 +183,11 @@ function openEditModal(proj: Project) {
   formTagIds.value = proj.tags?.map(t => t.id) || proj.tagIds || []
   formPublished.value = proj.published || false
   formHighlighted.value = proj.highlighted || false
-  
+
   selectedCover.value = null
   previewCover.value = proj.coverImage || null
   if (coverInput.value) coverInput.value.value = ''
-  
+
   newContentImages.value = []
   existingContentImages.value = proj.contentImages || []
   if (contentImagesInput.value) contentImagesInput.value.value = ''
@@ -292,7 +292,7 @@ async function handleSave() {
     formData.append('description', stringifyLocal(formDescription.value))
     formData.append('type', formType.value)
     formData.append('content', stringifyLocal(formContent.value))
-    
+
     // Convert back to UTC ISO for server
     const pubDateUtc = new Date(formPublishedAt.value).toISOString()
     formData.append('publishedAt', pubDateUtc)
@@ -364,21 +364,21 @@ async function handleDelete() {
 
 async function handleAutoTranslate() {
   if (translating.value) return
-  
+
   const hasEnDesc = formDescription.value.en?.trim()
   const hasEnContent = formContent.value.en?.trim()
-  
+
   if (!hasEnDesc && !hasEnContent) {
     showMessage('Please fill out at least one field (Description or Content) in English before translating.', 'error')
     return
   }
-  
+
   translating.value = true
   showMessage('Translating all fields from English...', 'info')
   try {
     const promises: Promise<any>[] = []
     const fieldsToUpdate: string[] = []
-    
+
     if (hasEnDesc) {
       promises.push(translateText(formDescription.value.en))
       fieldsToUpdate.push('description')
@@ -387,9 +387,9 @@ async function handleAutoTranslate() {
       promises.push(translateText(formContent.value.en))
       fieldsToUpdate.push('content')
     }
-    
+
     const results = await Promise.all(promises)
-    
+
     results.forEach((translatedMap, index) => {
       const field = fieldsToUpdate[index]
       if (field === 'description') {
@@ -404,7 +404,7 @@ async function handleAutoTranslate() {
         }
       }
     })
-    
+
     showMessage('Successfully translated all fields!', 'success')
   } catch (error: any) {
     console.error('Translation failed:', error)
@@ -437,10 +437,10 @@ function getExpectedUrl(file: File): string {
   const imgName = `${baseName}_${date}.png`
   const sanitized = imgName
     .replace(/\s+/g, '-')
-    .replace(/[^\w\-\.]/g, '')
-    .replace(/\-+/g, '-')
+    .replace(/[^\w\-.]/g, '')
+    .replace(/-+/g, '-')
     .toLowerCase()
-  return `${publicUrl.value || 'https://cdn.andikas.dev'}/${username}/projects/${sanitized}`
+  return `${publicUrl.value || ''}/${username}/projects/${sanitized}`
 }
 
 async function copyMarkdownToClipboard(url: string) {
@@ -600,7 +600,7 @@ function formatDate(dateString: string) {
       @confirm="handleSave"
     >
       <div class="form-container">
-        
+
         <div class="form-group cover-upload-section">
           <label>Cover Image</label>
           <div class="cover-preview-container">
@@ -665,8 +665,8 @@ function formatDate(dateString: string) {
         <div class="form-group">
           <label>Skills/Technologies</label>
           <div class="skills-grid">
-            <div 
-              v-for="skill in availableSkills" 
+            <div
+              v-for="skill in availableSkills"
               :key="skill.id"
               class="skill-chip"
               :class="{ selected: formSkillIds.includes(skill.id) }"
@@ -681,8 +681,8 @@ function formatDate(dateString: string) {
         <div class="form-group mt-4">
           <label>Tags</label>
           <div class="skills-grid">
-            <div 
-              v-for="tag in availableTags" 
+            <div
+              v-for="tag in availableTags"
               :key="tag.id"
               class="skill-chip tag-chip"
               :class="{ selected: formTagIds.includes(tag.id) }"
@@ -697,7 +697,7 @@ function formatDate(dateString: string) {
         <!-- Markdown Editor -->
         <div class="form-group mt-4 borders-top pt-4">
           <label>Markdown Content <span class="required" style="color: var(--color-danger)">*</span></label>
-          
+
           <div class="markdown-toolbar">
             <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('heading')" title="Heading">
               <PhTextH size="16" />
@@ -737,7 +737,7 @@ function formatDate(dateString: string) {
         <!-- Content Images -->
         <div class="form-group mt-4 borders-top pt-4">
           <label>Content Images Gallery (Optional)</label>
-          
+
           <div class="gallery-preview">
             <!-- Existing Images -->
             <div v-for="(imgUrl, idx) in existingContentImages" :key="'ex-'+idx" class="gallery-item">
@@ -752,7 +752,7 @@ function formatDate(dateString: string) {
                 </button>
               </div>
             </div>
-            
+
             <!-- New Images -->
             <div v-for="(file, idx) in newContentImages" :key="'new-'+idx" class="gallery-item new-item">
               <img :src="getObjectUrl(file)" alt="New Content Image" />
@@ -767,7 +767,7 @@ function formatDate(dateString: string) {
                 </button>
               </div>
             </div>
-            
+
             <label for="contentImages" class="gallery-add-btn">
               <PhPlus size="24" />
               <span>Add Images</span>

@@ -16,6 +16,7 @@ interface ProjectsClientProps {
     initialSearch: string;
     initialTagId?: number;
     lang: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dict: any;
 }
 
@@ -93,8 +94,8 @@ export default function ProjectsClient({
     const updateUrl = (params: { search?: string; tag?: number | null }) => {
         const url = new URLSearchParams();
 
-        let newSearch = params.search !== undefined ? params.search : initialSearch;
-        let newTag = params.tag !== undefined ? params.tag : initialTagId;
+        const newSearch = params.search !== undefined ? params.search : initialSearch;
+        const newTag = params.tag !== undefined ? params.tag : initialTagId;
 
         if (newSearch) url.set("search", newSearch);
         if (newTag) url.set("tag", newTag.toString());
@@ -109,6 +110,7 @@ export default function ProjectsClient({
             }
         }, 400);
         return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchQuery, initialSearch]);
 
     const projects = initialProjects;

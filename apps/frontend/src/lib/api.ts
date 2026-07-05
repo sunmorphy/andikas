@@ -1,4 +1,4 @@
-import { ApiResponse, PaginatedApiResponse, PaginatedMeta, User, Experience, Education, Certification, Project, Skill, Tag } from '@andikas/types';
+import { ApiResponse, PaginatedMeta, User, Experience, Education, Certification, Project, Skill, Tag } from '@andikas/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 const USERNAME = 'andikas';

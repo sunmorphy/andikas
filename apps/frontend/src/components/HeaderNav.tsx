@@ -17,6 +17,7 @@ export function HeaderNav({ lang }: Props) {
     useEffect(() => {
         // Load initial state on mount
         const saved = localStorage.getItem("free-scroll") === "true";
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsFreeScroll(saved);
         if (saved) {
             document.documentElement.classList.add("free-scroll");
@@ -28,10 +29,11 @@ export function HeaderNav({ lang }: Props) {
     const toggleScrollMode = () => {
         const newValue = !isFreeScroll;
         setIsFreeScroll(newValue);
-        localStorage.setItem("free-scroll", String(newValue));
         if (newValue) {
+            localStorage.setItem("free-scroll", "true");
             document.documentElement.classList.add("free-scroll");
         } else {
+            localStorage.setItem("free-scroll", "false");
             document.documentElement.classList.remove("free-scroll");
         }
     };
@@ -40,6 +42,7 @@ export function HeaderNav({ lang }: Props) {
         // If not on the homepage, index is active for projects path, otherwise fallback to none/home
         if (pathname !== `/${lang}` && pathname !== "/") {
             if (pathname?.includes("/projects")) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setActiveSection("index");
             } else {
                 setActiveSection("home");

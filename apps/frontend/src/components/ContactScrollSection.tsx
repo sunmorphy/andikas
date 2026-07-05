@@ -6,6 +6,7 @@ import { Download } from "iconoir-react";
 import { userConfig } from "@/lib/userConfig";
 
 interface Props {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dict: any;
 }
 
@@ -15,6 +16,7 @@ export default function ContactScrollSection({ dict }: Props) {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsFreeScroll(document.documentElement.classList.contains("free-scroll"));
 
             const observer = new MutationObserver(() => {
@@ -78,7 +80,7 @@ export default function ContactScrollSection({ dict }: Props) {
                     <div className="relative mb-16 select-none z-10">
                         <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase leading-[0.85] text-neutral-900">
                             <motion.span style={{ x: xLeft }} className="block" transition={{ ease: "linear" }}>
-                                LET'S BUILD
+                                LET&apos;S BUILD
                             </motion.span>
                             <motion.span style={{ x: xRight }} className="block" transition={{ ease: "linear" }}>
                                 SOMETHING

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import localFont from "next/font/local";
 import "../globals.css";
-import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Locale } from "@/i18n-config";
@@ -162,7 +161,7 @@ export default async function RootLayout({
   let preconnectUrl = "http://localhost:3000";
   try {
     preconnectUrl = new URL(backendUrl).origin;
-  } catch (e) {
+  } catch {
     preconnectUrl = backendUrl;
   }
 

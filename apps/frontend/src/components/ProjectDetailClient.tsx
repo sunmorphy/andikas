@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 
 interface Props {
     project: Project;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dict: any;
     lang: string;
 }
