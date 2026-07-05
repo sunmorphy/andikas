@@ -5,9 +5,10 @@ import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import BaseInput from '../components/ui/BaseInput.vue'
-import { PhPlus, PhPencilSimple, PhTrash, PhLink, PhImage as PhImageIcon } from '@phosphor-icons/vue'
+import { PhPlus, PhPencilSimple, PhTrash, PhLink, PhImage as PhImageIcon, PhCopy, PhTextB, PhTextItalic, PhTextH, PhQuotes, PhListDashes, PhListNumbers, PhBracketsCurly } from '@phosphor-icons/vue'
 import LanguageSelector from '../components/ui/LanguageSelector.vue'
 import { parseLocal, stringifyLocal, getDisplayLocal, defaultLang, getEmptyLocalized } from '../utils/i18n'
+import { useAuthStore } from '../stores/auth'
 
 interface Skill {
   id: string
@@ -56,6 +57,8 @@ const isEditing = ref(false)
 const currentId = ref('')
 const currentLang = ref(defaultLang)
 const translating = ref(false)
+const authStore = useAuthStore()
+const publicUrl = ref('')
 
 // Form state
 const formTitle = ref('')
@@ -111,8 +114,20 @@ async function fetchData() {
   }
 }
 
+const fetchUploadConfig = async () => {
+  try {
+    const res = await api.get('/upload/config')
+    if (res.data.success) {
+      publicUrl.value = res.data.data.publicUrl
+    }
+  } catch (err) {
+    console.error('Failed to load upload config', err)
+  }
+}
+
 onMounted(() => {
   fetchData()
+  fetchUploadConfig()
 })
 
 function openCreateModal() {
@@ -409,10 +424,111 @@ function showMessage(text: string, type: string) {
 async function copyToClipboard(text: string) {
   try {
     await navigator.clipboard.writeText(text)
-    showMessage('Copied to clipboard', 'success')
+    showMessage('Copied URL to clipboard!', 'success')
   } catch (err) {
-    showMessage('Failed to copy', 'error')
+    showMessage('Failed to copy URL', 'error')
   }
+}
+
+function getExpectedUrl(file: File): string {
+  const username = authStore.user?.username || 'admin'
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const baseName = file.name.replace(/\.[^.]+$/, '')
+  const imgName = `${baseName}_${date}.png`
+  const sanitized = imgName
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-\.]/g, '')
+    .replace(/\-+/g, '-')
+    .toLowerCase()
+  return `${publicUrl.value || 'https://cdn.andikas.dev'}/${username}/projects/${sanitized}`
+}
+
+async function copyMarkdownToClipboard(url: string) {
+  const mdString = `![Project Image](${url})`
+  try {
+    await navigator.clipboard.writeText(mdString)
+    showMessage('Copied Markdown image code to clipboard!', 'success')
+  } catch (err) {
+    showMessage('Failed to copy Markdown code', 'error')
+  }
+}
+
+const markdownTextarea = ref<HTMLTextAreaElement | null>(null)
+
+function insertMarkdown(format: string) {
+  const textarea = markdownTextarea.value
+  if (!textarea) return
+
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const text = textarea.value
+  const selectedText = text.substring(start, end)
+
+  let replacement = ''
+  let cursorOffset = 0
+
+  switch (format) {
+    case 'bold':
+      replacement = `**${selectedText || 'bold text'}**`
+      cursorOffset = selectedText ? 0 : 2
+      break
+    case 'italic':
+      replacement = `*${selectedText || 'italic text'}*`
+      cursorOffset = selectedText ? 0 : 1
+      break
+    case 'heading':
+      replacement = `\n# ${selectedText || 'Heading'}\n`
+      cursorOffset = selectedText ? 0 : 2
+      break
+    case 'link':
+      replacement = `[${selectedText || 'link text'}](https://example.com)`
+      cursorOffset = selectedText ? 12 : 1
+      break
+    case 'code':
+      replacement = `\`${selectedText || 'code'}\``
+      cursorOffset = selectedText ? 0 : 1
+      break
+    case 'codeblock':
+      replacement = `\n\`\`\`\n${selectedText || 'code'}\n\`\`\`\n`
+      cursorOffset = selectedText ? 0 : 4
+      break
+    case 'list':
+      replacement = `\n- ${selectedText || 'item'}`
+      cursorOffset = selectedText ? 0 : 2
+      break
+    case 'numlist':
+      replacement = `\n1. ${selectedText || 'item'}`
+      cursorOffset = selectedText ? 0 : 3
+      break
+    case 'quote':
+      replacement = `\n> ${selectedText || 'quote'}`
+      cursorOffset = selectedText ? 0 : 2
+      break
+  }
+
+  textarea.focus()
+
+  let success = false
+  try {
+    success = document.execCommand('insertText', false, replacement)
+  } catch (err) {
+    console.error('execCommand failed', err)
+  }
+
+  if (!success) {
+    const newContent = text.substring(0, start) + replacement + text.substring(end)
+    formContent.value[currentLang.value] = newContent
+  }
+
+  setTimeout(() => {
+    textarea.focus()
+    if (selectedText) {
+      textarea.setSelectionRange(start, start + replacement.length)
+    } else {
+      const pos = start + replacement.length - cursorOffset
+      textarea.setSelectionRange(pos, pos)
+    }
+  }, 0)
 }
 
 function formatDate(dateString: string) {
@@ -578,10 +694,43 @@ function formatDate(dateString: string) {
           </div>
         </div>
 
-        <!-- Markdown Editor (simplified as textarea for now) -->
+        <!-- Markdown Editor -->
         <div class="form-group mt-4 borders-top pt-4">
           <label>Markdown Content <span class="required" style="color: var(--color-danger)">*</span></label>
-          <textarea v-model="formContent[currentLang]" rows="10" class="textarea markdown-editor" placeholder="# My Project\n\nWrite your content here..." :required="currentLang === defaultLang"></textarea>
+          
+          <div class="markdown-toolbar">
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('heading')" title="Heading">
+              <PhTextH size="16" />
+            </button>
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('bold')" title="Bold">
+              <PhTextB size="16" />
+            </button>
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('italic')" title="Italic">
+              <PhTextItalic size="16" />
+            </button>
+            <div class="toolbar-separator"></div>
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('link')" title="Insert Link">
+              <PhLink size="16" />
+            </button>
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('code')" title="Inline Code">
+              <PhCode size="16" />
+            </button>
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('codeblock')" title="Code Block">
+              <PhBracketsCurly size="16" />
+            </button>
+            <div class="toolbar-separator"></div>
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('list')" title="Bullet List">
+              <PhListDashes size="16" />
+            </button>
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('numlist')" title="Numbered List">
+              <PhListNumbers size="16" />
+            </button>
+            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('quote')" title="Blockquote">
+              <PhQuotes size="16" />
+            </button>
+          </div>
+
+          <textarea ref="markdownTextarea" v-model="formContent[currentLang]" rows="10" class="textarea markdown-editor" placeholder="# My Project\n\nWrite your content here..." :required="currentLang === defaultLang"></textarea>
           <p class="help-text text-sm">You can embed images in markdown later by using the URLs returned after saving content images.</p>
         </div>
 
@@ -594,8 +743,13 @@ function formatDate(dateString: string) {
             <div v-for="(imgUrl, idx) in existingContentImages" :key="'ex-'+idx" class="gallery-item">
               <img :src="imgUrl" alt="Content Image" />
               <button class="remove-img-btn" @click.prevent="removeExistingContentImage(idx)">&times;</button>
-              <div class="img-url-overlay" @click.prevent="copyToClipboard(imgUrl)" title="Click to copy URL">
-                <PhLink />
+              <div class="img-actions-overlay">
+                <button type="button" class="action-btn" @click.prevent="copyToClipboard(imgUrl)" title="Copy Image URL">
+                  <PhLink size="16" />
+                </button>
+                <button type="button" class="action-btn" @click.prevent="copyMarkdownToClipboard(imgUrl)" title="Copy Markdown Tag">
+                  <PhCopy size="16" />
+                </button>
               </div>
             </div>
             
@@ -604,6 +758,14 @@ function formatDate(dateString: string) {
               <img :src="getObjectUrl(file)" alt="New Content Image" />
               <button class="remove-img-btn" @click.prevent="removeNewContentImage(idx)">&times;</button>
               <div class="new-badge">New</div>
+              <div class="img-actions-overlay">
+                <button type="button" class="action-btn" @click.prevent="copyToClipboard(getExpectedUrl(file))" title="Copy Expected Image URL">
+                  <PhLink size="16" />
+                </button>
+                <button type="button" class="action-btn" @click.prevent="copyMarkdownToClipboard(getExpectedUrl(file))" title="Copy Expected Markdown Tag">
+                  <PhCopy size="16" />
+                </button>
+              </div>
             </div>
             
             <label for="contentImages" class="gallery-add-btn">
@@ -910,25 +1072,53 @@ function formatDate(dateString: string) {
   font-size: 14px;
   border: none;
   cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.15s ease;
 }
 .remove-img-btn:hover { background-color: var(--color-danger); }
 
-.img-url-overlay {
+.img-actions-overlay {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  font-size: 1rem;
-  padding: 0.25rem;
-  text-align: center;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   opacity: 0;
-  transition: opacity 0.2s;
-  cursor: pointer;
+  transition: opacity 0.2s ease-in-out;
+  padding: 8px;
+  z-index: 5;
 }
 
-.gallery-item:hover .img-url-overlay { opacity: 1; }
+.gallery-item:hover .img-actions-overlay {
+  opacity: 1;
+}
+
+.img-actions-overlay .action-btn {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #1a1a1a;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.15s ease;
+}
+
+.img-actions-overlay .action-btn:hover {
+  background-color: #ffffff;
+  color: var(--color-primary);
+  transform: scale(1.1);
+}
 
 .new-item { border-color: var(--color-primary); }
 .new-badge {
@@ -968,4 +1158,49 @@ function formatDate(dateString: string) {
 .borders-top { border-top: 1px solid var(--color-border); }
 .text-sm { font-size: 0.875rem; }
 .text-tertiary { color: var(--color-text-tertiary); }
+
+/* Markdown Toolbar Styles */
+.markdown-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  padding: 6px 12px;
+  flex-wrap: wrap;
+}
+
+.markdown-editor {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+.toolbar-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toolbar-btn:hover {
+  background-color: var(--color-bg-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 16px;
+  background-color: var(--color-border);
+  margin: 0 4px;
+}
 </style>

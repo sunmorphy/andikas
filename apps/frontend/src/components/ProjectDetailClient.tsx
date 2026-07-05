@@ -137,36 +137,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                             </motion.section>
                         )}
 
-                        {project.contentImages && project.contentImages.length > 0 && (
-                            <div className="flex flex-col gap-8 w-full mt-8">
-                                {project.contentImages.map((img, idx) => (
-                                    <motion.div
-                                        key={idx}
-                                        initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
-                                        whileInView={{ clipPath: "inset(0% 0% 0% 0%)" }}
-                                        viewport={{ once: true, margin: "-20px" }}
-                                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                                        className="relative w-full aspect-[16/9] overflow-hidden"
-                                    >
-                                        <motion.div
-                                            className="relative w-full h-full"
-                                            initial={{ scale: 1.15 }}
-                                            whileInView={{ scale: 1 }}
-                                            viewport={{ once: true, margin: "-20px" }}
-                                            transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
-                                        >
-                                            <Image
-                                                src={img}
-                                                fill
-                                                alt={`${project.title} — gallery image ${idx + 1}`}
-                                                className="object-cover transition-all duration-500"
-                                                sizes="(max-width: 1024px) 100vw, 1200px"
-                                            />
-                                        </motion.div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        )}
+
                     </div>
                 </div>
 

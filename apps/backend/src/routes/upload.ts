@@ -65,4 +65,13 @@ router.post('/', requireAuth, upload.single('image'), asyncHandler(async (req, r
     });
 }));
 
+router.get('/config', requireAuth, (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            publicUrl: process.env.R2_PUBLIC_URL || '',
+        },
+    });
+});
+
 export default router;
