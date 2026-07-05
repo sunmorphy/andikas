@@ -51,7 +51,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                         animate={{ y: 0 }}
                                         transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
                                     >
-                                        {project.title}<span className="text-brand-900">.</span>
+                                        {project.title}<span className="inline-block w-[0.16em] h-[0.16em] bg-brand-900 ml-[0.05em] align-baseline"></span>
                                     </motion.h1>
                                 </div>
                             </div>

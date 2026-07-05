@@ -67,7 +67,7 @@ export default function SkillsScrollSection({ skills, title }: Props) {
                     transition={isFreeScroll ? { duration: 0.8, ease: [0.16, 1, 0.3, 1] } : { ease: "linear" }}
                 >
                     <h2 className="text-3xl md:text-5xl font-bold mb-6 md:mb-16 tracking-tight uppercase text-neutral-900">
-                        {title}<span className="text-brand-900">.</span>
+                        {title}<span className="inline-block w-[0.16em] h-[0.16em] bg-brand-900 ml-[0.05em] align-baseline"></span>
                     </h2>
 
                     <div className="w-full py-4 md:py-10">

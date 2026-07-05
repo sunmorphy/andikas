@@ -92,7 +92,7 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
                             style={{ x: xRight, opacity: titleOpacity }}
                             transition={{ ease: "linear" }}
                         >
-                            SULTANRAFLI<span className="text-brand-900">.</span>
+                            SULTANRAFLI<span className="inline-block w-[0.16em] h-[0.16em] bg-brand-900 ml-[0.05em] align-baseline"></span>
                         </motion.span>
                     </h1>
 

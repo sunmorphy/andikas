@@ -32,7 +32,8 @@ export default function NotFound() {
             </div>
 
             <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-tight mb-4 text-neutral-900">
-                {dict.heading}
+                {dict.heading.endsWith('.') || dict.heading.endsWith('。') ? dict.heading.slice(0, -1) : dict.heading}
+                <span className="inline-block w-[0.16em] h-[0.16em] bg-brand-900 ml-[0.05em] align-baseline"></span>
             </h1>
             <p className="text-neutral-500 text-lg mb-12 max-w-md leading-relaxed">
                 {dict.description}

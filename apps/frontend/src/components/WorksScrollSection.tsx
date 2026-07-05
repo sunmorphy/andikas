@@ -94,7 +94,7 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
             >
                 <div className="w-4/5 mx-auto px-6 flex flex-col items-start w-full">
                     <h2 className="text-3xl md:text-5xl font-bold mb-16 tracking-tight uppercase text-neutral-900">
-                        {title}<span className="text-brand-900">.</span>
+                        {title}<span className="inline-block w-[0.16em] h-[0.16em] bg-brand-900 ml-[0.05em] align-baseline"></span>
                     </h2>
 
                     <div className={`w-full mb-12 relative ${isFreeScroll ? "overflow-x-auto pointer-events-auto" : "overflow-hidden"}`}>

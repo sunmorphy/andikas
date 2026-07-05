@@ -84,10 +84,8 @@ export default function ContactScrollSection({ dict }: Props) {
                                 SOMETHING
                                 <motion.span
                                     style={{ scale: dotScale, opacity: dotOpacity, transformOrigin: "center" }}
-                                    className="inline-block text-brand-900 origin-center"
-                                >
-                                    .
-                                </motion.span>
+                                    className="inline-block w-[0.16em] h-[0.16em] bg-brand-900 ml-[0.05em] align-baseline origin-center"
+                                />
                             </motion.span>
                         </h2>
                     </div>
