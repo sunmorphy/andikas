@@ -1,13 +1,36 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import api, { translateText } from '../utils/api'
+import { onMounted, ref } from 'vue'
+import api, { generateProjectStory, translateText } from '../utils/api'
 import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import BaseInput from '../components/ui/BaseInput.vue'
-import { PhPlus, PhPencilSimple, PhTrash, PhLink, PhImage as PhImageIcon, PhCopy, PhTextB, PhTextItalic, PhTextH, PhQuotes, PhListDashes, PhListNumbers, PhBracketsCurly, PhCode } from '@phosphor-icons/vue'
+import {
+  PhBracketsCurly,
+  PhCode,
+  PhCopy,
+  PhImage as PhImageIcon,
+  PhLink,
+  PhListDashes,
+  PhListNumbers,
+  PhPencilSimple,
+  PhPlus,
+  PhQuotes,
+  PhSparkle,
+  PhTextB,
+  PhTextH,
+  PhTextItalic,
+  PhTrash,
+} from '@phosphor-icons/vue'
 import LanguageSelector from '../components/ui/LanguageSelector.vue'
-import { parseLocal, stringifyLocal, getDisplayLocal, defaultLang, getEmptyLocalized } from '../utils/i18n'
+import {
+  defaultLang,
+  getDisplayLocal,
+  getEmptyLocalized,
+  parseLocal,
+  stringifyLocal,
+  type SupportedLanguage,
+} from '../utils/i18n'
 import { useAuthStore } from '../stores/auth'
 
 interface Skill {
@@ -87,7 +110,7 @@ const columns = [
   { key: 'coverImage', label: 'Cover' },
   { key: 'title', label: 'Title' },
   { key: 'status', label: 'Status' },
-  { key: 'publishedAt', label: 'Date' }
+  { key: 'publishedAt', label: 'Date' },
 ]
 
 async function fetchData() {
@@ -96,13 +119,15 @@ async function fetchData() {
     const [projRes, skillsRes, tagsRes] = await Promise.all([
       api.get('/projects'),
       api.get('/skills'),
-      api.get('/tags')
+      api.get('/tags'),
     ])
     if (projRes.data.success) {
       projects.value = projRes.data.data.map((proj: any) => ({
         ...proj,
-        skills: proj.projectSkills ? proj.projectSkills.map((ps: any) => ps.skill) : (proj.skills || []),
-        tags: proj.projectTags ? proj.projectTags.map((pt: any) => pt.tag) : (proj.tags || [])
+        skills: proj.projectSkills
+          ? proj.projectSkills.map((ps: any) => ps.skill)
+          : proj.skills || [],
+        tags: proj.projectTags ? proj.projectTags.map((pt: any) => pt.tag) : proj.tags || [],
       }))
     }
     if (skillsRes.data.success) availableSkills.value = skillsRes.data.data
@@ -179,8 +204,8 @@ function openEditModal(proj: Project) {
   formGithubUrl.value = proj.githubUrl || ''
   formLiveUrl.value = proj.liveUrl || ''
 
-  formSkillIds.value = proj.skills?.map(s => s.id) || proj.skillIds || []
-  formTagIds.value = proj.tags?.map(t => t.id) || proj.tagIds || []
+  formSkillIds.value = proj.skills?.map((s) => s.id) || proj.skillIds || []
+  formTagIds.value = proj.tags?.map((t) => t.id) || proj.tagIds || []
   formPublished.value = proj.published || false
   formHighlighted.value = proj.highlighted || false
 
@@ -280,8 +305,8 @@ async function handleSave() {
     const buildUniformLocal = (val: string) => {
       const obj = getEmptyLocalized()
       if (val) {
-        Object.keys(obj).forEach(key => {
-          (obj as any)[key] = val
+        Object.keys(obj).forEach((key) => {
+          ;(obj as any)[key] = val
         })
       }
       return stringifyLocal(obj)
@@ -312,21 +337,21 @@ async function handleSave() {
     }
 
     if (isEditing.value) {
-       formData.append('existingContentImages', JSON.stringify(existingContentImages.value))
+      formData.append('existingContentImages', JSON.stringify(existingContentImages.value))
     }
 
-    newContentImages.value.forEach(file => {
+    newContentImages.value.forEach((file) => {
       formData.append('contentImages', file)
     })
 
     let result
     if (isEditing.value) {
       result = await api.put(`/projects/${currentId.value}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
       })
     } else {
       result = await api.post('/projects', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
       })
     }
 
@@ -369,7 +394,10 @@ async function handleAutoTranslate() {
   const hasEnContent = formContent.value.en?.trim()
 
   if (!hasEnDesc && !hasEnContent) {
-    showMessage('Please fill out at least one field (Description or Content) in English before translating.', 'error')
+    showMessage(
+      'Please fill out at least one field (Description or Content) in English before translating.',
+      'error',
+    )
     return
   }
 
@@ -395,12 +423,12 @@ async function handleAutoTranslate() {
       if (field === 'description') {
         formDescription.value = {
           ...formDescription.value,
-          ...translatedMap
+          ...translatedMap,
         }
       } else if (field === 'content') {
         formContent.value = {
           ...formContent.value,
-          ...translatedMap
+          ...translatedMap,
         }
       }
     })
@@ -534,6 +562,57 @@ function insertMarkdown(format: string) {
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString()
 }
+
+// AI Story Generation State & Handlers
+const showGeneratePromptModal = ref(false)
+const generatingStory = ref(false)
+const aiPromptNotes = ref('')
+
+function openGeneratePromptModal() {
+  if (!formTitle.value.trim()) {
+    showMessage('Please enter a Project Title first before generating content.', 'error')
+    return
+  }
+  aiPromptNotes.value = ''
+  showGeneratePromptModal.value = true
+}
+
+async function handleGenerateStory() {
+  generatingStory.value = true
+  try {
+    const skillsNames = formSkillIds.value
+      .map((id) => {
+        const s = availableSkills.value.find((sk) => sk.id === id)
+        return s ? s.name : ''
+      })
+      .filter(Boolean)
+
+    const tagsNames = formTagIds.value
+      .map((id) => {
+        const t = availableTags.value.find((tg) => tg.id === id)
+        return t ? t.name : ''
+      })
+      .filter(Boolean)
+
+    formContent.value[currentLang.value as SupportedLanguage] = await generateProjectStory({
+      title: formTitle.value,
+      description:
+        formDescription.value[currentLang.value as SupportedLanguage] ||
+        formDescription.value[defaultLang],
+      type: formType.value,
+      tags: tagsNames,
+      skills: skillsNames,
+      prompt: aiPromptNotes.value,
+    })
+    showGeneratePromptModal.value = false
+    showMessage('Successfully generated project story!', 'success')
+  } catch (error: any) {
+    console.error('Error generating story:', error)
+    showMessage(error.message || 'Failed to generate story content', 'error')
+  } finally {
+    generatingStory.value = false
+  }
+}
 </script>
 
 <template>
@@ -569,9 +648,7 @@ function formatDate(dateString: string) {
           <span class="badge" :class="row.type === 'group' ? 'badge-group' : 'badge-individual'">
             {{ row.type === 'group' ? 'Group Project' : 'Individual Project' }}
           </span>
-          <span v-if="row.highlighted" class="badge badge-highlighted">
-            Highlighted
-          </span>
+          <span v-if="row.highlighted" class="badge badge-highlighted"> Highlighted </span>
         </div>
       </template>
 
@@ -600,7 +677,6 @@ function formatDate(dateString: string) {
       @confirm="handleSave"
     >
       <div class="form-container">
-
         <div class="form-group cover-upload-section">
           <label>Cover Image</label>
           <div class="cover-preview-container">
@@ -610,20 +686,48 @@ function formatDate(dateString: string) {
             </div>
             <div>
               <label for="coverImage" class="upload-label btn btn-secondary">Choose Cover...</label>
-              <input type="file" id="coverImage" ref="coverInput" accept="image/*" @change="handleCoverSelect" class="file-input" />
+              <input
+                type="file"
+                id="coverImage"
+                ref="coverInput"
+                accept="image/*"
+                @change="handleCoverSelect"
+                class="file-input"
+              />
             </div>
           </div>
         </div>
 
-        <LanguageSelector v-model="currentLang" :translating="translating" @translate="handleAutoTranslate" />
+        <LanguageSelector
+          v-model="currentLang"
+          :translating="translating"
+          @translate="handleAutoTranslate"
+        />
 
         <div class="form-grid mt-4">
-          <BaseInput id="title" label="Title" v-model="formTitle" @input="handleTitleChange" required />
-          <BaseInput id="slug" label="Slug (URL)" v-model="formSlug" placeholder="my-awesome-project" required />
+          <BaseInput
+            id="title"
+            label="Title"
+            v-model="formTitle"
+            @input="handleTitleChange"
+            required
+          />
+          <BaseInput
+            id="slug"
+            label="Slug (URL)"
+            v-model="formSlug"
+            placeholder="my-awesome-project"
+            required
+          />
         </div>
 
         <div class="form-grid">
-          <BaseInput id="publishedAt" label="Publish Date" type="datetime-local" v-model="formPublishedAt" />
+          <BaseInput
+            id="publishedAt"
+            label="Publish Date"
+            type="datetime-local"
+            v-model="formPublishedAt"
+          />
           <div class="form-group">
             <label for="projectType">Project Type</label>
             <select id="projectType" v-model="formType">
@@ -634,8 +738,17 @@ function formatDate(dateString: string) {
         </div>
 
         <div class="form-group">
-          <label>Description / Overview <span class="required" style="color: var(--color-danger)">*</span></label>
-          <textarea v-model="formDescription[currentLang]" rows="3" class="textarea" :required="currentLang === defaultLang" placeholder="A more detailed summary or overview..."></textarea>
+          <label
+            >Description / Overview
+            <span class="required" style="color: var(--color-danger)">*</span></label
+          >
+          <textarea
+            v-model="formDescription[currentLang]"
+            rows="3"
+            class="textarea"
+            :required="currentLang === defaultLang"
+            placeholder="A more detailed summary or overview..."
+          ></textarea>
         </div>
 
         <div class="form-grid">
@@ -654,12 +767,28 @@ function formatDate(dateString: string) {
         </div>
 
         <div class="form-grid">
-          <BaseInput id="year" label="Year" type="number" v-model.number="formYear" placeholder="e.g. 2024" />
-          <BaseInput id="githubUrl" label="GitHub URL" v-model="formGithubUrl" placeholder="e.g. https://github.com/username/project" />
+          <BaseInput
+            id="year"
+            label="Year"
+            type="number"
+            v-model.number="formYear"
+            placeholder="e.g. 2024"
+          />
+          <BaseInput
+            id="githubUrl"
+            label="GitHub URL"
+            v-model="formGithubUrl"
+            placeholder="e.g. https://github.com/username/project"
+          />
         </div>
 
         <div class="form-grid">
-          <BaseInput id="liveUrl" label="Live Demo URL" v-model="formLiveUrl" placeholder="e.g. https://project.com" />
+          <BaseInput
+            id="liveUrl"
+            label="Live Demo URL"
+            v-model="formLiveUrl"
+            placeholder="e.g. https://project.com"
+          />
         </div>
 
         <div class="form-group">
@@ -696,42 +825,110 @@ function formatDate(dateString: string) {
 
         <!-- Markdown Editor -->
         <div class="form-group mt-4 borders-top pt-4">
-          <label>Markdown Content <span class="required" style="color: var(--color-danger)">*</span></label>
+          <label
+            >Markdown Content
+            <span class="required" style="color: var(--color-danger)">*</span></label
+          >
 
           <div class="markdown-toolbar">
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('heading')" title="Heading">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('heading')"
+              title="Heading"
+            >
               <PhTextH size="16" />
             </button>
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('bold')" title="Bold">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('bold')"
+              title="Bold"
+            >
               <PhTextB size="16" />
             </button>
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('italic')" title="Italic">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('italic')"
+              title="Italic"
+            >
               <PhTextItalic size="16" />
             </button>
             <div class="toolbar-separator"></div>
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('link')" title="Insert Link">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('link')"
+              title="Insert Link"
+            >
               <PhLink size="16" />
             </button>
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('code')" title="Inline Code">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('code')"
+              title="Inline Code"
+            >
               <PhCode size="16" />
             </button>
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('codeblock')" title="Code Block">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('codeblock')"
+              title="Code Block"
+            >
               <PhBracketsCurly size="16" />
             </button>
             <div class="toolbar-separator"></div>
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('list')" title="Bullet List">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('list')"
+              title="Bullet List"
+            >
               <PhListDashes size="16" />
             </button>
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('numlist')" title="Numbered List">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('numlist')"
+              title="Numbered List"
+            >
               <PhListNumbers size="16" />
             </button>
-            <button type="button" class="toolbar-btn" @click.prevent="insertMarkdown('quote')" title="Blockquote">
+            <button
+              type="button"
+              class="toolbar-btn"
+              @click.prevent="insertMarkdown('quote')"
+              title="Blockquote"
+            >
               <PhQuotes size="16" />
+            </button>
+            <div class="toolbar-separator"></div>
+            <button
+              type="button"
+              class="toolbar-btn ai-btn"
+              @click.prevent="openGeneratePromptModal"
+              title="AI Generate Story Content (Gemini)"
+            >
+              <PhSparkle size="16" />
+              <span class="btn-text">AI Story</span>
             </button>
           </div>
 
-          <textarea ref="markdownTextarea" v-model="formContent[currentLang]" rows="10" class="textarea markdown-editor" placeholder="# My Project\n\nWrite your content here..." :required="currentLang === defaultLang"></textarea>
-          <p class="help-text text-sm">You can embed images in markdown later by using the URLs returned after saving content images.</p>
+          <textarea
+            ref="markdownTextarea"
+            v-model="formContent[currentLang]"
+            rows="10"
+            class="textarea markdown-editor"
+            placeholder="# My Project\n\nWrite your content here..."
+            :required="currentLang === defaultLang"
+          ></textarea>
+          <p class="help-text text-sm">
+            You can embed images in markdown later by using the URLs returned after saving content
+            images.
+          </p>
         </div>
 
         <!-- Content Images -->
@@ -740,29 +937,61 @@ function formatDate(dateString: string) {
 
           <div class="gallery-preview">
             <!-- Existing Images -->
-            <div v-for="(imgUrl, idx) in existingContentImages" :key="'ex-'+idx" class="gallery-item">
+            <div
+              v-for="(imgUrl, idx) in existingContentImages"
+              :key="'ex-' + idx"
+              class="gallery-item"
+            >
               <img :src="imgUrl" alt="Content Image" />
-              <button class="remove-img-btn" @click.prevent="removeExistingContentImage(idx)">&times;</button>
+              <button class="remove-img-btn" @click.prevent="removeExistingContentImage(idx)">
+                &times;
+              </button>
               <div class="img-actions-overlay">
-                <button type="button" class="action-btn" @click.prevent="copyToClipboard(imgUrl)" title="Copy Image URL">
+                <button
+                  type="button"
+                  class="action-btn"
+                  @click.prevent="copyToClipboard(imgUrl)"
+                  title="Copy Image URL"
+                >
                   <PhLink size="16" />
                 </button>
-                <button type="button" class="action-btn" @click.prevent="copyMarkdownToClipboard(imgUrl)" title="Copy Markdown Tag">
+                <button
+                  type="button"
+                  class="action-btn"
+                  @click.prevent="copyMarkdownToClipboard(imgUrl)"
+                  title="Copy Markdown Tag"
+                >
                   <PhCopy size="16" />
                 </button>
               </div>
             </div>
 
             <!-- New Images -->
-            <div v-for="(file, idx) in newContentImages" :key="'new-'+idx" class="gallery-item new-item">
+            <div
+              v-for="(file, idx) in newContentImages"
+              :key="'new-' + idx"
+              class="gallery-item new-item"
+            >
               <img :src="getObjectUrl(file)" alt="New Content Image" />
-              <button class="remove-img-btn" @click.prevent="removeNewContentImage(idx)">&times;</button>
+              <button class="remove-img-btn" @click.prevent="removeNewContentImage(idx)">
+                &times;
+              </button>
               <div class="new-badge">New</div>
               <div class="img-actions-overlay">
-                <button type="button" class="action-btn" @click.prevent="copyToClipboard(getExpectedUrl(file))" title="Copy Expected Image URL">
+                <button
+                  type="button"
+                  class="action-btn"
+                  @click.prevent="copyToClipboard(getExpectedUrl(file))"
+                  title="Copy Expected Image URL"
+                >
                   <PhLink size="16" />
                 </button>
-                <button type="button" class="action-btn" @click.prevent="copyMarkdownToClipboard(getExpectedUrl(file))" title="Copy Expected Markdown Tag">
+                <button
+                  type="button"
+                  class="action-btn"
+                  @click.prevent="copyMarkdownToClipboard(getExpectedUrl(file))"
+                  title="Copy Expected Markdown Tag"
+                >
                   <PhCopy size="16" />
                 </button>
               </div>
@@ -772,10 +1001,17 @@ function formatDate(dateString: string) {
               <PhPlus size="24" />
               <span>Add Images</span>
             </label>
-            <input type="file" id="contentImages" ref="contentImagesInput" accept="image/*" multiple @change="handleContentImagesSelect" class="file-input" />
+            <input
+              type="file"
+              id="contentImages"
+              ref="contentImagesInput"
+              accept="image/*"
+              multiple
+              @change="handleContentImagesSelect"
+              class="file-input"
+            />
           </div>
         </div>
-
       </div>
     </BaseModal>
 
@@ -789,7 +1025,47 @@ function formatDate(dateString: string) {
       @close="showDeleteConfirm = false"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this project? This will also delete any associated files.</p>
+      <p>
+        Are you sure you want to delete this project? This will also delete any associated files.
+      </p>
+    </BaseModal>
+
+    <!-- AI Generate Prompt Modal -->
+    <BaseModal
+      :show="showGeneratePromptModal"
+      title="Generate Project Story with Gemini"
+      confirmText="Generate Content"
+      :loading="generatingStory"
+      @close="showGeneratePromptModal = false"
+      @confirm="handleGenerateStory"
+    >
+      <div class="form-container">
+        <p class="help-text" style="margin-bottom: 1rem; color: var(--color-text-secondary)">
+          Gemini will automatically generate a storytelling project description addressing
+          <strong>Why</strong> the project exists, <strong>What</strong> it does,
+          <strong>How</strong> it was built (using selected skills/tags), and
+          <strong>What was learned</strong>.
+        </p>
+        <div class="form-group">
+          <label for="aiPromptNotes"
+            >Paste Product Requirement Document (PRD) or Project Notes (Optional)</label
+          >
+          <textarea
+            id="aiPromptNotes"
+            v-model="aiPromptNotes"
+            rows="8"
+            class="textarea"
+            placeholder="Paste your PRD, feature specs, or journey outline here. Gemini will analyze it thoroughly to extract the project's purpose (Why), features/scope (What), technical architecture (How), and logical takeaways (Learnings) to write your portfolio story."
+          ></textarea>
+          <p
+            class="help-text text-sm"
+            style="margin-top: 0.5rem; color: var(--color-text-tertiary)"
+          >
+            You can paste raw markdown, specifications, or bullet points. Gemini will structure the
+            story accordingly.
+          </p>
+        </div>
+      </div>
     </BaseModal>
   </div>
 </template>
@@ -845,10 +1121,20 @@ function formatDate(dateString: string) {
   display: inline-flex;
 }
 
-.edit-btn { color: var(--color-text-secondary); }
-.edit-btn:hover { color: var(--color-primary); background-color: rgba(59, 130, 246, 0.1); }
-.delete-btn { color: var(--color-text-secondary); }
-.delete-btn:hover { color: var(--color-danger); background-color: rgba(239, 68, 68, 0.1); }
+.edit-btn {
+  color: var(--color-text-secondary);
+}
+.edit-btn:hover {
+  color: var(--color-primary);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+.delete-btn {
+  color: var(--color-text-secondary);
+}
+.delete-btn:hover {
+  color: var(--color-danger);
+  background-color: rgba(239, 68, 68, 0.1);
+}
 
 .alert {
   padding: 1rem;
@@ -856,8 +1142,16 @@ function formatDate(dateString: string) {
   margin-bottom: 1.5rem;
   font-size: 0.875rem;
 }
-.alert-success { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
-.alert-error { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+.alert-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.alert-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
 
 /* Form Styles */
 .form-container {
@@ -876,7 +1170,9 @@ function formatDate(dateString: string) {
   gap: 1rem;
 }
 
-.mt-4 { margin-top: 1rem; }
+.mt-4 {
+  margin-top: 1rem;
+}
 
 .textarea {
   width: 100%;
@@ -932,8 +1228,13 @@ function formatDate(dateString: string) {
   object-fit: cover;
 }
 
-.upload-label { cursor: pointer; display: inline-block; }
-.file-input { display: none; }
+.upload-label {
+  cursor: pointer;
+  display: inline-block;
+}
+.file-input {
+  display: none;
+}
 
 .skills-grid {
   display: flex;
@@ -955,13 +1256,19 @@ function formatDate(dateString: string) {
   transition: all 0.15s ease;
   user-select: none;
 }
-.skill-chip:hover { border-color: var(--color-text-secondary); }
+.skill-chip:hover {
+  border-color: var(--color-text-secondary);
+}
 .skill-chip.selected {
   background-color: rgba(59, 130, 246, 0.1);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
-.chip-icon { width: 16px; height: 16px; object-fit: contain; }
+.chip-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
 
 .tag-chip {
   padding: 0.25rem 0.75rem;
@@ -1027,7 +1334,7 @@ function formatDate(dateString: string) {
   user-select: none;
 }
 
-.checkbox-label input[type="checkbox"] {
+.checkbox-label input[type='checkbox'] {
   width: 1rem;
   height: 1rem;
   cursor: pointer;
@@ -1075,7 +1382,9 @@ function formatDate(dateString: string) {
   z-index: 10;
   transition: background-color 0.15s ease;
 }
-.remove-img-btn:hover { background-color: var(--color-danger); }
+.remove-img-btn:hover {
+  background-color: var(--color-danger);
+}
 
 .img-actions-overlay {
   position: absolute;
@@ -1120,7 +1429,9 @@ function formatDate(dateString: string) {
   transform: scale(1.1);
 }
 
-.new-item { border-color: var(--color-primary); }
+.new-item {
+  border-color: var(--color-primary);
+}
 .new-badge {
   position: absolute;
   bottom: 4px;
@@ -1151,13 +1462,25 @@ function formatDate(dateString: string) {
   color: var(--color-text-primary);
   background-color: var(--color-bg-surface-hover);
 }
-.gallery-add-btn span { font-size: 0.75rem; }
+.gallery-add-btn span {
+  font-size: 0.75rem;
+}
 
-.mt-4 { margin-top: 1rem; }
-.pt-4 { padding-top: 1rem; }
-.borders-top { border-top: 1px solid var(--color-border); }
-.text-sm { font-size: 0.875rem; }
-.text-tertiary { color: var(--color-text-tertiary); }
+.mt-4 {
+  margin-top: 1rem;
+}
+.pt-4 {
+  padding-top: 1rem;
+}
+.borders-top {
+  border-top: 1px solid var(--color-border);
+}
+.text-sm {
+  font-size: 0.875rem;
+}
+.text-tertiary {
+  color: var(--color-text-tertiary);
+}
 
 /* Markdown Toolbar Styles */
 .markdown-toolbar {
@@ -1202,5 +1525,24 @@ function formatDate(dateString: string) {
   height: 16px;
   background-color: var(--color-border);
   margin: 0 4px;
+}
+
+.ai-btn {
+  width: auto !important;
+  padding: 0 8px !important;
+  gap: 4px;
+  color: var(--color-primary) !important;
+  font-weight: 750;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.ai-btn:hover {
+  background-color: rgba(229, 37, 33, 0.08) !important;
+  color: var(--color-primary-hover) !important;
+}
+
+.ai-btn .btn-text {
+  font-family: inherit;
 }
 </style>

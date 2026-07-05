@@ -29,4 +29,20 @@ export async function translateText(text: string, targetLangs?: string[]): Promi
   throw new Error(res.data.error || 'Translation failed')
 }
 
+export async function generateProjectStory(params: {
+  title: string
+  description?: string
+  type?: string
+  tags?: string[]
+  skills?: string[]
+  prompt?: string
+}): Promise<string> {
+  if (!params.title) throw new Error('Title is required')
+  const res = await api.post('/generate/story-description', params)
+  if (res.data.success) {
+    return res.data.content
+  }
+  throw new Error(res.data.error || 'Content generation failed')
+}
+
 export default api

@@ -21,6 +21,7 @@ import projectsRouter from './routes/projects.js';
 import tagsRouter from './routes/tags.js';
 import uploadRouter from './routes/upload.js';
 import translateRouter from './routes/translate.js';
+import generateRouter from './routes/generate.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -108,6 +109,7 @@ app.use('/api/projects', projectsRouter);
 app.use('/api/tags', tagsRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/translate', translateRouter);
+app.use('/api/generate', generateRouter);
 
 // 404 handler
 app.use((req, res) => {
