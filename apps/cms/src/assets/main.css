@@ -284,3 +284,47 @@ textarea::placeholder {
 .status-badges {
   min-width: 130px !important;
 }
+
+/* Global Alert / Toast Notifications */
+.alert {
+  position: fixed !important;
+  top: 24px !important;
+  right: 24px !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: var(--radius-md) !important;
+  font-size: 0.875rem !important;
+  z-index: 9999 !important; /* On top of modals and all overlays */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  max-width: 400px !important;
+  margin-bottom: 0 !important;
+  animation: toastSlideIn 0.3s ease-out !important;
+}
+
+.alert-success {
+  background-color: #ffffff !important;
+  color: #10b981 !important;
+  border: 1.5px solid #10b981 !important;
+}
+
+.alert-error {
+  background-color: #ffffff !important;
+  color: #e52521 !important;
+  border: 1.5px solid #e52521 !important;
+}
+
+.alert-info {
+  background-color: #ffffff !important;
+  color: #3b82f6 !important;
+  border: 1.5px solid #3b82f6 !important;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

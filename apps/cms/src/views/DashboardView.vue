@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import api from '../utils/api'
+import { getDisplayLocal } from '../utils/i18n'
 
 interface Skill {
   id: string
@@ -118,7 +119,7 @@ const projectsByType = computed(() => {
           <div class="projects-list">
             <div v-for="proj in projects.slice(0, 5)" :key="proj.id" class="project-item">
               <div class="project-info">
-                <h4>{{ proj.title }}</h4>
+                <h4>{{ getDisplayLocal(proj.title, 'en') }}</h4>
                 <span class="project-meta-type">{{ proj.type }}</span>
               </div>
               <div class="project-status-tags">
