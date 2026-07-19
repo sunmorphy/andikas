@@ -60,6 +60,11 @@ export async function generateProjectStory(params: {
     tags?: string[];
     skills?: string[];
     prompt?: string;
+    files?: Array<{
+        buffer: Buffer;
+        originalname: string;
+        mimetype: string;
+    }>;
 }): Promise<string> {
     if (!genAI) {
         throw new Error('GEMINI_API_KEY is not configured in the backend environment.');
@@ -68,31 +73,33 @@ export async function generateProjectStory(params: {
     try {
         const model = genAI.getGenerativeModel({
             model: 'gemini-3.5-flash',
-            systemInstruction: `You are a professional software engineer, technical writer, and personal blogger. Generate a compelling, high-quality project story in Markdown format for a developer portfolio page.
+            systemInstruction: `You are a professional project manager and senior product owner with deep technical expertise about the your products, you are also a professional content writer that knows how to attract people to read your writings. Your task is to generate a comprehensive, premium portfolio project case study in Markdown format.
 
-The entire text MUST be written in a literal, conversational storytelling format:
-- Write in natural, flowing paragraphs.
-- Avoid using dry bulleted lists, technical tables, tree structure diagrams, or formal feature checklists.
-- Maintain an authentic, personal first-person voice (using "I" for individual projects or "we" for group projects).
-- Use conversational headers rather than rigid system headings (e.g., use '## How did I come up with the idea?' or '## The Search for a Solution' instead of '## Why it exists' or '## Features list').
-- Keep a human, developer-blog tone, incorporating real thoughts, engineering decisions, and personal takeaways (e.g. explaining why standard options didn't fit, what trade-offs were made, what is still in progress, and the expected outcomes).
+The entire text MUST be written in a literal, engaging, first-person storytelling case study format:
+- Structure the text around standard research and product design case study phases (e.g., Context & Origin, The Core Problem, The Technical Strategy, Outcomes & Deliverables, and Takeaways).
+- Use natural, flowing paragraphs. Write in an authentic, personal first-person voice (using "I" for individual projects or "we" for group projects).
+- Use engaging, conversational headers that frame a story (e.g., '## Setting the Scene: The Project Origin', '## The Challenge: Privacy vs. Convenience', '## The Technical Strategy: Offline-First Security', '## Outcomes & Current State', '## Key Takeaways & Lessons').
+- Do NOT use dry bulleted lists, technical tables, tree structure diagrams, or formal checklists. Turn all technical descriptions and features into narrative prose.
 
-If a Product Requirement Document (PRD), specification, or notes outline is provided:
-- Analyze it thoroughly to understand the technical context, but synthesize the details into organic prose.
-- Translate the requirements, features, and tech stack into the story's narrative flow rather than listing them out.
-- Highlight the motivation (Why), the core features (What), the engineering implementation (How), and personal lessons/challenges (Learnings) entirely as cohesive narrative paragraphs.
+Image Placement Suggestions:
+- You must suggest to the user where to put images/illustrations to make the case study visually engaging.
+- Place a clear, descriptive placeholder where it would be beneficial to add an image.
+- Format the image suggestion exactly like this:
+  ![[SUGGESTION: Describe what type of screenshot, diagram, or mock-up should go here to illustrate this section of the case study]]
 
-Guidelines:
-- Do NOT output extra text or markdown wrappers like \`\`\`markdown ... \`\`\`, return ONLY the raw markdown text itself.
-- Do NOT invent fake company names or client details unless provided. Keep it focused on the technical and product journey.
-- Keep the length comprehensive but engaging (about 400 to 600 words).`
+If a Product Requirement Document (PRD), specification, or notes outline (including uploaded PDFs or text files) is provided:
+- Analyze it thoroughly as a project manager to extract the technical context, goals, features, and constraints.
+- Synthesize all raw specifications and design parameters into cohesive narrative paragraphs without list structures.
+- Detail the exact technologies and libraries used (e.g., SQLCipher, Room, Jetpack Compose) and describe their strategic choices.
+
+Keep the length comprehensive and professional (about 700 to 1500 words).`
         });
 
         const projectTypeStr = params.type === 'group' ? 'group project' : 'individual personal project';
         const tagsStr = params.tags && params.tags.length > 0 ? params.tags.join(', ') : 'None';
         const skillsStr = params.skills && params.skills.length > 0 ? params.skills.join(', ') : 'None';
 
-        let promptContent = `Generate a storytelling project description for:
+        let promptContent = `Generate a storytelling case study project content body for:
 Project Title: ${params.title}
 Project Type: ${projectTypeStr}
 Short Overview: ${params.description || 'None'}
@@ -101,10 +108,28 @@ Technologies/Skills Used: ${skillsStr}
 `;
 
         if (params.prompt && params.prompt.trim() !== '') {
-            promptContent += `\nAdditional User Notes/Outline to incorporate:\n${params.prompt}`;
+            promptContent += `\nAdditional User Notes/Outline/PRD:\n${params.prompt}`;
         }
 
-        const result = await model.generateContent(promptContent);
+        const promptParts: any[] = [promptContent];
+
+        if (params.files && params.files.length > 0) {
+            for (const file of params.files) {
+                if (file.mimetype === 'application/pdf') {
+                    promptParts.push({
+                        inlineData: {
+                            data: file.buffer.toString('base64'),
+                            mimeType: 'application/pdf'
+                        }
+                    });
+                } else if (file.mimetype.startsWith('text/') || file.originalname.endsWith('.txt') || file.originalname.endsWith('.md')) {
+                    const textContent = file.buffer.toString('utf-8');
+                    promptParts.push(`\nUploaded Document [${file.originalname}]:\n${textContent}\n`);
+                }
+            }
+        }
+
+        const result = await model.generateContent(promptParts);
         const responseText = result.response.text();
         return responseText.trim();
     } catch (error: any) {

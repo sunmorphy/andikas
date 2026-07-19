@@ -29,7 +29,7 @@ export async function translateText(text: string, targetLangs?: string[]): Promi
   throw new Error(res.data.error || 'Translation failed')
 }
 
-export async function generateProjectStory(params: {
+export async function generateProjectStory(params: FormData | {
   title: string
   description?: string
   type?: string
@@ -37,8 +37,11 @@ export async function generateProjectStory(params: {
   skills?: string[]
   prompt?: string
 }): Promise<string> {
-  if (!params.title) throw new Error('Title is required')
-  const res = await api.post('/generate/story-description', params)
+  const isFormData = params instanceof FormData
+  if (!isFormData && !params.title) throw new Error('Title is required')
+  const res = await api.post('/generate/story-description', params, {
+    headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+  })
   if (res.data.success) {
     return res.data.content
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
+import { marked } from 'marked'
 import api, { generateProjectStory, translateText } from '../utils/api'
 import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
@@ -181,6 +182,7 @@ function openCreateModal() {
   existingContentImages.value = []
   if (contentImagesInput.value) contentImagesInput.value.value = ''
 
+  activeEditorTab.value = 'write'
   showModal.value = true
 }
 
@@ -217,6 +219,7 @@ function openEditModal(proj: Project) {
   existingContentImages.value = proj.contentImages || []
   if (contentImagesInput.value) contentImagesInput.value.value = ''
 
+  activeEditorTab.value = 'write'
   showModal.value = true
 }
 
@@ -567,6 +570,53 @@ function formatDate(dateString: string) {
 const showGeneratePromptModal = ref(false)
 const generatingStory = ref(false)
 const aiPromptNotes = ref('')
+const aiInputMode = ref<'text' | 'file'>('text')
+const aiSelectedFiles = ref<File[]>([])
+const aiFileInput = ref<HTMLInputElement | null>(null)
+
+function handleAiFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (!target.files) return
+
+  const filesArray = Array.from(target.files)
+  if (aiSelectedFiles.value.length + filesArray.length > 3) {
+    showMessage('You can upload a maximum of 3 files.', 'error')
+    if (aiFileInput.value) aiFileInput.value.value = ''
+    return
+  }
+
+  const allowedExtensions = ['.pdf', '.txt', '.md']
+  const maxSize = 5 * 1024 * 1024
+
+  for (const file of filesArray) {
+    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase()
+    if (!allowedExtensions.includes(ext) && !file.type.startsWith('text/')) {
+      showMessage(`File "${file.name}" is not supported. Only PDF, Markdown (.md), and Text (.txt) files are allowed.`, 'error')
+      if (aiFileInput.value) aiFileInput.value.value = ''
+      return
+    }
+    if (file.size > maxSize) {
+      showMessage(`File "${file.name}" exceeds the 5MB size limit.`, 'error')
+      if (aiFileInput.value) aiFileInput.value.value = ''
+      return
+    }
+  }
+
+  aiSelectedFiles.value = [...aiSelectedFiles.value, ...filesArray]
+  if (aiFileInput.value) aiFileInput.value.value = ''
+}
+
+function removeAiFile(index: number) {
+  aiSelectedFiles.value.splice(index, 1)
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
 
 function openGeneratePromptModal() {
   if (!formTitle.value.trim()) {
@@ -574,6 +624,8 @@ function openGeneratePromptModal() {
     return
   }
   aiPromptNotes.value = ''
+  aiInputMode.value = 'text'
+  aiSelectedFiles.value = []
   showGeneratePromptModal.value = true
 }
 
@@ -594,18 +646,32 @@ async function handleGenerateStory() {
       })
       .filter(Boolean)
 
-    formContent.value[currentLang.value as SupportedLanguage] = await generateProjectStory({
-      title: formTitle.value,
-      description:
-        formDescription.value[currentLang.value as SupportedLanguage] ||
-        formDescription.value[defaultLang],
-      type: formType.value,
-      tags: tagsNames,
-      skills: skillsNames,
-      prompt: aiPromptNotes.value,
-    })
+    const formData = new FormData()
+    formData.append('title', formTitle.value)
+    formData.append(
+      'description',
+      formDescription.value[currentLang.value as SupportedLanguage] ||
+        formDescription.value[defaultLang]
+    )
+    formData.append('type', formType.value)
+    formData.append('tags', JSON.stringify(tagsNames))
+    formData.append('skills', JSON.stringify(skillsNames))
+
+    if (aiInputMode.value === 'text' && aiPromptNotes.value.trim() !== '') {
+      formData.append('prompt', aiPromptNotes.value)
+    }
+
+    if (aiInputMode.value === 'file' && aiSelectedFiles.value.length > 0) {
+      aiSelectedFiles.value.forEach((file) => {
+        formData.append('files', file)
+      })
+    }
+
+    const generatedMarkdown = await generateProjectStory(formData)
+
+    formContent.value[currentLang.value as SupportedLanguage] = generatedMarkdown
     showGeneratePromptModal.value = false
-    showMessage('Successfully generated project story!', 'success')
+    showMessage('Successfully generated project story case study!', 'success')
   } catch (error: any) {
     console.error('Error generating story:', error)
     showMessage(error.message || 'Failed to generate story content', 'error')
@@ -613,6 +679,14 @@ async function handleGenerateStory() {
     generatingStory.value = false
   }
 }
+
+// Markdown preview tab state
+const activeEditorTab = ref<'write' | 'preview'>('write')
+
+const renderedMarkdown = computed(() => {
+  const content = formContent.value[currentLang.value as SupportedLanguage] || ''
+  return marked.parse(content) as string
+})
 </script>
 
 <template>
@@ -825,110 +899,138 @@ async function handleGenerateStory() {
 
         <!-- Markdown Editor -->
         <div class="form-group mt-4 borders-top pt-4">
-          <label
-            >Markdown Content
-            <span class="required" style="color: var(--color-danger)">*</span></label
-          >
-
-          <div class="markdown-toolbar">
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('heading')"
-              title="Heading"
+          <div class="editor-header-tabs" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label style="margin-bottom: 0;"
+              >Markdown Content
+              <span class="required" style="color: var(--color-danger)">*</span></label
             >
-              <PhTextH size="16" />
-            </button>
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('bold')"
-              title="Bold"
-            >
-              <PhTextB size="16" />
-            </button>
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('italic')"
-              title="Italic"
-            >
-              <PhTextItalic size="16" />
-            </button>
-            <div class="toolbar-separator"></div>
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('link')"
-              title="Insert Link"
-            >
-              <PhLink size="16" />
-            </button>
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('code')"
-              title="Inline Code"
-            >
-              <PhCode size="16" />
-            </button>
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('codeblock')"
-              title="Code Block"
-            >
-              <PhBracketsCurly size="16" />
-            </button>
-            <div class="toolbar-separator"></div>
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('list')"
-              title="Bullet List"
-            >
-              <PhListDashes size="16" />
-            </button>
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('numlist')"
-              title="Numbered List"
-            >
-              <PhListNumbers size="16" />
-            </button>
-            <button
-              type="button"
-              class="toolbar-btn"
-              @click.prevent="insertMarkdown('quote')"
-              title="Blockquote"
-            >
-              <PhQuotes size="16" />
-            </button>
-            <div class="toolbar-separator"></div>
-            <button
-              type="button"
-              class="toolbar-btn ai-btn"
-              @click.prevent="openGeneratePromptModal"
-              title="AI Generate Story Content (Gemini)"
-            >
-              <PhSparkle size="16" />
-              <span class="btn-text">AI Story</span>
-            </button>
+            <div class="segmented-tabs" style="display: flex; gap: 0.25rem; background-color: var(--color-bg-surface-hover); padding: 0.2rem; border-radius: 4px; border: 1px solid var(--color-border);">
+              <button 
+                type="button" 
+                class="tab-btn" 
+                :class="activeEditorTab === 'write' ? 'active' : ''" 
+                @click="activeEditorTab = 'write'"
+                style="padding: 0.2rem 0.6rem; border: none; border-radius: 3px; font-size: 0.75rem; cursor: pointer; transition: all 0.15s ease; background: none; font-weight: 600; color: var(--color-text-secondary);"
+              >
+                Write
+              </button>
+              <button 
+                type="button" 
+                class="tab-btn" 
+                :class="activeEditorTab === 'preview' ? 'active' : ''" 
+                @click="activeEditorTab = 'preview'"
+                style="padding: 0.2rem 0.6rem; border: none; border-radius: 3px; font-size: 0.75rem; cursor: pointer; transition: all 0.15s ease; background: none; font-weight: 600; color: var(--color-text-secondary);"
+              >
+                Preview
+              </button>
+            </div>
           </div>
 
-          <textarea
-            ref="markdownTextarea"
-            v-model="formContent[currentLang]"
-            rows="10"
-            class="textarea markdown-editor"
-            placeholder="# My Project\n\nWrite your content here..."
-            :required="currentLang === defaultLang"
-          ></textarea>
-          <p class="help-text text-sm">
-            You can embed images in markdown later by using the URLs returned after saving content
-            images.
-          </p>
+          <div v-show="activeEditorTab === 'write'">
+            <div class="markdown-toolbar">
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('heading')"
+                title="Heading"
+              >
+                <PhTextH size="16" />
+              </button>
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('bold')"
+                title="Bold"
+              >
+                <PhTextB size="16" />
+              </button>
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('italic')"
+                title="Italic"
+              >
+                <PhTextItalic size="16" />
+              </button>
+              <div class="toolbar-separator"></div>
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('link')"
+                title="Insert Link"
+              >
+                <PhLink size="16" />
+              </button>
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('code')"
+                title="Inline Code"
+              >
+                <PhCode size="16" />
+              </button>
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('codeblock')"
+                title="Code Block"
+              >
+                <PhBracketsCurly size="16" />
+              </button>
+              <div class="toolbar-separator"></div>
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('list')"
+                title="Bullet List"
+              >
+                <PhListDashes size="16" />
+              </button>
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('numlist')"
+                title="Numbered List"
+              >
+                <PhListNumbers size="16" />
+              </button>
+              <button
+                type="button"
+                class="toolbar-btn"
+                @click.prevent="insertMarkdown('quote')"
+                title="Blockquote"
+              >
+                <PhQuotes size="16" />
+              </button>
+              <div class="toolbar-separator"></div>
+              <button
+                type="button"
+                class="toolbar-btn ai-btn"
+                @click.prevent="openGeneratePromptModal"
+                title="AI Generate Story Content (Gemini)"
+              >
+                <PhSparkle size="16" />
+                <span class="btn-text">AI Story</span>
+              </button>
+            </div>
+
+            <textarea
+              ref="markdownTextarea"
+              v-model="formContent[currentLang]"
+              rows="10"
+              class="textarea markdown-editor"
+              placeholder="# My Project\n\nWrite your content here..."
+              :required="currentLang === defaultLang"
+            ></textarea>
+            <p class="help-text text-sm">
+              You can embed images in markdown later by using the URLs returned after saving content
+              images.
+            </p>
+          </div>
+
+          <div v-show="activeEditorTab === 'preview'">
+            <div class="markdown-preview-container" v-html="renderedMarkdown"></div>
+          </div>
         </div>
 
         <!-- Content Images -->
@@ -1033,37 +1135,100 @@ async function handleGenerateStory() {
     <!-- AI Generate Prompt Modal -->
     <BaseModal
       :show="showGeneratePromptModal"
-      title="Generate Project Story with Gemini"
+      title="Generate Project Case Study with Gemini"
       confirmText="Generate Content"
       :loading="generatingStory"
       @close="showGeneratePromptModal = false"
       @confirm="handleGenerateStory"
     >
       <div class="form-container">
-        <p class="help-text" style="margin-bottom: 1rem; color: var(--color-text-secondary)">
-          Gemini will automatically generate a storytelling project description addressing
-          <strong>Why</strong> the project exists, <strong>What</strong> it does,
-          <strong>How</strong> it was built (using selected skills/tags), and
-          <strong>What was learned</strong>.
+        <p class="help-text" style="margin-bottom: 1.5rem; color: var(--color-text-secondary)">
+          Gemini will roleplay as a <strong>Professional Project Manager</strong> to generate a comprehensive, premium portfolio project <strong>Case Study</strong> (answering Why, What, How, and What was learned) in a literal storytelling format, including suggestions on where to place illustrative screenshots or diagrams.
         </p>
-        <div class="form-group">
-          <label for="aiPromptNotes"
-            >Paste Product Requirement Document (PRD) or Project Notes (Optional)</label
+
+        <!-- Segmented Tab / Mode Selector -->
+        <div class="input-mode-selector" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+          <button 
+            type="button" 
+            class="btn btn-sm" 
+            :class="aiInputMode === 'text' ? 'btn-primary' : 'btn-secondary'"
+            @click="aiInputMode = 'text'"
+            style="font-size: 0.85rem;"
           >
+            Paste PRD / Notes
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-sm" 
+            :class="aiInputMode === 'file' ? 'btn-primary' : 'btn-secondary'"
+            @click="aiInputMode = 'file'"
+            style="font-size: 0.85rem;"
+          >
+            Upload PRD Documents
+          </button>
+        </div>
+
+        <!-- Mode 1: Paste Text -->
+        <div v-if="aiInputMode === 'text'" class="form-group">
+          <label for="aiPromptNotes">Paste Product Requirement Document (PRD) or Project Notes (Optional)</label>
           <textarea
             id="aiPromptNotes"
             v-model="aiPromptNotes"
             rows="8"
             class="textarea"
-            placeholder="Paste your PRD, feature specs, or journey outline here. Gemini will analyze it thoroughly to extract the project's purpose (Why), features/scope (What), technical architecture (How), and logical takeaways (Learnings) to write your portfolio story."
+            placeholder="Paste your PRD, feature specs, or journey outline here. Gemini will analyze it thoroughly to extract the project's purpose (Why), features/scope (What), technical architecture (How), and logical takeaways (Learnings) to write your portfolio case study."
           ></textarea>
-          <p
-            class="help-text text-sm"
-            style="margin-top: 0.5rem; color: var(--color-text-tertiary)"
-          >
-            You can paste raw markdown, specifications, or bullet points. Gemini will structure the
-            story accordingly.
+          <p class="help-text text-sm" style="margin-top: 0.5rem; color: var(--color-text-tertiary)">
+            You can paste raw markdown, specifications, or bullet points.
           </p>
+        </div>
+
+        <!-- Mode 2: Upload Files -->
+        <div v-else class="form-group">
+          <label>Upload PRD / Specification Documents (Optional)</label>
+          <div class="file-uploader-box" style="border: 2px dashed var(--color-border); padding: 1.5rem; border-radius: 6px; text-align: center; background-color: var(--color-bg-surface-hover); margin-bottom: 1rem;">
+            <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--color-text-secondary);">
+              Select up to 3 files (PDF, Markdown, or Plain Text) from your local computer. Max size is 5MB per file.
+            </p>
+            <label for="aiDocuments" class="btn btn-secondary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+              <PhPlus size="16" />
+              <span>Choose Files...</span>
+            </label>
+            <input
+              type="file"
+              id="aiDocuments"
+              ref="aiFileInput"
+              accept=".pdf,.txt,.md"
+              multiple
+              @change="handleAiFileSelect"
+              class="file-input"
+              style="display: none;"
+            />
+          </div>
+
+          <!-- Uploaded Files List -->
+          <div v-if="aiSelectedFiles.length > 0" class="uploaded-files-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+            <div 
+              v-for="(file, idx) in aiSelectedFiles" 
+              :key="idx" 
+              class="file-item-row"
+              style="display: flex; justify-content: space-between; align-items: center; background-color: var(--color-bg-surface); padding: 0.5rem 0.75rem; border: 1px solid var(--color-border); border-radius: 4px;"
+            >
+              <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0;">
+                <span style="font-weight: 550; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">{{ file.name }}</span>
+                <span style="font-size: 0.75rem; color: var(--color-text-tertiary)">({{ formatFileSize(file.size) }})</span>
+              </div>
+              <button 
+                type="button" 
+                @click="removeAiFile(idx)" 
+                style="background: none; border: none; color: var(--color-danger); cursor: pointer; font-size: 1.1rem; line-height: 1;"
+                title="Remove File"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+          <p v-else class="help-text text-sm" style="color: var(--color-text-tertiary); text-align: center;">No files selected yet.</p>
         </div>
       </div>
     </BaseModal>
@@ -1544,5 +1709,121 @@ async function handleGenerateStory() {
 
 .ai-btn .btn-text {
   font-family: inherit;
+}
+
+.segmented-tabs .tab-btn.active {
+  background-color: var(--color-bg-surface) !important;
+  color: var(--color-primary) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-preview-container {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1rem;
+  min-height: 250px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+.markdown-preview-container :deep(h1),
+.markdown-preview-container :deep(h2),
+.markdown-preview-container :deep(h3),
+.markdown-preview-container :deep(h4) {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-text-primary);
+}
+
+.markdown-preview-container :deep(h1) { font-size: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.3rem; }
+.markdown-preview-container :deep(h2) { font-size: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.3rem; }
+.markdown-preview-container :deep(h3) { font-size: 1.1rem; }
+
+.markdown-preview-container :deep(p) {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.markdown-preview-container :deep(ul),
+.markdown-preview-container :deep(ol) {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  color: var(--color-text-secondary);
+}
+
+.markdown-preview-container :deep(ul) {
+  list-style-type: disc;
+}
+
+.markdown-preview-container :deep(ol) {
+  list-style-type: decimal;
+}
+
+.markdown-preview-container :deep(li) {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-preview-container :deep(strong) {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.markdown-preview-container :deep(em) {
+  font-style: italic;
+}
+
+.markdown-preview-container :deep(code) {
+  background-color: var(--color-bg-surface-hover);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--color-primary);
+}
+
+.markdown-preview-container :deep(pre) {
+  background-color: var(--color-bg-surface-hover);
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+}
+
+.markdown-preview-container :deep(pre code) {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+}
+
+.markdown-preview-container :deep(a) {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.markdown-preview-container :deep(a:hover) {
+  color: var(--color-primary-hover);
+}
+
+.markdown-preview-container :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.markdown-preview-container :deep(blockquote) {
+  border-left: 4px solid var(--color-primary);
+  padding-left: 1rem;
+  color: var(--color-text-tertiary);
+  margin-bottom: 1rem;
+  font-style: italic;
 }
 </style>
