@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "iconoir-react";
+import { ArrowLeft, Xmark, ZoomIn, ZoomOut, Refresh } from "iconoir-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Project } from "@andikas/types";
 import { Button } from "@/components/ui/Button";
 
@@ -19,6 +19,66 @@ interface Props {
 
 export default function ProjectDetailClient({ project, dict, lang }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
+    const [previewImage, setPreviewImage] = useState<{ src: string; alt?: string } | null>(null);
+    const [zoomScale, setZoomScale] = useState<number>(1);
+
+    const openPreview = (src: string, alt?: string) => {
+        setZoomScale(1);
+        setPreviewImage({ src, alt });
+    };
+
+    const closePreview = useCallback(() => {
+        setPreviewImage(null);
+        setZoomScale(1);
+    }, []);
+
+    const handleZoomIn = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setZoomScale(prev => Math.min(3, +(prev + 0.5).toFixed(1)));
+    };
+
+    const handleZoomOut = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setZoomScale(prev => Math.max(1, +(prev - 0.5).toFixed(1)));
+    };
+
+    const handleResetZoom = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setZoomScale(1);
+    };
+
+    const toggleImageZoom = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setZoomScale(prev => (prev > 1 ? 1 : 2));
+    };
+
+    // Handle mouse wheel zoom
+    const handleWheelZoom = (e: React.WheelEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const delta = e.deltaY < 0 ? 0.25 : -0.25;
+        setZoomScale(prev => {
+            const next = +(prev + delta).toFixed(2);
+            return Math.min(3, Math.max(1, next));
+        });
+    };
+
+    // Handle Escape key and disable scrolling when preview is open
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                closePreview();
+            }
+        };
+        if (previewImage) {
+            window.addEventListener("keydown", handleKeyDown);
+            document.body.style.overflow = "hidden";
+        }
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            document.body.style.overflow = "unset";
+        };
+    }, [previewImage, closePreview]);
 
     // Track scroll progress of the entire article container
     const { scrollYProgress } = useScroll({
@@ -27,6 +87,25 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
     });
 
     const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+    const markdownComponents = {
+        // Custom renderer for markdown images
+        img: ({ ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => (
+            <span
+                className="block my-6 cursor-zoom-in overflow-hidden rounded-xl group relative select-none"
+                onClick={() => props.src && openPreview(String(props.src), props.alt ? String(props.alt) : undefined)}
+            >
+                <img
+                    {...props}
+                    className="w-full h-auto rounded-xl transition-transform duration-500 group-hover:scale-[1.02] shadow-sm"
+                    alt={props.alt || "Project detail image"}
+                />
+                <span className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-950/80 text-white text-[11px] font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm pointer-events-none shadow-sm">
+                    Click to enlarge
+                </span>
+            </span>
+        )
+    };
 
     return (
         <article ref={containerRef} className="w-full md:w-4/5 mx-auto px-6 pt-24 pb-32 relative">
@@ -96,7 +175,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                         >
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.description}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{project.description}</ReactMarkdown>
                         </motion.div>
 
                         {project.coverImage && (
@@ -105,7 +184,8 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                 whileInView={{ clipPath: "inset(0% 0% 0% 0%)" }}
                                 viewport={{ once: true, margin: "-20px" }}
                                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                                className="relative w-full aspect-[16/9] overflow-hidden"
+                                className="relative w-full aspect-[16/9] overflow-hidden rounded-xl cursor-zoom-in group select-none"
+                                onClick={() => openPreview(project.coverImage, project.title)}
                             >
                                 <motion.div
                                     className="relative w-full h-full"
@@ -118,10 +198,15 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                         src={project.coverImage}
                                         fill
                                         alt={project.title}
-                                        className="object-cover transition-all duration-500"
+                                        className="object-cover transition-all duration-500 group-hover:scale-105"
                                         sizes="(max-width: 1024px) 100vw, 1200px"
                                         priority
                                     />
+                                    <div className="absolute inset-0 bg-neutral-950/0 group-hover:bg-neutral-950/20 transition-colors flex items-end justify-end p-4">
+                                        <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-950/80 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-sm pointer-events-none">
+                                            Click to enlarge
+                                        </span>
+                                    </div>
                                 </motion.div>
                             </motion.div>
                         )}
@@ -134,7 +219,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                                 viewport={{ once: true, margin: "-20px" }}
                                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             >
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{project.content}</ReactMarkdown>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{project.content}</ReactMarkdown>
                             </motion.section>
                         )}
 
@@ -165,6 +250,119 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
                     </div>
                 </motion.div>
             </div>
+
+            {/* Image Preview Lightbox Modal */}
+            <AnimatePresence>
+                {previewImage && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-neutral-950/90 backdrop-blur-md select-none overflow-hidden"
+                        onClick={closePreview}
+                        onWheel={handleWheelZoom}
+                    >
+                        {/* Floating Top Control Toolbar */}
+                        <div
+                            className="absolute top-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900/80 border border-neutral-800 backdrop-blur-md shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                type="button"
+                                onClick={handleZoomOut}
+                                disabled={zoomScale <= 1}
+                                className="p-2 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                title="Zoom Out"
+                                aria-label="Zoom Out"
+                            >
+                                <ZoomOut className="w-5 h-5" />
+                            </button>
+
+                            <span className="text-xs font-bold text-neutral-300 min-w-[44px] text-center tracking-wider">
+                                {Math.round(zoomScale * 100)}%
+                            </span>
+
+                            <button
+                                type="button"
+                                onClick={handleZoomIn}
+                                disabled={zoomScale >= 3}
+                                className="p-2 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-800 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                title="Zoom In"
+                                aria-label="Zoom In"
+                            >
+                                <ZoomIn className="w-5 h-5" />
+                            </button>
+
+                            {zoomScale > 1 && (
+                                <button
+                                    type="button"
+                                    onClick={handleResetZoom}
+                                    className="p-2 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all"
+                                    title="Reset Zoom"
+                                    aria-label="Reset Zoom"
+                                >
+                                    <Refresh className="w-4 h-4" />
+                                </button>
+                            )}
+
+                            <div className="w-[1px] h-4 bg-neutral-800 mx-1" />
+
+                            {/* Close Button */}
+                            <button
+                                type="button"
+                                onClick={closePreview}
+                                className="p-2 rounded-full text-neutral-300 hover:text-white hover:bg-brand-900 transition-all"
+                                title="Close"
+                                aria-label="Close image preview"
+                            >
+                                <Xmark className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Modal Content Container */}
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            className="relative max-w-7xl max-h-[88vh] flex flex-col items-center justify-center"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Image Box */}
+                            <div className="relative overflow-hidden rounded-xl border border-neutral-800 shadow-2xl bg-neutral-950 max-h-[82vh] flex items-center justify-center">
+                                <motion.div
+                                    drag={zoomScale > 1}
+                                    dragConstraints={{ left: -300 * zoomScale, right: 300 * zoomScale, top: -200 * zoomScale, bottom: 200 * zoomScale }}
+                                    dragElastic={0.1}
+                                    animate={{ scale: zoomScale }}
+                                    transition={{ duration: 0.2 }}
+                                    className={`relative transition-cursor ${zoomScale > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in"}`}
+                                    onClick={toggleImageZoom}
+                                >
+                                    <img
+                                        src={previewImage.src}
+                                        alt={previewImage.alt || "Project detail image preview"}
+                                        className="max-h-[82vh] w-auto max-w-full object-contain pointer-events-none select-none"
+                                    />
+                                </motion.div>
+                            </div>
+
+                            {/* Caption / Alt text if available */}
+                            {previewImage.alt && (
+                                <motion.p
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.15 }}
+                                    className="mt-3 text-xs md:text-sm text-neutral-400 font-medium text-center max-w-2xl px-4"
+                                >
+                                    {previewImage.alt}
+                                </motion.p>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </article>
     );
 }
