@@ -42,9 +42,9 @@ router.post('/', requireAuth, upload.single('image'), asyncHandler(async (req, r
         });
     }
 
-    // Convert image to WebP at 80% quality
+    // Convert image to PNG at 100% quality
     const compressed = await sharp(req.file.buffer)
-        .png({ quality: 80 })
+        .png({ quality: 100 })
         .toBuffer();
 
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
