@@ -1,5 +1,6 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3';
 import dotenv from 'dotenv';
+import {getMediaUrl} from '../utils/media.js';
 
 dotenv.config();
 
@@ -26,36 +27,33 @@ export interface R2UploadResult {
     customCoordinates?: string | null;
 }
 
-export const uploadToR2 = async (file: Buffer, fileName: string, username: string, subFolder?: string): Promise<R2UploadResult> => {
+export const uploadToR2 = async (file: Buffer, fileName: string, username?: string, subFolder?: string): Promise<R2UploadResult> => {
     try {
         const sanitizedFileName = sanitizeFileName(fileName);
-        const folderPath = subFolder ? `${username}/${subFolder}` : username;
-        const filePath = `${folderPath}/${sanitizedFileName}`;
         const bucketName = process.env.R2_BUCKET_NAME!;
-        const publicUrl = process.env.R2_PUBLIC_URL!;
 
         const contentType = getContentType(fileName);
 
         const command = new PutObjectCommand({
             Bucket: bucketName,
-            Key: filePath,
+            Key: sanitizedFileName,
             Body: file,
             ContentType: contentType,
         });
 
         await r2Client.send(command);
 
-        const url = `${publicUrl}/${filePath}`;
+        const url = getMediaUrl(sanitizedFileName) || sanitizedFileName;
 
         return {
-            fileId: generateFileId(filePath),
+            fileId: generateFileId(sanitizedFileName),
             name: sanitizedFileName,
             url: url,
             thumbnailUrl: url,
             height: 0,
             width: 0,
             size: file.length,
-            filePath: filePath,
+            filePath: sanitizedFileName,
             tags: null,
             isPrivateFile: false,
             customCoordinates: null,
@@ -65,42 +63,8 @@ export const uploadToR2 = async (file: Buffer, fileName: string, username: strin
     }
 };
 
-export const uploadProfileImageToR2 = async (file: Buffer, fileName: string, username: string): Promise<R2UploadResult> => {
-    try {
-        const sanitizedFileName = sanitizeFileName(fileName);
-        const filePath = `${username}/${sanitizedFileName}`;
-        const bucketName = process.env.R2_BUCKET_NAME!;
-        const publicUrl = process.env.R2_PUBLIC_URL!;
-
-        const contentType = getContentType(fileName);
-
-        const command = new PutObjectCommand({
-            Bucket: bucketName,
-            Key: filePath,
-            Body: file,
-            ContentType: contentType,
-        });
-
-        await r2Client.send(command);
-
-        const url = `${publicUrl}/${filePath}`;
-
-        return {
-            fileId: generateFileId(filePath),
-            name: sanitizedFileName,
-            url: url,
-            thumbnailUrl: url,
-            height: 0,
-            width: 0,
-            size: file.length,
-            filePath: filePath,
-            tags: null,
-            isPrivateFile: false,
-            customCoordinates: null,
-        };
-    } catch (error) {
-        throw new Error(`Profile image upload failed: ${error}`);
-    }
+export const uploadProfileImageToR2 = async (file: Buffer, fileName: string, username?: string): Promise<R2UploadResult> => {
+    return uploadToR2(file, fileName, username, 'users');
 };
 
 function sanitizeFileName(fileName: string): string {

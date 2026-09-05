@@ -461,8 +461,22 @@ async function copyToClipboard(text: string) {
   }
 }
 
+function resolveMediaUrl(urlOrName?: string | null): string {
+  if (!urlOrName) return ''
+  if (
+    urlOrName.startsWith('http://') ||
+    urlOrName.startsWith('https://') ||
+    urlOrName.startsWith('data:') ||
+    urlOrName.startsWith('blob:')
+  ) {
+    return urlOrName
+  }
+  const host = (publicUrl.value || '').replace(/\/+$/, '')
+  const clean = urlOrName.replace(/^\/+/, '')
+  return host ? `${host}/${clean}` : `/${clean}`
+}
+
 function getExpectedUrl(file: File): string {
-  const username = authStore.user?.username || 'admin'
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
   const baseName = file.name.replace(/\.[^.]+$/, '')
   const imgName = `${baseName}_${date}.png`
@@ -471,7 +485,8 @@ function getExpectedUrl(file: File): string {
     .replace(/[^\w\-.]/g, '')
     .replace(/-+/g, '-')
     .toLowerCase()
-  return `${publicUrl.value || ''}/${username}/projects/${sanitized}`
+  const host = (publicUrl.value || '').replace(/\/+$/, '')
+  return host ? `${host}/${sanitized}` : sanitized
 }
 
 async function copyMarkdownToClipboard(url: string) {
@@ -591,7 +606,10 @@ function handleAiFileSelect(event: Event) {
   for (const file of filesArray) {
     const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase()
     if (!allowedExtensions.includes(ext) && !file.type.startsWith('text/')) {
-      showMessage(`File "${file.name}" is not supported. Only PDF, Markdown (.md), and Text (.txt) files are allowed.`, 'error')
+      showMessage(
+        `File "${file.name}" is not supported. Only PDF, Markdown (.md), and Text (.txt) files are allowed.`,
+        'error',
+      )
       if (aiFileInput.value) aiFileInput.value.value = ''
       return
     }
@@ -651,7 +669,7 @@ async function handleGenerateStory() {
     formData.append(
       'description',
       formDescription.value[currentLang.value as SupportedLanguage] ||
-        formDescription.value[defaultLang]
+        formDescription.value[defaultLang],
     )
     formData.append('type', formType.value)
     formData.append('tags', JSON.stringify(tagsNames))
@@ -705,7 +723,7 @@ const renderedMarkdown = computed(() => {
     <BaseTable :columns="columns" :data="projects" :loading="loading">
       <template #coverImage="{ row }">
         <div class="cover-thumb">
-          <img v-if="row.coverImage" :src="row.coverImage" :alt="row.title" />
+          <img v-if="row.coverImage" :src="resolveMediaUrl(row.coverImage)" :alt="row.title" />
           <div v-else class="no-thumb"><PhImageIcon /></div>
         </div>
       </template>
@@ -755,7 +773,7 @@ const renderedMarkdown = computed(() => {
           <label>Cover Image</label>
           <div class="cover-preview-container">
             <div class="cover-preview">
-              <img v-if="previewCover" :src="previewCover" alt="Preview" />
+              <img v-if="previewCover" :src="resolveMediaUrl(previewCover)" alt="Preview" />
               <div v-else class="no-photo"><PhImageIcon size="32" /></div>
             </div>
             <div>
@@ -899,27 +917,65 @@ const renderedMarkdown = computed(() => {
 
         <!-- Markdown Editor -->
         <div class="form-group mt-4 borders-top pt-4">
-          <div class="editor-header-tabs" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <label style="margin-bottom: 0;"
+          <div
+            class="editor-header-tabs"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <label style="margin-bottom: 0"
               >Markdown Content
               <span class="required" style="color: var(--color-danger)">*</span></label
             >
-            <div class="segmented-tabs" style="display: flex; gap: 0.25rem; background-color: var(--color-bg-surface-hover); padding: 0.2rem; border-radius: 4px; border: 1px solid var(--color-border);">
-              <button 
-                type="button" 
-                class="tab-btn" 
-                :class="activeEditorTab === 'write' ? 'active' : ''" 
+            <div
+              class="segmented-tabs"
+              style="
+                display: flex;
+                gap: 0.25rem;
+                background-color: var(--color-bg-surface-hover);
+                padding: 0.2rem;
+                border-radius: 4px;
+                border: 1px solid var(--color-border);
+              "
+            >
+              <button
+                type="button"
+                class="tab-btn"
+                :class="activeEditorTab === 'write' ? 'active' : ''"
                 @click="activeEditorTab = 'write'"
-                style="padding: 0.2rem 0.6rem; border: none; border-radius: 3px; font-size: 0.75rem; cursor: pointer; transition: all 0.15s ease; background: none; font-weight: 600; color: var(--color-text-secondary);"
+                style="
+                  padding: 0.2rem 0.6rem;
+                  border: none;
+                  border-radius: 3px;
+                  font-size: 0.75rem;
+                  cursor: pointer;
+                  transition: all 0.15s ease;
+                  background: none;
+                  font-weight: 600;
+                  color: var(--color-text-secondary);
+                "
               >
                 Write
               </button>
-              <button 
-                type="button" 
-                class="tab-btn" 
-                :class="activeEditorTab === 'preview' ? 'active' : ''" 
+              <button
+                type="button"
+                class="tab-btn"
+                :class="activeEditorTab === 'preview' ? 'active' : ''"
                 @click="activeEditorTab = 'preview'"
-                style="padding: 0.2rem 0.6rem; border: none; border-radius: 3px; font-size: 0.75rem; cursor: pointer; transition: all 0.15s ease; background: none; font-weight: 600; color: var(--color-text-secondary);"
+                style="
+                  padding: 0.2rem 0.6rem;
+                  border: none;
+                  border-radius: 3px;
+                  font-size: 0.75rem;
+                  cursor: pointer;
+                  transition: all 0.15s ease;
+                  background: none;
+                  font-weight: 600;
+                  color: var(--color-text-secondary);
+                "
               >
                 Preview
               </button>
@@ -1044,7 +1100,7 @@ const renderedMarkdown = computed(() => {
               :key="'ex-' + idx"
               class="gallery-item"
             >
-              <img :src="imgUrl" alt="Content Image" />
+              <img :src="resolveMediaUrl(imgUrl)" alt="Content Image" />
               <button class="remove-img-btn" @click.prevent="removeExistingContentImage(idx)">
                 &times;
               </button>
@@ -1143,26 +1199,38 @@ const renderedMarkdown = computed(() => {
     >
       <div class="form-container">
         <p class="help-text" style="margin-bottom: 1.5rem; color: var(--color-text-secondary)">
-          Gemini will roleplay as a <strong>Professional Project Manager</strong> to generate a comprehensive, premium portfolio project <strong>Case Study</strong> (answering Why, What, How, and What was learned) in a literal storytelling format, including suggestions on where to place illustrative screenshots or diagrams.
+          Gemini will roleplay as a <strong>Professional Project Manager</strong> to generate a
+          comprehensive, premium portfolio project <strong>Case Study</strong> (answering Why, What,
+          How, and What was learned) in a literal storytelling format, including suggestions on
+          where to place illustrative screenshots or diagrams.
         </p>
 
         <!-- Segmented Tab / Mode Selector -->
-        <div class="input-mode-selector" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
-          <button 
-            type="button" 
-            class="btn btn-sm" 
+        <div
+          class="input-mode-selector"
+          style="
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 0.75rem;
+          "
+        >
+          <button
+            type="button"
+            class="btn btn-sm"
             :class="aiInputMode === 'text' ? 'btn-primary' : 'btn-secondary'"
             @click="aiInputMode = 'text'"
-            style="font-size: 0.85rem;"
+            style="font-size: 0.85rem"
           >
             Paste PRD / Notes
           </button>
-          <button 
-            type="button" 
-            class="btn btn-sm" 
+          <button
+            type="button"
+            class="btn btn-sm"
             :class="aiInputMode === 'file' ? 'btn-primary' : 'btn-secondary'"
             @click="aiInputMode = 'file'"
-            style="font-size: 0.85rem;"
+            style="font-size: 0.85rem"
           >
             Upload PRD Documents
           </button>
@@ -1170,7 +1238,9 @@ const renderedMarkdown = computed(() => {
 
         <!-- Mode 1: Paste Text -->
         <div v-if="aiInputMode === 'text'" class="form-group">
-          <label for="aiPromptNotes">Paste Product Requirement Document (PRD) or Project Notes (Optional)</label>
+          <label for="aiPromptNotes"
+            >Paste Product Requirement Document (PRD) or Project Notes (Optional)</label
+          >
           <textarea
             id="aiPromptNotes"
             v-model="aiPromptNotes"
@@ -1178,7 +1248,10 @@ const renderedMarkdown = computed(() => {
             class="textarea"
             placeholder="Paste your PRD, feature specs, or journey outline here. Gemini will analyze it thoroughly to extract the project's purpose (Why), features/scope (What), technical architecture (How), and logical takeaways (Learnings) to write your portfolio case study."
           ></textarea>
-          <p class="help-text text-sm" style="margin-top: 0.5rem; color: var(--color-text-tertiary)">
+          <p
+            class="help-text text-sm"
+            style="margin-top: 0.5rem; color: var(--color-text-tertiary)"
+          >
             You can paste raw markdown, specifications, or bullet points.
           </p>
         </div>
@@ -1186,11 +1259,26 @@ const renderedMarkdown = computed(() => {
         <!-- Mode 2: Upload Files -->
         <div v-else class="form-group">
           <label>Upload PRD / Specification Documents (Optional)</label>
-          <div class="file-uploader-box" style="border: 2px dashed var(--color-border); padding: 1.5rem; border-radius: 6px; text-align: center; background-color: var(--color-bg-surface-hover); margin-bottom: 1rem;">
-            <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--color-text-secondary);">
-              Select up to 3 files (PDF, Markdown, or Plain Text) from your local computer. Max size is 5MB per file.
+          <div
+            class="file-uploader-box"
+            style="
+              border: 2px dashed var(--color-border);
+              padding: 1.5rem;
+              border-radius: 6px;
+              text-align: center;
+              background-color: var(--color-bg-surface-hover);
+              margin-bottom: 1rem;
+            "
+          >
+            <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--color-text-secondary)">
+              Select up to 3 files (PDF, Markdown, or Plain Text) from your local computer. Max size
+              is 5MB per file.
             </p>
-            <label for="aiDocuments" class="btn btn-secondary btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <label
+              for="aiDocuments"
+              class="btn btn-secondary btn-sm"
+              style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem"
+            >
               <PhPlus size="16" />
               <span>Choose Files...</span>
             </label>
@@ -1202,33 +1290,70 @@ const renderedMarkdown = computed(() => {
               multiple
               @change="handleAiFileSelect"
               class="file-input"
-              style="display: none;"
+              style="display: none"
             />
           </div>
 
           <!-- Uploaded Files List -->
-          <div v-if="aiSelectedFiles.length > 0" class="uploaded-files-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
-            <div 
-              v-for="(file, idx) in aiSelectedFiles" 
-              :key="idx" 
+          <div
+            v-if="aiSelectedFiles.length > 0"
+            class="uploaded-files-list"
+            style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem"
+          >
+            <div
+              v-for="(file, idx) in aiSelectedFiles"
+              :key="idx"
               class="file-item-row"
-              style="display: flex; justify-content: space-between; align-items: center; background-color: var(--color-bg-surface); padding: 0.5rem 0.75rem; border: 1px solid var(--color-border); border-radius: 4px;"
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: var(--color-bg-surface);
+                padding: 0.5rem 0.75rem;
+                border: 1px solid var(--color-border);
+                border-radius: 4px;
+              "
             >
-              <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0;">
-                <span style="font-weight: 550; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">{{ file.name }}</span>
-                <span style="font-size: 0.75rem; color: var(--color-text-tertiary)">({{ formatFileSize(file.size) }})</span>
+              <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0">
+                <span
+                  style="
+                    font-weight: 550;
+                    font-size: 0.9rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 250px;
+                  "
+                  >{{ file.name }}</span
+                >
+                <span style="font-size: 0.75rem; color: var(--color-text-tertiary)"
+                  >({{ formatFileSize(file.size) }})</span
+                >
               </div>
-              <button 
-                type="button" 
-                @click="removeAiFile(idx)" 
-                style="background: none; border: none; color: var(--color-danger); cursor: pointer; font-size: 1.1rem; line-height: 1;"
+              <button
+                type="button"
+                @click="removeAiFile(idx)"
+                style="
+                  background: none;
+                  border: none;
+                  color: var(--color-danger);
+                  cursor: pointer;
+                  font-size: 1.1rem;
+                  line-height: 1;
+                "
                 title="Remove File"
               >
                 &times;
               </button>
             </div>
           </div>
-          <p v-else class="help-text text-sm" style="color: var(--color-text-tertiary); text-align: center;">No files selected yet.</p>
+          <p
+            v-else
+            class="help-text text-sm"
+            style="color: var(--color-text-tertiary); text-align: center"
+          >
+            No files selected yet.
+          </p>
         </div>
       </div>
     </BaseModal>
@@ -1739,9 +1864,19 @@ const renderedMarkdown = computed(() => {
   color: var(--color-text-primary);
 }
 
-.markdown-preview-container :deep(h1) { font-size: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.3rem; }
-.markdown-preview-container :deep(h2) { font-size: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.3rem; }
-.markdown-preview-container :deep(h3) { font-size: 1.1rem; }
+.markdown-preview-container :deep(h1) {
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.3rem;
+}
+.markdown-preview-container :deep(h2) {
+  font-size: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.3rem;
+}
+.markdown-preview-container :deep(h3) {
+  font-size: 1.1rem;
+}
 
 .markdown-preview-container :deep(p) {
   margin-bottom: 1rem;

@@ -1,14 +1,15 @@
-import { Router } from 'express';
-import { eq, and, asc, sql } from 'drizzle-orm';
+import {Router} from 'express';
+import {eq, and, asc, sql} from 'drizzle-orm';
 import multer from 'multer';
 import sharp from 'sharp';
-import { db } from '../db/index.js';
-import { skills, users } from '../db/schema.js';
-import { skillSchema } from '../validators/index.js';
-import { asyncHandler, NotFoundError } from '../utils/errors.js';
-import { requireAuth } from '../middleware/auth.js';
-import { uploadToR2 } from '../services/r2.js';
-import { triggerRevalidation } from '../utils/revalidate.js';
+import {db} from '../db/index.js';
+import {skills, users} from '../db/schema.js';
+import {skillSchema} from '../validators/index.js';
+import {asyncHandler, NotFoundError} from '../utils/errors.js';
+import {requireAuth} from '../middleware/auth.js';
+import {uploadToR2} from '../services/r2.js';
+import {triggerRevalidation} from '../utils/revalidate.js';
+import {extractFileName, formatSkillMedia} from '../utils/media.js';
 
 const router = Router();
 
@@ -37,12 +38,12 @@ router.get('/', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: allSkills,
+        data: allSkills.map(formatSkillMedia),
     });
 }));
 
 router.get('/user/:username', asyncHandler(async (req, res) => {
-    const { username } = req.params;
+    const {username} = req.params;
 
     const [user] = await db.select().from(users).where(eq(users.username, username!));
 
@@ -54,18 +55,18 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: userSkills,
+        data: userSkills.map(formatSkillMedia),
     });
 }));
 
 router.get('/userId/:userId', asyncHandler(async (req, res) => {
-    const { userId } = req.params;
+    const {userId} = req.params;
 
     const userSkills = await db.select().from(skills).where(eq(skills.userId, userId!)).orderBy(asc(skills.order));
 
     res.json({
         success: true,
-        data: userSkills,
+        data: userSkills.map(formatSkillMedia),
     });
 }));
 
@@ -87,7 +88,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: skill,
+        data: formatSkillMedia(skill),
     });
 }));
 
@@ -110,20 +111,26 @@ router.post('/', requireAuth, upload.single('icon'), asyncHandler(async (req, re
         });
     }
 
-    const iconBuffer = await sharp(req.file.buffer).png({ quality: 80 }).toBuffer();
+    const iconBuffer = await sharp(req.file.buffer).png({quality: 80}).toBuffer();
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const iconName = `${req.file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
     const result = await uploadToR2(iconBuffer, iconName, user.username, 'skills');
 
     const [maxOrderResult] = await db
-        .select({ maxOrder: sql<number>`COALESCE(MAX(${skills.order}), 0)` })
+        .select({
+            maxOrder: sql<number>`COALESCE(MAX(
+            ${skills.order}
+            ),
+            0
+            )`
+        })
         .from(skills)
         .where(eq(skills.userId, req.user!.userId));
     const nextOrder = (maxOrderResult?.maxOrder ?? 0) + 1;
 
     const [newSkill] = await db.insert(skills).values({
         name: validated.name,
-        icon: result.url,
+        icon: result.name,
         userId: req.user!.userId,
         order: nextOrder,
     }).returning();
@@ -132,12 +139,12 @@ router.post('/', requireAuth, upload.single('icon'), asyncHandler(async (req, re
 
     res.status(201).json({
         success: true,
-        data: newSkill,
+        data: formatSkillMedia(newSkill),
     });
 }));
 
 router.put('/reorder', requireAuth, asyncHandler(async (req, res) => {
-    const { ids } = req.body;
+    const {ids} = req.body;
     if (!Array.isArray(ids)) {
         return res.status(400).json({
             success: false,
@@ -150,7 +157,7 @@ router.put('/reorder', requireAuth, asyncHandler(async (req, res) => {
     await db.transaction(async (tx) => {
         for (let i = 0; i < parsedIds.length; i++) {
             await tx.update(skills)
-                .set({ order: i, updatedAt: new Date() })
+                .set({order: i, updatedAt: new Date()})
                 .where(and(eq(skills.id, parsedIds[i]!), eq(skills.userId, req.user!.userId)));
         }
     });
@@ -176,7 +183,7 @@ router.put('/:id', requireAuth, upload.single('icon'), asyncHandler(async (req, 
         throw new NotFoundError('Skill not found');
     }
 
-    let iconUrl = existing.icon;
+    let iconName = existing.icon;
 
     if (req.file) {
         const [user] = await db.select().from(users).where(eq(users.id, req.user!.userId));
@@ -188,21 +195,23 @@ router.put('/:id', requireAuth, upload.single('icon'), asyncHandler(async (req, 
             });
         }
 
-        const iconBuffer = await sharp(req.file.buffer).png({ quality: 80 }).toBuffer();
+        const iconBuffer = await sharp(req.file.buffer).png({quality: 80}).toBuffer();
         const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        const iconName = `${req.file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
-        const result = await uploadToR2(iconBuffer, iconName, user.username, 'skills');
+        const baseIconName = `${req.file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
+        const result = await uploadToR2(iconBuffer, baseIconName, user.username, 'skills');
 
-        iconUrl = result.url;
+        iconName = result.name;
+    } else if (validated.icon) {
+        iconName = extractFileName(validated.icon) || existing.icon;
     }
 
     const [updated] = await db
         .update(skills)
-        .set({ 
-            name: validated.name, 
-            icon: iconUrl, 
+        .set({
+            name: validated.name,
+            icon: iconName,
             order: validated.order ?? existing.order,
-            updatedAt: new Date() 
+            updatedAt: new Date()
         })
         .where(eq(skills.id, skillId))
         .returning();
@@ -211,7 +220,7 @@ router.put('/:id', requireAuth, upload.single('icon'), asyncHandler(async (req, 
 
     res.json({
         success: true,
-        data: updated,
+        data: formatSkillMedia(updated),
     });
 }));
 

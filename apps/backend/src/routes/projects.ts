@@ -1,15 +1,16 @@
-import { Router } from 'express';
-import { eq, and, sql, ilike, exists } from 'drizzle-orm';
+import {Router} from 'express';
+import {eq, and, sql, ilike, exists} from 'drizzle-orm';
 import multer from 'multer';
 import sharp from 'sharp';
-import { db } from '../db/index.js';
-import { projects, projectSkills, projectTags, users } from '../db/schema.js';
-import { projectSchema } from '../validators/index.js';
-import { asyncHandler, NotFoundError } from '../utils/errors.js';
-import { requireAuth } from '../middleware/auth.js';
-import { uploadToR2 } from '../services/r2.js';
-import { localizeData } from '../utils/localize.js';
-import { triggerRevalidation } from '../utils/revalidate.js';
+import {db} from '../db/index.js';
+import {projects, projectSkills, projectTags, users} from '../db/schema.js';
+import {projectSchema} from '../validators/index.js';
+import {asyncHandler, NotFoundError} from '../utils/errors.js';
+import {requireAuth} from '../middleware/auth.js';
+import {uploadToR2} from '../services/r2.js';
+import {localizeData} from '../utils/localize.js';
+import {triggerRevalidation} from '../utils/revalidate.js';
+import {extractFileName, formatProjectMedia} from '../utils/media.js';
 
 const router = Router();
 
@@ -18,7 +19,7 @@ const extractPagination = (query: any) => {
     const page = parseInt(query.page as string, 10) || 1;
     const limit = parseInt(query.limit as string, 10) || 10;
     const offset = (page - 1) * limit;
-    return { page, limit, offset };
+    return {page, limit, offset};
 };
 
 const extractFilters = (query: any) => {
@@ -29,7 +30,8 @@ const extractFilters = (query: any) => {
     if (query.published === 'false') filters.push(eq(projects.published, false));
     if (query.search) {
         // Search inside the 'en' localization key for the title
-        filters.push(ilike(sql`${projects.title}->>'en'`, `%${query.search}%`));
+        filters.push(ilike(sql`${projects.title}
+        ->>'en'`, `%${query.search}%`));
     }
 
     if (query.tag) {
@@ -70,15 +72,15 @@ router.get('/', asyncHandler(async (req, res) => {
     const userId = req.user?.userId;
 
     if (!userId) {
-        return res.json({ success: true, data: [] });
+        return res.json({success: true, data: []});
     }
 
-    const { page, limit, offset } = extractPagination(req.query);
+    const {page, limit, offset} = extractPagination(req.query);
     const filters = extractFilters(req.query);
     const whereClause = and(eq(projects.userId, userId), ...filters);
 
     const [totalResult] = await db
-        .select({ count: sql<number>`count(*)` })
+        .select({count: sql<number>`count(*)`})
         .from(projects)
         .where(whereClause);
 
@@ -90,18 +92,18 @@ router.get('/', asyncHandler(async (req, res) => {
         offset,
         with: {
             projectSkills: {
-                with: { skill: true },
+                with: {skill: true},
             },
             projectTags: {
-                with: { tag: true },
+                with: {tag: true},
             },
         },
-        orderBy: (projects, { desc }) => [desc(projects.year), desc(projects.createdAt)],
+        orderBy: (projects, {desc}) => [desc(projects.year), desc(projects.createdAt)],
     });
 
     res.json({
         success: true,
-        data: localizeData(allProjects, req.query.lang as string),
+        data: (localizeData(allProjects, req.query.lang as string) || []).map(formatProjectMedia),
         meta: {
             total,
             page,
@@ -112,7 +114,7 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 router.get('/user/:username', asyncHandler(async (req, res) => {
-    const { username } = req.params;
+    const {username} = req.params;
 
     const [user] = await db.select().from(users).where(eq(users.username, username!));
 
@@ -120,14 +122,15 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
         throw new NotFoundError('User not found');
     }
 
-    const { page, limit, offset } = extractPagination(req.query);
+    const {page, limit, offset} = extractPagination(req.query);
     const filterConditions: any[] = [eq(projects.userId, user.id), eq(projects.published, true)];
 
     // For public endpoints, force published=true and allow highlighting, search, and tag filters
     if (req.query.highlighted === 'true') filterConditions.push(eq(projects.highlighted, true));
     if (req.query.highlighted === 'false') filterConditions.push(eq(projects.highlighted, false));
     if (req.query.search) {
-        filterConditions.push(ilike(sql`${projects.title}->>'en'`, `%${req.query.search}%`));
+        filterConditions.push(ilike(sql`${projects.title}
+        ->>'en'`, `%${req.query.search}%`));
     }
     if (req.query.tag) {
         const tagId = parseInt(req.query.tag as string, 10);
@@ -141,7 +144,7 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
     const whereClause = and(...filterConditions);
 
     const [totalResult] = await db
-        .select({ count: sql<number>`count(*)` })
+        .select({count: sql<number>`count(*)`})
         .from(projects)
         .where(whereClause);
 
@@ -153,18 +156,18 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
         offset,
         with: {
             projectSkills: {
-                with: { skill: true },
+                with: {skill: true},
             },
             projectTags: {
-                with: { tag: true },
+                with: {tag: true},
             },
         },
-        orderBy: (projects, { desc }) => [desc(projects.year), desc(projects.createdAt)],
+        orderBy: (projects, {desc}) => [desc(projects.year), desc(projects.createdAt)],
     });
 
     res.json({
         success: true,
-        data: localizeData(userProjects, req.query.lang as string),
+        data: (localizeData(userProjects, req.query.lang as string) || []).map(formatProjectMedia),
         meta: {
             total,
             page,
@@ -175,16 +178,17 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
 }));
 
 router.get('/userId/:userId', asyncHandler(async (req, res) => {
-    const { userId } = req.params;
+    const {userId} = req.params;
 
-    const { page, limit, offset } = extractPagination(req.query);
+    const {page, limit, offset} = extractPagination(req.query);
     const filterConditions: any[] = [eq(projects.userId, userId!), eq(projects.published, true)];
 
     // For public endpoints, force published=true and allow highlighting, search, and tag filters
     if (req.query.highlighted === 'true') filterConditions.push(eq(projects.highlighted, true));
     if (req.query.highlighted === 'false') filterConditions.push(eq(projects.highlighted, false));
     if (req.query.search) {
-        filterConditions.push(ilike(sql`${projects.title}->>'en'`, `%${req.query.search}%`));
+        filterConditions.push(ilike(sql`${projects.title}
+        ->>'en'`, `%${req.query.search}%`));
     }
     if (req.query.tag) {
         const tagId = parseInt(req.query.tag as string, 10);
@@ -198,7 +202,7 @@ router.get('/userId/:userId', asyncHandler(async (req, res) => {
     const whereClause = and(...filterConditions);
 
     const [totalResult] = await db
-        .select({ count: sql<number>`count(*)` })
+        .select({count: sql<number>`count(*)`})
         .from(projects)
         .where(whereClause);
 
@@ -210,18 +214,18 @@ router.get('/userId/:userId', asyncHandler(async (req, res) => {
         offset,
         with: {
             projectSkills: {
-                with: { skill: true },
+                with: {skill: true},
             },
             projectTags: {
-                with: { tag: true },
+                with: {tag: true},
             },
         },
-        orderBy: (projects, { desc }) => [desc(projects.year), desc(projects.createdAt)],
+        orderBy: (projects, {desc}) => [desc(projects.year), desc(projects.createdAt)],
     });
 
     res.json({
         success: true,
-        data: localizeData(userProjects, req.query.lang as string),
+        data: (localizeData(userProjects, req.query.lang as string) || []).map(formatProjectMedia),
         meta: {
             total,
             page,
@@ -232,7 +236,7 @@ router.get('/userId/:userId', asyncHandler(async (req, res) => {
 }));
 
 router.get('/user/:username/:slug', asyncHandler(async (req, res) => {
-    const { username, slug } = req.params;
+    const {username, slug} = req.params;
 
     const [user] = await db.select().from(users).where(eq(users.username, username!));
 
@@ -262,12 +266,12 @@ router.get('/user/:username/:slug', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: localizeData(project, req.query.lang as string),
+        data: formatProjectMedia(localizeData(project, req.query.lang as string)),
     });
 }));
 
 router.get('/userId/:userId/:slug', asyncHandler(async (req, res) => {
-    const { userId, slug } = req.params;
+    const {userId, slug} = req.params;
 
     const project = await db.query.projects.findFirst({
         where: and(eq(projects.slug, slug!), eq(projects.userId, userId!)),
@@ -291,12 +295,12 @@ router.get('/userId/:userId/:slug', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: localizeData(project, req.query.lang as string),
+        data: formatProjectMedia(localizeData(project, req.query.lang as string)),
     });
 }));
 
 router.get('/:slug', asyncHandler(async (req, res) => {
-    const { slug } = req.params;
+    const {slug} = req.params;
     const userId = req.user?.userId;
 
     if (!userId) {
@@ -325,16 +329,16 @@ router.get('/:slug', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: localizeData(project, req.query.lang as string),
+        data: formatProjectMedia(localizeData(project, req.query.lang as string)),
     });
 }));
 
 router.post('/', requireAuth, upload.fields([
-    { name: 'coverImage', maxCount: 1 },
-    { name: 'contentImages', maxCount: 20 }
+    {name: 'coverImage', maxCount: 1},
+    {name: 'contentImages', maxCount: 20}
 ]), asyncHandler(async (req, res) => {
     const validated = projectSchema.parse(req.body);
-    const { skillIds, tagIds, publishedAt, ...projectData } = validated;
+    const {skillIds, tagIds, publishedAt, ...projectData} = validated;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     const [user] = await db.select().from(users).where(eq(users.id, req.user!.userId));
@@ -346,27 +350,33 @@ router.post('/', requireAuth, upload.fields([
         });
     }
 
-    let coverImageUrl = projectData.coverImage;
-    let contentImageUrls: string[] = [];
+    let coverImageName = extractFileName(projectData.coverImage);
+    let contentImageNames: string[] = [];
 
     if (files?.coverImage?.[0]) {
         const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        const coverBuffer = await sharp(files.coverImage[0].buffer).resize(1200, 900, { fit: 'inside', withoutEnlargement: true }).png({ quality: 80 }).toBuffer();
+        const coverBuffer = await sharp(files.coverImage[0].buffer).resize(1200, 900, {
+            fit: 'inside',
+            withoutEnlargement: true
+        }).png({quality: 80}).toBuffer();
         const coverName = `${files.coverImage[0].originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
         const result = await uploadToR2(coverBuffer, coverName, user.username, 'projects');
 
-        coverImageUrl = result.url;
+        coverImageName = result.name;
     }
 
     // Upload content images
     if (files?.contentImages) {
         for (const file of files.contentImages) {
             const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const imgBuffer = await sharp(file.buffer).resize(1600, 900, { fit: 'inside', withoutEnlargement: true }).png({ quality: 80 }).toBuffer();
+            const imgBuffer = await sharp(file.buffer).resize(1600, 900, {
+                fit: 'inside',
+                withoutEnlargement: true
+            }).png({quality: 80}).toBuffer();
             const imgName = `${file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
             const result = await uploadToR2(imgBuffer, imgName, user.username, 'projects');
 
-            contentImageUrls.push(result.url);
+            contentImageNames.push(result.name);
         }
     }
 
@@ -374,8 +384,8 @@ router.post('/', requireAuth, upload.fields([
 
     const [newProject] = await db.insert(projects).values({
         ...projectData,
-        coverImage: coverImageUrl,
-        contentImages: contentImageUrls.length > 0 ? contentImageUrls : null,
+        coverImage: coverImageName,
+        contentImages: contentImageNames.length > 0 ? contentImageNames : null,
         publishedAt: publishedAtDate,
         userId: req.user!.userId,
     }).returning();
@@ -421,17 +431,17 @@ router.post('/', requireAuth, upload.fields([
 
     res.status(201).json({
         success: true,
-        data: result,
+        data: formatProjectMedia(result),
     });
 }));
 
 router.put('/:id', requireAuth, upload.fields([
-    { name: 'coverImage', maxCount: 1 },
-    { name: 'contentImages', maxCount: 20 }
+    {name: 'coverImage', maxCount: 1},
+    {name: 'contentImages', maxCount: 20}
 ]), asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const {id} = req.params;
     const validated = projectSchema.parse(req.body);
-    const { skillIds, tagIds, publishedAt, ...projectData } = validated;
+    const {skillIds, tagIds, publishedAt, ...projectData} = validated;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     const [existing] = await db.select().from(projects)
@@ -450,35 +460,46 @@ router.put('/:id', requireAuth, upload.fields([
         });
     }
 
-    let coverImageUrl = projectData.coverImage;
-    let contentImageUrls: string[] = existing.contentImages || [];
-
-    if (files?.coverImage?.[0]) {
-        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-        const coverBuffer = await sharp(files.coverImage[0].buffer).resize(1200, 900, { fit: 'inside', withoutEnlargement: true }).png({ quality: 80 }).toBuffer();
-        const coverName = `${files.coverImage[0].originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
-        const result = await uploadToR2(coverBuffer, coverName, user.username, 'projects');
-
-        coverImageUrl = result.url;
-    }
+    let coverImageName = projectData.coverImage !== undefined ? extractFileName(projectData.coverImage) : existing.coverImage;
+    let contentImageNames: string[] = [];
 
     if (req.body.existingContentImages) {
         try {
-            contentImageUrls = JSON.parse(req.body.existingContentImages);
+            const parsed = JSON.parse(req.body.existingContentImages);
+            contentImageNames = Array.isArray(parsed)
+                ? (parsed.map((img: string) => extractFileName(img)).filter(Boolean) as string[])
+                : [];
         } catch (e) {
-            contentImageUrls = [];
+            contentImageNames = [];
         }
-    } else {
-        contentImageUrls = existing.contentImages || [];
+    } else if (existing.contentImages) {
+        contentImageNames = (existing.contentImages || [])
+            .map((img: string) => extractFileName(img))
+            .filter(Boolean) as string[];
+    }
+
+    if (files?.coverImage?.[0]) {
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const coverBuffer = await sharp(files.coverImage[0].buffer).resize(1200, 900, {
+            fit: 'inside',
+            withoutEnlargement: true
+        }).png({quality: 80}).toBuffer();
+        const coverName = `${files.coverImage[0].originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
+        const result = await uploadToR2(coverBuffer, coverName, user.username, 'projects');
+
+        coverImageName = result.name;
     }
 
     if (files?.contentImages) {
         for (const file of files.contentImages) {
             const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const imgBuffer = await sharp(file.buffer).resize(1600, 900, { fit: 'inside', withoutEnlargement: true }).png({ quality: 80 }).toBuffer();
+            const imgBuffer = await sharp(file.buffer).resize(1600, 900, {
+                fit: 'inside',
+                withoutEnlargement: true
+            }).png({quality: 80}).toBuffer();
             const imgName = `${file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
             const result = await uploadToR2(imgBuffer, imgName, user.username, 'projects');
-            contentImageUrls.push(result.url);
+            contentImageNames.push(result.name);
         }
     }
 
@@ -488,8 +509,8 @@ router.put('/:id', requireAuth, upload.fields([
         .update(projects)
         .set({
             ...projectData,
-            coverImage: coverImageUrl,
-            contentImages: contentImageUrls.length > 0 ? contentImageUrls : null,
+            coverImage: coverImageName,
+            contentImages: contentImageNames.length > 0 ? contentImageNames : null,
             publishedAt: publishedAtDate,
             updatedAt: new Date()
         })
@@ -540,12 +561,12 @@ router.put('/:id', requireAuth, upload.fields([
 
     res.json({
         success: true,
-        data: result,
+        data: formatProjectMedia(result),
     });
 }));
 
 router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const {id} = req.params;
 
     const [existing] = await db.select().from(projects)
         .where(and(eq(projects.id, id!), eq(projects.userId, req.user!.userId)));

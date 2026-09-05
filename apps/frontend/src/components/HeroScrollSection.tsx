@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import {motion, useScroll, useTransform} from "framer-motion";
+import {useRef, useState, useEffect} from "react";
 import Image from "next/image";
+import {getMediaUrl} from "@/lib/media";
 
 interface Props {
     description: string;
@@ -12,7 +13,7 @@ interface Props {
     location: string;
 }
 
-export default function HeroScrollSection({ description, role, profilePhoto, name, location }: Props) {
+export default function HeroScrollSection({description, role, profilePhoto, name, location}: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isFreeScroll, setIsFreeScroll] = useState(false);
 
@@ -34,12 +35,13 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
         }
     }, []);
 
-    const { scrollYProgress } = useScroll({
+    const {scrollYProgress} = useScroll({
         target: containerRef,
         offset: isFreeScroll ? ["start start", "end start"] : ["start start", "end end"],
     });
 
-    const isGif = profilePhoto ? profilePhoto.split("?")[0].toLowerCase().endsWith(".gif") : false;
+    const photoUrl = getMediaUrl(profilePhoto);
+    const isGif = photoUrl ? photoUrl.split("?")[0].toLowerCase().endsWith(".gif") : false;
 
     // Map scroll progress to horizontal translation and opacity for the title split
     const xLeftRaw = useTransform(scrollYProgress, [0, 0.4], ["0%", "-100%"]);
@@ -74,26 +76,27 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
             <motion.div
                 id="hero-scroll-inner"
                 className="sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden"
-                style={isFreeScroll ? undefined : { opacity: heroOpacity }}
-                initial={isFreeScroll ? { opacity: 0, y: 30 } : undefined}
-                animate={isFreeScroll ? { opacity: 1, y: 0 } : undefined}
-                transition={isFreeScroll ? { duration: 0.8, ease: [0.16, 1, 0.3, 1] } : undefined}
+                style={isFreeScroll ? undefined : {opacity: heroOpacity}}
+                initial={isFreeScroll ? {opacity: 0, y: 30} : undefined}
+                animate={isFreeScroll ? {opacity: 1, y: 0} : undefined}
+                transition={isFreeScroll ? {duration: 0.8, ease: [0.16, 1, 0.3, 1]} : undefined}
             >
                 <div className="w-[90%] md:w-4/5 mx-auto px-6 flex flex-col items-start relative">
                     <h1 className="text-[clamp(2.5rem,8.5vw,9rem)] font-bold tracking-tighter leading-[0.85] uppercase text-neutral-900 w-full overflow-hidden py-2 select-none">
                         <motion.span
                             className="block"
-                            style={{ x: xLeft, opacity: titleOpacity }}
-                            transition={{ ease: "linear" }}
+                            style={{x: xLeft, opacity: titleOpacity}}
+                            transition={{ease: "linear"}}
                         >
                             ANDIKA
                         </motion.span>
                         <motion.span
                             className="block"
-                            style={{ x: xRight, opacity: titleOpacity }}
-                            transition={{ ease: "linear" }}
+                            style={{x: xRight, opacity: titleOpacity}}
+                            transition={{ease: "linear"}}
                         >
-                            SULTANRAFLI<span className="inline-block w-[0.16em] h-[0.16em] bg-brand-900 ml-[0.05em] align-baseline"></span>
+                            SULTANRAFLI<span
+                            className="inline-block w-[0.16em] h-[0.16em] bg-brand-900 ml-[0.05em] align-baseline"></span>
                         </motion.span>
                     </h1>
 
@@ -101,8 +104,8 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
                         className={`grid grid-cols-2 md:grid-cols-12 gap-x-6 gap-y-4 md:gap-10 items-start mt-6 md:mt-12 w-full ${
                             isFreeScroll ? "relative mt-6" : "absolute left-6 right-6 top-0 md:top-auto md:relative"
                         }`}
-                        style={{ opacity: detailsOpacity, y: detailsY }}
-                        transition={{ ease: "linear" }}
+                        style={{opacity: detailsOpacity, y: detailsY}}
+                        transition={{ease: "linear"}}
                     >
                         <div className="col-span-2 md:col-span-5 pr-4">
                             <p className="text-[1.625rem] md:text-xl text-neutral-600 font-normal leading-relaxed">
@@ -110,7 +113,8 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
                             </p>
                         </div>
 
-                        <div className="col-span-1 md:col-span-3 flex flex-col gap-4 text-[10px] font-bold uppercase tracking-wider text-neutral-500 pl-0 md:pl-6 h-full min-h-0 md:min-h-[140px]">
+                        <div
+                            className="col-span-1 md:col-span-3 flex flex-col gap-4 text-[10px] font-bold uppercase tracking-wider text-neutral-500 pl-0 md:pl-6 h-full min-h-0 md:min-h-[140px]">
                             <div>
                                 <span className="text-neutral-400 block mb-0.5">Role</span>
                                 <span className="text-neutral-900">{role}</span>
@@ -122,10 +126,10 @@ export default function HeroScrollSection({ description, role, profilePhoto, nam
                         </div>
 
                         <div className="col-span-1 md:col-span-4 flex justify-end">
-                            {profilePhoto && (
+                            {photoUrl && (
                                 <div className="relative w-full aspect-square max-w-[240px] md:max-w-[360px]">
                                     <Image
-                                        src={profilePhoto}
+                                        src={photoUrl}
                                         alt={name || "Profile"}
                                         fill
                                         className="object-cover transition-all duration-350"

@@ -1,12 +1,12 @@
-import { Router } from 'express';
+import {Router} from 'express';
 import multer from 'multer';
-import { eq } from 'drizzle-orm';
+import {eq} from 'drizzle-orm';
 import sharp from 'sharp';
-import { uploadToR2 } from '../services/r2.js';
-import { asyncHandler } from '../utils/errors.js';
-import { requireAuth } from '../middleware/auth.js';
-import { db } from '../db/index.js';
-import { users } from '../db/schema.js';
+import {uploadToR2} from '../services/r2.js';
+import {asyncHandler} from '../utils/errors.js';
+import {requireAuth} from '../middleware/auth.js';
+import {db} from '../db/index.js';
+import {users} from '../db/schema.js';
 
 const router = Router();
 
@@ -44,7 +44,7 @@ router.post('/', requireAuth, upload.single('image'), asyncHandler(async (req, r
 
     // Convert image to PNG at 100% quality
     const compressed = await sharp(req.file.buffer)
-        .png({ quality: 100 })
+        .png({quality: 100})
         .toBuffer();
 
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -66,10 +66,12 @@ router.post('/', requireAuth, upload.single('image'), asyncHandler(async (req, r
 }));
 
 router.get('/config', requireAuth, (req, res) => {
+    const host = process.env.IMAGE_HOST || process.env.R2_PUBLIC_URL || '';
     res.json({
         success: true,
         data: {
-            publicUrl: process.env.R2_PUBLIC_URL || '',
+            publicUrl: host,
+            imageHost: host,
         },
     });
 });
