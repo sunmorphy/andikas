@@ -1,12 +1,12 @@
 import { MetadataRoute } from "next";
 import { fetchProjects } from "@/lib/api";
 import { i18n } from "@/i18n-config";
+import { siteConfig } from "@/lib/siteConfig";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://andikas.dev";
+  const baseUrl = siteConfig.url;
   const sitemaps: MetadataRoute.Sitemap = [];
 
-  // Add static localized pages
   for (const lang of i18n.locales) {
     sitemaps.push({
       url: `${baseUrl}/${lang}`,
@@ -21,7 +21,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     });
 
-    // Fetch projects for this language to dynamically include project detail pages
     try {
       const projectsRes = await fetchProjects(undefined, { limit: 100 }, lang);
       for (const project of projectsRes.data) {

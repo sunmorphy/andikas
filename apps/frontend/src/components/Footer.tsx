@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Locale } from "@/i18n-config";
+import { siteConfig } from "@/lib/siteConfig";
 
 export default function Footer({
   lang,
@@ -18,7 +19,7 @@ export default function Footer({
           href={`/${lang}`}
           className="hover:text-brand-900 transition-colors underline underline-offset-4 decoration-1"
         >
-          andikas.dev
+          {siteConfig.domain}
         </Link>
         <span>© {currentYear} {rightsText.toLowerCase()}</span>
       </div>

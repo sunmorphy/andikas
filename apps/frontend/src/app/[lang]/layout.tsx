@@ -9,10 +9,10 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import HashScroller from "@/components/HashScroller";
 import ThemeProvider from "@/components/ThemeProvider";
-import { fetchUser } from "@/lib/api";
 import { getDictionary } from "@/get-dictionary";
 
 import { i18n } from "@/i18n-config";
+import { siteConfig } from "@/lib/siteConfig";
 
 const haasGrotesk = localFont({
   src: [
@@ -90,18 +90,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const lang = resolvedParams.lang as Locale;
 
-  let shareImage = "https://andikas.andpuji27.workers.dev/andikas/users/img_20251129_164332-cropped_20260410.webp";
-
-  try {
-    const user = await fetchUser(undefined, lang);
-    if (user?.profilePhoto) {
-      shareImage = user.profilePhoto;
-    }
-  } catch (error) {
-    console.error("Failed to fetch dynamic share image from database:", error);
-  }
-
-  const isSquare = shareImage.toLowerCase().includes("cropped") || shareImage.split("?")[0].toLowerCase().endsWith(".gif");
+  const shareImage = `${siteConfig.url}/og.png`;
 
   return {
     title: {
@@ -109,38 +98,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       template: "%s - Andika Sultanrafli",
     },
     description: "Independent product designer and full-stack engineer building digital experiences.",
-    keywords: ["Andika Sultanrafli", "Product Designer", "Full-Stack Engineer", "Software Engineer", "React Developer", "Next.js", "Design Engineer", "Portfolio"],
-    authors: [{ name: "Andika Sultanrafli" }],
-    creator: "Andika Sultanrafli",
-    metadataBase: new URL("https://andikas.dev"),
+    metadataBase: new URL(siteConfig.url),
     alternates: {
-      canonical: "/",
+      canonical: `/${lang}`,
       languages: {
-        "en-US": "/en",
-        "id-ID": "/id",
-        "de-DE": "/de",
+        en: "/en",
+        id: "/id",
+        de: "/de",
+        ja: "/ja",
+        nl: "/nl",
+        "x-default": "/en",
       },
     },
     openGraph: {
-      title: "Andika Sultanrafli - Portfolio",
-      description: "Independent product designer and full-stack engineer building digital experiences.",
-      url: "https://andikas.dev",
-      siteName: "Andika Sultanrafli Portfolio",
-      locale: "en_US",
+      title: "Andika Sultanrafli",
+      description: "Experienced software engineer.",
+      url: `${siteConfig.url}/${lang}`,
+      siteName: "Andika Sultanrafli",
+      locale: lang === "id" ? "id_ID" : lang === "de" ? "de_DE" : lang === "ja" ? "ja_JP" : lang === "nl" ? "nl_NL" : "en_US",
       type: "website",
       images: [
         {
           url: shareImage,
-          width: isSquare ? 600 : 1200,
-          height: isSquare ? 600 : 630,
-          alt: "Andika Sultanrafli - Portfolio",
+          width: 1200,
+          height: 630,
+          alt: "Andika Sultanrafli",
         },
       ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: "Andika Sultanrafli - Portfolio",
-      description: "Independent product designer and full-stack engineer building digital experiences.",
     },
     robots: {
       index: true,

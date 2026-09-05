@@ -5,6 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { SkillsSection } from "@/components/SkillsSection";
 import { WorksSection } from "@/components/WorksSection";
 import { userConfig } from "@/lib/userConfig";
+import { siteConfig } from "@/lib/siteConfig";
 
 export default async function Home({
   params,
@@ -24,23 +25,39 @@ export default async function Home({
   const highlightedProjects = projectsRes.data;
   const socialUrls = userConfig.socialMedias.map((sm) => sm.split("|")[1]);
 
-  const personJsonLd = {
+  const structuredData = {
     "@context": "https://schema.org",
-    "@type": "Person",
-    name: user?.name || userConfig.name,
-    email: userConfig.email,
-    jobTitle: user?.role || dict.profile.role,
-    description: user?.description || dict.profile.description,
-    url: `https://andikas.dev/${lang}`,
-    image: user?.profilePhoto || userConfig.profilePhoto,
-    sameAs: socialUrls,
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": `${siteConfig.url}/#person`,
+        name: user?.name || userConfig.name,
+        email: userConfig.email,
+        jobTitle: user?.role || dict.profile.role,
+        description: user?.description || dict.profile.description,
+        url: `${siteConfig.url}/${lang}`,
+        image: user?.profilePhoto || userConfig.profilePhoto,
+        sameAs: socialUrls,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteConfig.url}/#website`,
+        url: `${siteConfig.url}/${lang}`,
+        name: `${user?.name || userConfig.name}`,
+        description: user?.description || dict.profile.description,
+        inLanguage: lang,
+        author: {
+          "@id": `${siteConfig.url}/#person`,
+        },
+      },
+    ],
   };
 
   return (
     <div className="flex flex-col items-center w-full">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
 
       <HeroSection
