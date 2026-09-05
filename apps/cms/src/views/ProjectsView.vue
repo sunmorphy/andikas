@@ -710,9 +710,9 @@ const renderedMarkdown = computed(() => {
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-title">Projects</h1>
+      <h1 class="page-title">projects</h1>
       <BaseButton variant="primary" @click="openCreateModal">
-        <PhPlus weight="bold" /> Add Project
+        <PhPlus weight="bold" /> add project
       </BaseButton>
     </div>
 
@@ -729,18 +729,18 @@ const renderedMarkdown = computed(() => {
       </template>
 
       <template #title="{ row }">
-        <strong>{{ getDisplayLocal(row.title) }}</strong>
+        <strong>{{ getDisplayLocal(row.title).toLowerCase() }}</strong>
       </template>
 
       <template #status="{ row }">
         <div class="status-badges">
           <span class="badge" :class="row.published ? 'badge-published' : 'badge-draft'">
-            {{ row.published ? 'Published' : 'Draft' }}
+            {{ row.published ? 'published' : 'draft' }}
           </span>
           <span class="badge" :class="row.type === 'group' ? 'badge-group' : 'badge-individual'">
-            {{ row.type === 'group' ? 'Group Project' : 'Individual Project' }}
+            {{ row.type === 'group' ? 'group' : 'individual' }}
           </span>
-          <span v-if="row.highlighted" class="badge badge-highlighted"> Highlighted </span>
+          <span v-if="row.highlighted" class="badge badge-highlighted"> starred </span>
         </div>
       </template>
 
@@ -1368,10 +1368,7 @@ const renderedMarkdown = computed(() => {
   margin-bottom: 2rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
+
 
 .cover-thumb {
   width: 60px;
@@ -1577,35 +1574,40 @@ const renderedMarkdown = computed(() => {
 }
 
 .badge {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  font-weight: 500;
+  border-radius: 0px;
+  font-weight: 800;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
 }
 
 .badge-published {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-base);
 }
 
 .badge-draft {
-  background-color: var(--color-bg-surface-hover);
-  color: var(--color-text-tertiary);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
 }
 
 .badge-highlighted {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background-color: var(--color-primary);
+  color: var(--color-bg-base);
 }
 
 .badge-individual {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
 }
 
 .badge-group {
-  background-color: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
 }
 
 .checkbox-group {
@@ -1824,7 +1826,7 @@ const renderedMarkdown = computed(() => {
   color: var(--color-primary) !important;
   font-weight: 750;
   font-size: 0.75rem;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 .ai-btn:hover {

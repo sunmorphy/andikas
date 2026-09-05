@@ -4,8 +4,8 @@
         "journey": "Mein Weg",
         "academic": "Akademische Wurzeln",
         "professional": "Beruflicher Werdegang",
-        "selectedWorks": "Ausgewählte Werke",
-        "seeAllWorks": "Alle Werke ansehen",
+        "selectedWorks": "Werke",
+        "seeAllWorks": "Alle ansehen",
         "letsTalk": "Lass uns reden.",
         "freelance": "Ich bin derzeit offen für Projekte und Kooperationen.",
         "skills": "Fähigkeiten",
@@ -15,13 +15,21 @@
         "hireMe": "Engagiere mich",
         "downloadResume": "Lebenslauf"
     },
+    "nav": {
+        "home": "Startseite",
+        "works": "Werke",
+        "projects": "Projekte"
+    },
     "projects": {
-        "allWorks": "Alle Werke",
+        "allWorks": "Werke",
         "noProjects": "Keine Projekte entsprechen Ihren Suchkriterien.",
         "project": "PROJEKT",
         "uiDesign": "UI-DESIGN",
         "frontend": "FRONTEND",
         "backToProjects": "Zurück zu Projekten",
+        "backToHome": "Zurück zur Startseite",
+        "searchPlaceholder": "Projekte suchen...",
+        "all": "Alle",
         "type": "Typ",
         "personalProject": "Persönliches Projekt",
         "groupProject": "Gruppenprojekt",
@@ -30,10 +38,12 @@
         "noCoverImage": "Kein Titelbild verfügbar.",
         "content": "Inhalt",
         "interestedTitle": "Interesse an einer Zusammenarbeit?",
-        "letsTalk": "Lass uns reden"
+        "letsTalk": "Lass uns reden",
+        "github": "GitHub",
+        "live": "Live"
     },
     "footer": {
-        "rights": "Andikas. Alle Rechte vorbehalten."
+        "rights": "andikas. Alle Rechte vorbehalten."
     },
     "notFound": {
         "heading": "Seite nicht gefunden.",
@@ -44,5 +54,13 @@
         "role": "Softwareentwickler",
         "location": "Surabaya, Indonesia",
         "description": "Erfahrener Software-Engineer mit Spezialisierung auf plattformübergreifende Mobile-Entwicklung im Fintech- und Bankensektor, mit wachsender Expertise in Backend-Systemen, Cloud-Infrastruktur und skalierbarem API-Design."
+    },
+    "common": {
+        "loading": "Laden",
+        "noImage": "Kein Bild",
+        "zoomIn": "Vergrößern",
+        "zoomOut": "Verkleinern",
+        "resetZoom": "Zoom zurücksetzen",
+        "close": "Schließen"
     }
 }

@@ -30,7 +30,7 @@ defineEmits<{
 
       <div class="modal-footer">
         <button class="btn btn-secondary" @click="$emit('close')" :disabled="loading">
-          {{ cancelText || 'Cancel' }}
+          {{ cancelText || 'cancel' }}
         </button>
         <button 
           class="btn" 
@@ -39,7 +39,7 @@ defineEmits<{
           :disabled="loading"
         >
           <span v-if="loading" class="spinner"></span>
-          {{ confirmText || 'Confirm' }}
+          {{ confirmText || 'confirm' }}
         </button>
       </div>
     </div>
@@ -53,7 +53,8 @@ defineEmits<{
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(57, 62, 65, 0.75);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -82,7 +83,7 @@ defineEmits<{
 .modal-header h3 {
   font-size: 1.125rem;
   font-weight: 900;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: -0.02em;
 }
 

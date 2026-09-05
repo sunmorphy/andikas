@@ -4,8 +4,8 @@
         "journey": "My Journey",
         "academic": "Academic Roots",
         "professional": "Professional Path",
-        "selectedWorks": "Selected Works",
-        "seeAllWorks": "See All Works",
+        "selectedWorks": "Works",
+        "seeAllWorks": "See All",
         "letsTalk": "Let's talk.",
         "freelance": "I'm currently open to projects and collaborations.",
         "skills": "Skills",
@@ -15,13 +15,21 @@
         "hireMe": "Hire Me",
         "downloadResume": "Resume"
     },
+    "nav": {
+        "home": "Home",
+        "works": "Works",
+        "projects": "Projects"
+    },
     "projects": {
-        "allWorks": "All Works",
+        "allWorks": "Works",
         "noProjects": "No projects match your search criteria.",
         "project": "PROJECT",
         "uiDesign": "UI DESIGN",
         "frontend": "FRONTEND",
         "backToProjects": "Back to projects",
+        "backToHome": "Back to home",
+        "searchPlaceholder": "Search projects...",
+        "all": "All",
         "type": "Type",
         "personalProject": "Personal Project",
         "groupProject": "Group Project",
@@ -30,10 +38,12 @@
         "noCoverImage": "No cover image available.",
         "content": "Content",
         "interestedTitle": "Interested in working together?",
-        "letsTalk": "Let's Talk"
+        "letsTalk": "Let's Talk",
+        "github": "GitHub",
+        "live": "Live"
     },
     "footer": {
-        "rights": "Andikas. All rights reserved."
+        "rights": "andikas. All rights reserved."
     },
     "notFound": {
         "heading": "Page not found.",
@@ -44,5 +54,13 @@
         "role": "Software Engineer",
         "location": "Surabaya, Indonesia",
         "description": "Experienced software engineer specializing in cross-platform mobile development for fintech and banking, with a broadening foundation in backend systems, cloud infrastructure, and scalable API design."
+    },
+    "common": {
+        "loading": "Loading",
+        "noImage": "No image",
+        "zoomIn": "Zoom In",
+        "zoomOut": "Zoom Out",
+        "resetZoom": "Reset Zoom",
+        "close": "Close"
     }
 }

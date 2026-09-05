@@ -16,19 +16,20 @@
   --color-neutral-800: #21201E;
   --color-neutral-900: #0C0C0B;
 
-  --color-surface: #F2F1ED;
-  --color-surface-dark: #F2F1ED;
+  --color-surface: #F6F7EB;
+  --color-surface-dark: #F6F7EB;
 
-  --color-card: #FAF9F6;
-  --color-card-dark: #FAF9F6;
+  --color-card: #F6F7EB;
+  --color-card-dark: #F6F7EB;
 
-  --color-ink: #000000;
-  --color-ink-dark: #000000;
-  --color-ink-muted: #5A5A57;
-  --color-ink-muted-dark: #5A5A57;
+  --color-ink: #393E41;
+  --color-ink-dark: #393E41;
+  --color-ink-muted: #6F7477;
+  --color-ink-muted-dark: #6F7477;
 
-  --color-brand-100: #FFEAE8;
-  --color-brand-900: #E52521;
+  --color-brand-100: #FDECE9;
+  --color-brand-900: #E94F37;
+  --color-brand: #E94F37;
 
   --font-sans: var(--font-haas), "Neue Haas Grotesk Text Pro", "Neue Haas Grotesk Disp Pro", "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -71,7 +72,7 @@
   body {
     background-color: var(--color-surface);
     color: var(--color-ink);
-    font-family: var(--font-sans);
+    font-family: var(--font-haas), var(--font-sans);
     letter-spacing: -0.04em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

@@ -1,14 +1,31 @@
-import { Code } from "iconoir-react";
+"use client";
+
+import { useParams } from "next/navigation";
+import { i18n, Locale } from "@/i18n-config";
+import en from "@/dictionaries/en.json";
+import id from "@/dictionaries/id.json";
+import de from "@/dictionaries/de.json";
+import ja from "@/dictionaries/ja.json";
+import nl from "@/dictionaries/nl.json";
+
+const dictionaries = { en, id, de, ja, nl };
 
 export default function Loading() {
-    return (
-        <div className="fixed inset-0 z-[100] bg-surface flex items-center justify-center">
-            <div className="relative flex flex-col items-center gap-3">
-                <div className="relative bg-brand-900 w-12 h-12 flex items-center justify-center animate-[spin_3s_linear_infinite]">
-                    <Code className="w-6 h-6 text-neutral-50" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-450">LOADING...</span>
-            </div>
-        </div>
-    );
+  const params = useParams();
+  const rawLang = params?.lang;
+  const lang: Locale =
+    typeof rawLang === "string" && (i18n.locales as readonly string[]).includes(rawLang)
+      ? (rawLang as Locale)
+      : i18n.defaultLocale;
+
+  const loadingText = dictionaries[lang]?.common?.loading || "loading";
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-surface flex items-center justify-center select-none">
+      <div className="flex items-center gap-2 text-base md:text-xl font-bold tracking-tight text-ink lowercase">
+        <span>{loadingText.toLowerCase()}</span>
+        <span className="text-brand-900 animate-pulse">/</span>
+      </div>
+    </div>
+  );
 }

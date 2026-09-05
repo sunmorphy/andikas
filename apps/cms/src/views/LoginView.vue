@@ -30,13 +30,13 @@ async function handleLogin() {
   <div class="login-container">
     <div class="card login-card">
       <div class="login-header">
-        <h1>Portfolio CMS</h1>
-        <p>Login to manage your portfolio</p>
+        <h1>portfolio <span class="accent-slash">/</span> cms</h1>
+        <p>login to manage portfolio</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label for="identifier">Email or Username</label>
+          <label for="identifier">email or username</label>
           <input 
             id="identifier" 
             v-model="identifier" 
@@ -48,7 +48,7 @@ async function handleLogin() {
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">password</label>
           <input 
             id="password" 
             v-model="password" 
@@ -60,11 +60,11 @@ async function handleLogin() {
         </div>
 
         <div v-if="errorMsg" class="error-msg">
-          {{ errorMsg }}
+          {{ errorMsg.toLowerCase() }}
         </div>
 
         <button type="submit" class="btn btn-primary login-btn" :disabled="authStore.loading">
-          {{ authStore.loading ? 'Signing in...' : 'Sign In' }}
+          {{ authStore.loading ? 'signing in...' : 'sign in' }}
         </button>
       </form>
     </div>
@@ -100,16 +100,20 @@ async function handleLogin() {
   font-weight: 900;
   letter-spacing: -0.04em;
   margin-bottom: 0.5rem;
-  text-transform: uppercase;
+  text-transform: lowercase;
   line-height: 1.0;
+}
+
+.accent-slash {
+  color: var(--color-primary);
 }
 
 .login-header p {
   color: var(--color-primary);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
 }
 
 .login-btn {
@@ -121,7 +125,7 @@ async function handleLogin() {
   color: var(--color-danger);
   font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 0.02em;
   margin-top: 0.75rem;
   text-align: center;

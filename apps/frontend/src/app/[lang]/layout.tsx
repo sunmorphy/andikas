@@ -10,6 +10,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import HashScroller from "@/components/HashScroller";
 import ThemeProvider from "@/components/ThemeProvider";
 import { fetchUser } from "@/lib/api";
+import { getDictionary } from "@/get-dictionary";
 
 import { i18n } from "@/i18n-config";
 
@@ -37,6 +38,11 @@ const haasGrotesk = localFont({
     },
     {
       path: "../fonts/HaasGrotText-75Bold.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../fonts/HaasGrotText-75Bold.woff2",
       weight: "700",
       style: "normal",
     },
@@ -49,6 +55,11 @@ const haasGrotesk = localFont({
       path: "../fonts/HaasGrotText-75Bold.woff2",
       weight: "900",
       style: "normal",
+    },
+    {
+      path: "../fonts/HaasGrotText-76BoldItalic.woff2",
+      weight: "600",
+      style: "italic",
     },
     {
       path: "../fonts/HaasGrotText-76BoldItalic.woff2",
@@ -67,6 +78,8 @@ const haasGrotesk = localFont({
     },
   ],
   variable: "--font-haas",
+  display: "block",
+  preload: true,
 });
 
 interface Props {
@@ -165,21 +178,29 @@ export default async function RootLayout({
     preconnectUrl = backendUrl;
   }
 
+  const [dict] = await Promise.all([
+    getDictionary(lang),
+  ]);
+
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning className={haasGrotesk.variable}>
       <head>
         <link rel="preconnect" href={preconnectUrl} crossOrigin="anonymous" />
       </head>
       <body
         suppressHydrationWarning
-        className={`${haasGrotesk.variable} min-h-screen bg-surface text-ink font-sans selection:bg-brand-900 selection:text-neutral-50`}
+        className={`${haasGrotesk.className} ${haasGrotesk.variable} min-h-screen bg-surface text-ink font-sans selection:bg-brand-900 selection:text-neutral-50`}
       >
         <ThemeProvider>
-          <Header lang={lang} />
+          <Header lang={lang} dict={dict?.nav} />
           <main className="min-h-[calc(100vh-160px)]">{children}</main>
-          <Footer lang={lang} />
-          <Analytics />
-          <SpeedInsights />
+          <Footer lang={lang} dict={dict?.footer} />
+          {process.env.NODE_ENV === "production" && (
+            <>
+              <Analytics />
+              <SpeedInsights />
+            </>
+          )}
           <Suspense fallback={null}>
             <HashScroller />
           </Suspense>

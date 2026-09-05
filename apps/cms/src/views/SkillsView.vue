@@ -192,9 +192,9 @@ function formatDate(dateString: string) {
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-title">Skills</h1>
+      <h1 class="page-title">skills</h1>
       <BaseButton variant="primary" @click="openCreateModal">
-        <PhPlus weight="bold" /> Add Skill
+        <PhPlus weight="bold" /> add skill
       </BaseButton>
     </div>
 
@@ -210,7 +210,7 @@ function formatDate(dateString: string) {
       </template>
 
       <template #name="{ row }">
-        <strong>{{ row.name }}</strong>
+        <strong>{{ row.name.toLowerCase() }}</strong>
       </template>
       
       <template #updatedAt="{ row }">
@@ -219,55 +219,53 @@ function formatDate(dateString: string) {
 
       <template #actions="{ row }">
         <div class="action-buttons">
-          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="Edit">
+          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="edit">
             <PhPencilSimple weight="fill" />
           </button>
-          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="Delete">
+          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="delete">
             <PhTrash weight="fill" />
           </button>
         </div>
       </template>
     </BaseTable>
 
-    <!-- Create/Edit Modal -->
     <BaseModal
       :show="showModal"
-      :title="isEditing ? 'Edit Skill' : 'Add New Skill'"
+      :title="isEditing ? 'edit skill' : 'add skill'"
       :loading="modalLoading"
       @close="showModal = false"
       @confirm="handleSave"
     >
       <div class="form-container">
-        <BaseInput id="name" label="Skill Name" v-model="form.name" required />
+        <BaseInput id="name" label="skill name" v-model="form.name" required />
         
         <div class="form-group">
-          <label>Skill Icon <span v-if="!isEditing" class="required">*</span></label>
+          <label>skill icon <span v-if="!isEditing" class="required">*</span></label>
           <div class="photo-upload-container">
             <div class="icon-preview">
               <img v-if="previewUrl" :src="previewUrl" alt="Preview" />
-              <div v-else class="no-photo">No Icon</div>
+              <div v-else class="no-photo">no icon</div>
             </div>
             <div>
-              <label for="skillIcon" class="upload-label">Select Image</label>
+              <label for="skillIcon" class="upload-label">select image</label>
               <input type="file" id="skillIcon" ref="fileInput" accept="image/*" @change="handleFileSelect" class="file-input" />
-              <p class="help-text">Recommended: square aspect ratio, png/svg format.</p>
+              <p class="help-text">recommended: square aspect ratio, png/svg format.</p>
             </div>
           </div>
         </div>
       </div>
     </BaseModal>
 
-    <!-- Delete Confirm Modal -->
     <BaseModal
       :show="showDeleteConfirm"
-      title="Confirm Delete"
-      confirmText="Delete"
+      title="confirm delete"
+      confirmText="delete"
       danger
       :loading="modalLoading"
       @close="showDeleteConfirm = false"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this skill? This action cannot be undone.</p>
+      <p>are you sure you want to delete this skill? this action cannot be undone.</p>
     </BaseModal>
   </div>
 </template>
@@ -280,10 +278,6 @@ function formatDate(dateString: string) {
   margin-bottom: 2rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
 
 .skill-icon-wrap {
   width: 40px;

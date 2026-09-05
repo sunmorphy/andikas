@@ -23,7 +23,7 @@ defineEmits<{
         :class="{ active: modelValue === lang.code }"
         @click="$emit('update:modelValue', lang.code)"
       >
-        {{ lang.name }} ({{ lang.code.toUpperCase() }})
+        {{ lang.name.toLowerCase() }} ({{ lang.code }})
       </button>
     </div>
     
@@ -34,7 +34,7 @@ defineEmits<{
       @click="$emit('translate')"
       title="Translate English fields to all other languages using Gemini AI"
     >
-      {{ translating ? '⏳ Translating...' : '✨ Translate Form from EN' }}
+      {{ translating ? 'translating...' : '✨ translate form from en' }}
     </button>
   </div>
 </template>
@@ -65,10 +65,10 @@ defineEmits<{
   border: none;
   border-bottom: 3px solid transparent;
   color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: -0.01em;
   cursor: pointer;
   white-space: nowrap;
   transition: none;
@@ -82,28 +82,28 @@ defineEmits<{
 .lang-tab.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .translate-btn {
   background: transparent;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   color: var(--color-primary);
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: -0.01em;
   padding: 0.35rem 0.75rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: none;
 }
 
 .translate-btn:hover {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-bg-base);
 }
 
 .translate-btn:disabled {

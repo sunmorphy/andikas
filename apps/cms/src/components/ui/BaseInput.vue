@@ -43,7 +43,7 @@ defineEmits<{
   color: var(--color-danger);
   font-size: 0.7rem;
   font-weight: 800;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 0.03em;
   margin-top: 0.35rem;
 }

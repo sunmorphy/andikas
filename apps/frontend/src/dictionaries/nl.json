@@ -4,8 +4,8 @@
         "journey": "Mijn Reis",
         "academic": "Academische Wortels",
         "professional": "Professionele Weg",
-        "selectedWorks": "Geselecteerde Werken",
-        "seeAllWorks": "Bekijk Alle Werken",
+        "selectedWorks": "Werken",
+        "seeAllWorks": "Bekijk Alles",
         "letsTalk": "Laten we praten.",
         "freelance": "Ik sta momenteel open voor projecten en samenwerkingen.",
         "skills": "Vaardigheden",
@@ -15,13 +15,21 @@
         "hireMe": "Huur mij in",
         "downloadResume": "CV"
     },
+    "nav": {
+        "home": "Home",
+        "works": "Werken",
+        "projects": "Projecten"
+    },
     "projects": {
-        "allWorks": "Alle Werken",
+        "allWorks": "Werken",
         "noProjects": "Geen projecten komen overeen met uw zoekcriteria.",
         "project": "PROJECT",
         "uiDesign": "UI-ONTWERP",
         "frontend": "FRONTEND",
         "backToProjects": "Terug naar projecten",
+        "backToHome": "Terug naar home",
+        "searchPlaceholder": "Projecten zoeken...",
+        "all": "Alle",
         "type": "Type",
         "personalProject": "Persoonlijk Project",
         "groupProject": "Groepsproject",
@@ -30,10 +38,12 @@
         "noCoverImage": "Geen omslagafbeelding beschikbaar.",
         "content": "Inhoud",
         "interestedTitle": "Interesse in samenwerken?",
-        "letsTalk": "Laten we praten"
+        "letsTalk": "Laten we praten",
+        "github": "GitHub",
+        "live": "Live"
     },
     "footer": {
-        "rights": "Andikas. Alle rechten voorbehouden."
+        "rights": "andikas. Alle rechten voorbehouden."
     },
     "notFound": {
         "heading": "Pagina niet gevonden.",
@@ -44,5 +54,13 @@
         "role": "Software Engineer",
         "location": "Surabaya, Indonesia",
         "description": "Ervaren software-engineer gespecialiseerd in cross-platform mobiele ontwikkeling voor fintech en banking, met een groeiende basis in backendsystemen, cloudinfrastructuur en schaalbaar API-ontwerp."
+    },
+    "common": {
+        "loading": "Laden",
+        "noImage": "Geen afbeelding",
+        "zoomIn": "Inzoomen",
+        "zoomOut": "Uitzoomen",
+        "resetZoom": "Zoom resetten",
+        "close": "Sluiten"
     }
 }

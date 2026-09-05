@@ -25,7 +25,7 @@ function closeMenu() {
   <div class="app-layout">
     <!-- Mobile Header -->
     <header class="mobile-header">
-      <h2>Manage Content</h2>
+      <h2>manage <span class="accent-slash">/</span> content</h2>
       <button class="menu-toggle" @click="toggleMenu" aria-label="Toggle menu">
         <span class="bar" :class="{ 'open': isMenuOpen }"></span>
         <span class="bar" :class="{ 'open': isMenuOpen }"></span>
@@ -36,20 +36,20 @@ function closeMenu() {
     <!-- Sidebar / Drawer -->
     <aside class="sidebar" :class="{ 'is-open': isMenuOpen }">
       <div class="brand">
-        <h2>Manage Content</h2>
+        <h2>manage <span class="accent-slash">/</span> content</h2>
       </div>
       <nav class="nav-menu">
-        <router-link to="/" class="nav-link" exact-active-class="active" @click="closeMenu">Dashboard</router-link>
-        <router-link to="/profile" class="nav-link" exact-active-class="active" @click="closeMenu">Profile</router-link>
-        <router-link to="/skills" class="nav-link" exact-active-class="active" @click="closeMenu">Skills</router-link>
-        <router-link to="/tags" class="nav-link" exact-active-class="active" @click="closeMenu">Tags</router-link>
-        <router-link to="/experience" class="nav-link" exact-active-class="active" @click="closeMenu">Experience</router-link>
-        <router-link to="/education" class="nav-link" exact-active-class="active" @click="closeMenu">Education</router-link>
-        <router-link to="/certifications" class="nav-link" exact-active-class="active" @click="closeMenu">Certifications</router-link>
-        <router-link to="/projects" class="nav-link" exact-active-class="active" @click="closeMenu">Projects</router-link>
+        <router-link to="/" class="nav-link" exact-active-class="active" @click="closeMenu">dashboard</router-link>
+        <router-link to="/profile" class="nav-link" exact-active-class="active" @click="closeMenu">profile</router-link>
+        <router-link to="/skills" class="nav-link" exact-active-class="active" @click="closeMenu">skills</router-link>
+        <router-link to="/tags" class="nav-link" exact-active-class="active" @click="closeMenu">tags</router-link>
+        <router-link to="/experience" class="nav-link" exact-active-class="active" @click="closeMenu">experience</router-link>
+        <router-link to="/education" class="nav-link" exact-active-class="active" @click="closeMenu">education</router-link>
+        <router-link to="/certifications" class="nav-link" exact-active-class="active" @click="closeMenu">certifications</router-link>
+        <router-link to="/projects" class="nav-link" exact-active-class="active" @click="closeMenu">projects</router-link>
       </nav>
       <div class="sidebar-footer">
-        <button class="btn btn-secondary logout-btn" @click="logout">Logout</button>
+        <button class="btn btn-secondary logout-btn" @click="logout">logout</button>
       </div>
     </aside>
 
@@ -84,11 +84,18 @@ function closeMenu() {
   border-bottom: 1.5px solid var(--color-border);
 }
 
-.brand h2 {
-  font-size: 1.25rem;
-  font-weight: 900;
+.brand h2,
+.mobile-header h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
   color: var(--color-text-primary);
   letter-spacing: -0.04em;
+  text-transform: lowercase;
+}
+
+.accent-slash {
+  color: var(--color-primary);
+  font-weight: 800;
 }
 
 .nav-menu {
@@ -101,10 +108,10 @@ function closeMenu() {
 
 .nav-link {
   padding: 0.75rem 1.5rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: -0.01em;
   color: var(--color-text-secondary);
   border-left: 4px solid transparent;
   transition: none;
@@ -117,8 +124,8 @@ function closeMenu() {
 
 .nav-link.active {
   background-color: var(--color-primary);
-  color: #ffffff;
-  border-left-color: #ffffff;
+  color: var(--color-bg-base);
+  border-left-color: var(--color-primary);
 }
 
 .sidebar-footer {

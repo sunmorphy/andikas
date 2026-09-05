@@ -225,7 +225,7 @@ function showMessage(text: string, type: string) {
 
 <template>
   <div>
-    <h1 class="page-title">Profile Management</h1>
+    <h1 class="page-title">profile</h1>
     
     <div v-if="loading" class="spinner-container">
       <div class="spinner"></div>
@@ -240,23 +240,23 @@ function showMessage(text: string, type: string) {
         <div class="header-photo">
           <div class="photo-preview">
             <img v-if="previewUrl || form.profilePhotoUrl" :src="previewUrl || form.profilePhotoUrl" alt="Profile" />
-            <div v-else class="no-photo">No Photo</div>
+            <div v-else class="no-photo">no photo</div>
           </div>
           <div class="photo-upload">
-            <label for="profilePhoto" class="upload-label">Change Profile Photo</label>
+            <label for="profilePhoto" class="upload-label">change profile photo</label>
             <input type="file" id="profilePhoto" ref="fileInput" accept="image/*" @change="handleFileSelect" class="file-input" />
           </div>
         </div>
 
         <div class="header-photo">
           <div class="photo-preview">
-            <a v-if="previewResumeUrl" :href="previewResumeUrl" target="_blank" class="preview-link">View</a>
-            <div v-else class="no-photo">No Resume</div>
+            <a v-if="previewResumeUrl" :href="previewResumeUrl" target="_blank" class="preview-link">view</a>
+            <div v-else class="no-photo">no resume</div>
           </div>
           <div class="photo-upload">
-            <label for="resumeInput" class="upload-label">Change Resume (PDF)</label>
+            <label for="resumeInput" class="upload-label">change resume (pdf)</label>
             <input type="file" id="resumeInput" ref="resumeInput" accept="application/pdf" @change="handleResumeSelect" class="file-input" />
-            <p class="help-text">Resume will be compressed locally before uploading.</p>
+            <p class="help-text">resume will be compressed locally before uploading.</p>
           </div>
         </div>
 
@@ -279,9 +279,9 @@ function showMessage(text: string, type: string) {
 
         <div class="socials-section">
           <div class="section-header">
-            <h3>Social Media Links</h3>
+            <h3>social media links</h3>
             <BaseButton variant="secondary" @click="addSocial">
-              <PhPlusCircle weight="bold" /> Add Link
+              <PhPlusCircle weight="bold" /> add link
             </BaseButton>
           </div>
           
@@ -292,11 +292,11 @@ function showMessage(text: string, type: string) {
               <PhTrash weight="bold" />
             </BaseButton>
           </div>
-          <p v-if="form.socialMedias.length === 0" class="empty-socials">No social links added.</p>
+          <p v-if="form.socialMedias.length === 0" class="empty-socials">no social links added.</p>
         </div>
 
         <div class="form-actions">
-          <BaseButton type="submit" variant="primary" :loading="saving">Save Changes</BaseButton>
+          <BaseButton type="submit" variant="primary" :loading="saving">save changes</BaseButton>
         </div>
       </form>
     </div>
@@ -304,11 +304,7 @@ function showMessage(text: string, type: string) {
 </template>
 
 <style scoped>
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-}
+
 
 .spinner-container {
   display: flex;

@@ -60,76 +60,70 @@ const projectsByType = computed(() => {
 
 <template>
   <div class="dashboard-container">
-    <h1 class="page-title">Dashboard</h1>
+    <h1 class="page-title">dashboard</h1>
     
-    <!-- Welcome Banner -->
     <div class="welcome-card card">
-      <h2>Welcome back, {{ authStore.user?.name || authStore.user?.username || 'User' }}</h2>
-      <p>Monitor your portfolio metrics and project analytics below.</p>
+      <h2>welcome back, {{ (authStore.user?.name || authStore.user?.username || 'user').toLowerCase() }}</h2>
+      <p>monitor your portfolio metrics and project analytics below.</p>
     </div>
 
-    <!-- Loading/Error States -->
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
-      <span>Loading project insights...</span>
+      <span>loading project insights...</span>
     </div>
     
     <div v-else-if="error" class="error-state card">
-      <p>Failed to retrieve project data. Please verify your connection status.</p>
+      <p>failed to retrieve project data. please verify your connection status.</p>
     </div>
 
     <div v-else class="insights-content">
-      <!-- Stats Cards -->
       <div class="stats-grid">
         <div class="stat-box card">
           <div class="stat-num">{{ totalProjects }}</div>
-          <div class="stat-label">Total Projects</div>
+          <div class="stat-label">total projects</div>
         </div>
         <div class="stat-box card">
           <div class="stat-num">{{ publishedCount }}</div>
-          <div class="stat-label">Published</div>
+          <div class="stat-label">published</div>
         </div>
         <div class="stat-box card">
           <div class="stat-num">{{ draftCount }}</div>
-          <div class="stat-label">Drafts</div>
+          <div class="stat-label">drafts</div>
         </div>
         <div class="stat-box card">
           <div class="stat-num">{{ highlightedCount }}</div>
-          <div class="stat-label">Starred</div>
+          <div class="stat-label">starred</div>
         </div>
       </div>
 
-      <!-- Details Section -->
       <div class="details-section">
-        <!-- Breakdown Card -->
         <div class="card breakdown-card">
-          <h3>Breakdown by Type</h3>
+          <h3>breakdown by type</h3>
           <div class="breakdown-list">
             <div v-for="item in projectsByType" :key="item.type" class="breakdown-item">
-              <span class="item-type">{{ item.type }}</span>
+              <span class="item-type">{{ item.type.toLowerCase() }}</span>
               <span class="item-count">{{ item.count }}</span>
             </div>
-            <div v-if="projectsByType.length === 0" class="empty-text">No project classifications.</div>
+            <div v-if="projectsByType.length === 0" class="empty-text">no project classifications.</div>
           </div>
         </div>
 
-        <!-- Recent Projects Card -->
         <div class="card recent-projects-card">
-          <h3>Recent Projects Log</h3>
+          <h3>recent projects log</h3>
           <div class="projects-list">
             <div v-for="proj in projects.slice(0, 5)" :key="proj.id" class="project-item">
               <div class="project-info">
-                <h4>{{ getDisplayLocal(proj.title, 'en') }}</h4>
-                <span class="project-meta-type">{{ proj.type }}</span>
+                <h4>{{ getDisplayLocal(proj.title, 'en').toLowerCase() }}</h4>
+                <span class="project-meta-type">{{ proj.type.toLowerCase() }}</span>
               </div>
               <div class="project-status-tags">
-                <span v-if="proj.highlighted" class="status-tag tag-highlighted">Starred</span>
+                <span v-if="proj.highlighted" class="status-tag tag-highlighted">starred</span>
                 <span :class="['status-tag', proj.published ? 'tag-published' : 'tag-draft']">
-                  {{ proj.published ? 'Published' : 'Draft' }}
+                  {{ proj.published ? 'published' : 'draft' }}
                 </span>
               </div>
             </div>
-            <div v-if="projects.length === 0" class="empty-text">No projects found. Create one from the Projects panel.</div>
+            <div v-if="projects.length === 0" class="empty-text">no projects found. create one from the projects panel.</div>
           </div>
         </div>
       </div>
@@ -224,7 +218,7 @@ const projectsByType = computed(() => {
 .stat-label {
   font-size: 0.7rem;
   font-weight: 800;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 0.05em;
   color: var(--color-text-secondary);
 }
@@ -269,7 +263,7 @@ const projectsByType = computed(() => {
   border-bottom: 1px solid var(--color-border);
   font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 0.03em;
 }
 
@@ -306,7 +300,7 @@ const projectsByType = computed(() => {
 .project-info h4 {
   font-size: 0.85rem;
   font-weight: 800;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: -0.01em;
   color: var(--color-text-primary);
 }
@@ -314,7 +308,7 @@ const projectsByType = computed(() => {
 .project-meta-type {
   font-size: 0.65rem;
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--color-text-tertiary);
   margin-top: 0.2rem;
   display: block;
@@ -328,7 +322,7 @@ const projectsByType = computed(() => {
 .status-tag {
   font-size: 0.6rem;
   font-weight: 800;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 0.05em;
   padding: 0.25rem 0.5rem;
   display: inline-block;
@@ -347,7 +341,7 @@ const projectsByType = computed(() => {
 
 .tag-highlighted {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-bg-base);
 }
 
 .empty-text {
@@ -355,7 +349,7 @@ const projectsByType = computed(() => {
   color: var(--color-text-tertiary);
   text-align: center;
   padding: 3rem 0;
-  text-transform: uppercase;
+  text-transform: lowercase;
   font-weight: 700;
 }
 </style>

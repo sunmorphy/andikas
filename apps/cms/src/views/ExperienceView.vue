@@ -247,9 +247,9 @@ function showMessage(text: string, type: string) {
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-title">Experience</h1>
+      <h1 class="page-title">experience</h1>
       <BaseButton variant="primary" @click="openCreateModal">
-        <PhPlus weight="bold" /> Add Experience
+        <PhPlus weight="bold" /> add experience
       </BaseButton>
     </div>
 
@@ -259,15 +259,15 @@ function showMessage(text: string, type: string) {
 
     <BaseTable :columns="columns" :data="experiences" :loading="loading">
       <template #companyName="{ row }">
-        <strong>{{ getDisplayLocal(row.companyName) }}</strong>
+        <strong>{{ getDisplayLocal(row.companyName).toLowerCase() }}</strong>
       </template>
 
       <template #period="{ row }">
-        {{ row.startYear }} - {{ row.endYear || 'Present' }}
+        {{ row.startYear }} - {{ row.endYear || 'present' }}
       </template>
 
       <template #location="{ row }">
-        {{ getDisplayLocal(row.location) }}
+        {{ getDisplayLocal(row.location).toLowerCase() }}
       </template>
 
       <template #skills="{ row }">
@@ -275,26 +275,25 @@ function showMessage(text: string, type: string) {
           <span v-for="skill in (row.skills || [])" :key="skill.id" class="skill-tag" :title="skill.name">
             <img :src="skill.icon" :alt="skill.name" />
           </span>
-          <span v-if="!(row.skills?.length)" class="text-tertiary">None</span>
+          <span v-if="!(row.skills?.length)" class="text-tertiary">none</span>
         </div>
       </template>
 
       <template #actions="{ row }">
         <div class="action-buttons">
-          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="Edit">
+          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="edit">
             <PhPencilSimple weight="fill" />
           </button>
-          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="Delete">
+          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="delete">
             <PhTrash weight="fill" />
           </button>
         </div>
       </template>
     </BaseTable>
 
-    <!-- Create/Edit Modal -->
     <BaseModal
       :show="showModal"
-      :title="isEditing ? 'Edit Experience' : 'Add Experience'"
+      :title="isEditing ? 'edit experience' : 'add experience'"
       :loading="modalLoading"
       @close="showModal = false"
       @confirm="handleSave"
@@ -303,34 +302,34 @@ function showMessage(text: string, type: string) {
         <LanguageSelector v-model="currentLang" :translating="translating" @translate="handleAutoTranslate" />
 
         <div class="form-grid mt-4">
-          <BaseInput id="company" label="Company Name" v-model="form.companyName[currentLang]" :required="currentLang === defaultLang" />
-          <BaseInput id="location" label="Location" v-model="form.location[currentLang]" />
+          <BaseInput id="company" label="company name" v-model="form.companyName[currentLang]" :required="currentLang === defaultLang" />
+          <BaseInput id="location" label="location" v-model="form.location[currentLang]" />
         </div>
         
         <div class="form-grid">
-          <BaseInput id="startYear" label="Start Year" type="number" v-model.number="form.startYear" required />
+          <BaseInput id="startYear" label="start year" type="number" v-model.number="form.startYear" required />
           <div>
             <BaseInput 
               id="endYear" 
-              label="End Year" 
+              label="end year" 
               type="number" 
               v-model.number="form.endYear" 
               :disabled="form.isCurrent"
             />
             <label class="checkbox-label mt-2">
               <input type="checkbox" v-model="form.isCurrent" />
-              <span>Current Employment</span>
+              <span>current employment</span>
             </label>
           </div>
         </div>
 
         <div class="form-group mb-4">
-          <label>Description</label>
+          <label>description</label>
           <textarea v-model="form.description[currentLang]" rows="4" class="textarea"></textarea>
         </div>
 
         <div class="form-group">
-          <label>Related Skills</label>
+          <label>related skills</label>
           <div class="skills-grid">
             <div 
               v-for="skill in availableSkills" 
@@ -343,24 +342,23 @@ function showMessage(text: string, type: string) {
               <span>{{ skill.name }}</span>
             </div>
             <div v-if="availableSkills.length === 0" class="text-tertiary text-sm">
-              No skills available. Add them in the Skills section first.
+              no skills available. add them in the skills section first.
             </div>
           </div>
         </div>
       </div>
     </BaseModal>
 
-    <!-- Delete Confirm Modal -->
     <BaseModal
       :show="showDeleteConfirm"
-      title="Confirm Delete"
-      confirmText="Delete"
+      title="confirm delete"
+      confirmText="delete"
       danger
       :loading="modalLoading"
       @close="showDeleteConfirm = false"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this experience?</p>
+      <p>are you sure you want to delete this experience?</p>
     </BaseModal>
   </div>
 </template>
@@ -373,10 +371,6 @@ function showMessage(text: string, type: string) {
   margin-bottom: 2rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
 
 .skill-tags {
   display: flex;

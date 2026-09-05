@@ -1,32 +1,27 @@
 import Link from "next/link";
-import { getDictionary } from "@/get-dictionary";
 import { Locale } from "@/i18n-config";
 
-export default async function Footer({ lang }: { lang: Locale }) {
-    const dict = await getDictionary(lang);
+export default function Footer({
+  lang,
+  dict,
+}: {
+  lang: Locale;
+  dict?: { rights?: string };
+}) {
+  const currentYear = new Date().getFullYear();
+  const rightsText = dict?.rights || "andikas. all rights reserved.";
 
-    return (
-        <footer className="w-full mt-32">
-            <div className="w-full px-6 py-12 flex flex-col gap-12">
-                <div className="w-full text-start pb-12">
-                    <span className="text-[8.5vw] font-extrabold tracking-tighter leading-none text-neutral-900 uppercase block select-none">
-                        ANDIKA—
-                    </span>
-                    <span className="text-[8.5vw] font-extrabold tracking-tighter leading-none text-neutral-900 uppercase block select-none">
-                        SULTANRAFLI
-                    </span>
-                </div>
-
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-[10px] font-bold uppercase tracking-widest text-ink-muted">
-                    <div className="flex flex-col md:flex-row items-center gap-4">
-                        <Link href={`/${lang}`} className="text-neutral-900 hover:text-brand-900 transition-colors">
-                            andikas.dev
-                        </Link>
-                    </div>
-
-                    <span>© {new Date().getFullYear()} {dict.footer.rights}</span>
-                </div>
-            </div>
-        </footer>
-    );
+  return (
+    <footer className="w-full mt-32 pb-12 pt-8">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-ink lowercase select-none">
+        <Link
+          href={`/${lang}`}
+          className="hover:text-brand-900 transition-colors underline underline-offset-4 decoration-1"
+        >
+          andikas.dev
+        </Link>
+        <span>© {currentYear} {rightsText.toLowerCase()}</span>
+      </div>
+    </footer>
+  );
 }

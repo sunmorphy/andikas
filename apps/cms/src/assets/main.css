@@ -1,19 +1,113 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-55Roman.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-56Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-65Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-66MediumItalic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-75Bold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-75Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-75Bold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-75Bold.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-76BoldItalic.woff2') format('woff2');
+  font-weight: 600;
+  font-style: italic;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-76BoldItalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-76BoldItalic.woff2') format('woff2');
+  font-weight: 800;
+  font-style: italic;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Haas Grotesk';
+  src: url('./fonts/HaasGrotText-76BoldItalic.woff2') format('woff2');
+  font-weight: 900;
+  font-style: italic;
+  font-display: block;
+}
 
 :root {
-  --color-bg-base: #F2F1ED;
+  --color-bg-base: #F6F7EB;
   --color-bg-surface: #ffffff;
-  --color-bg-surface-hover: #FAF9F6;
-  --color-border: #CECDC9;
+  --color-bg-surface-hover: #FAFBF2;
+  --color-border: #E1E2D3;
 
-  --color-text-primary: #0C0C0B;
-  --color-text-secondary: #5D5C58;
+  --color-text-primary: #393E41;
+  --color-text-secondary: #6F7477;
   --color-text-tertiary: #9E9D99;
 
-  --color-primary: #E52521;
-  --color-primary-hover: #C31F1C;
-  --color-danger: #E52521;
-  --color-danger-hover: #C31F1C;
+  --color-primary: #E94F37;
+  --color-primary-hover: #D33E27;
+  --color-danger: #E94F37;
+  --color-danger-hover: #D33E27;
 
   --radius-sm: 0px;
   --radius-md: 0px;
@@ -21,6 +115,11 @@
 
   --shadow-sm: none;
   --shadow-md: none;
+}
+
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-bg-base);
 }
 
 *,
@@ -32,10 +131,11 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Haas Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--color-bg-base);
   color: var(--color-text-primary);
   line-height: 1.5;
+  letter-spacing: -0.02em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -46,10 +146,10 @@ h3,
 h4,
 h5,
 h6 {
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.1;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 a {
@@ -97,7 +197,6 @@ textarea::placeholder {
   color: var(--color-text-tertiary);
 }
 
-/* Base Utility Classes */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -105,10 +204,10 @@ textarea::placeholder {
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
   border-radius: var(--radius-md);
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  text-transform: lowercase;
+  font-size: 0.8rem;
+  letter-spacing: -0.01em;
   transition: none;
 }
 
@@ -119,14 +218,14 @@ textarea::placeholder {
 
 .btn-primary {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-bg-base);
   border: 1.5px solid var(--color-primary);
 }
 
 .btn-primary:not(:disabled):hover {
-  background-color: #000000;
-  color: #ffffff;
-  border-color: #000000;
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-base);
+  border-color: var(--color-text-primary);
 }
 
 .btn-secondary {
@@ -149,7 +248,7 @@ textarea::placeholder {
 
 .btn-danger:not(:disabled):hover {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-bg-base);
 }
 
 .card {
@@ -169,21 +268,20 @@ textarea::placeholder {
 .form-group label {
   font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  letter-spacing: -0.01em;
   color: var(--color-text-secondary);
 }
 
-/* Layout Utilities */
 .page-title {
   font-size: 2rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: -0.03em;
+  font-weight: 800;
+  text-transform: lowercase;
+  letter-spacing: -0.04em;
   line-height: 1.1;
   margin-bottom: 2rem;
   color: var(--color-text-primary);
-  border-bottom: 3.5px solid var(--color-primary);
+  border-bottom: 3px solid var(--color-primary);
   padding-bottom: 0.35rem;
   display: inline-block;
 }
@@ -308,8 +406,8 @@ textarea::placeholder {
 
 .alert-error {
   background-color: #ffffff !important;
-  color: #e52521 !important;
-  border: 1.5px solid #e52521 !important;
+  color: var(--color-danger) !important;
+  border: 1.5px solid var(--color-danger) !important;
 }
 
 .alert-info {

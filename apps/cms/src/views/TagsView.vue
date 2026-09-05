@@ -155,9 +155,9 @@ function showMessage(text: string, type: string) {
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-title">Tags</h1>
+      <h1 class="page-title">tags</h1>
       <BaseButton variant="primary" @click="openCreateModal">
-        <PhPlus weight="bold" /> Add Tag
+        <PhPlus weight="bold" /> add tag
       </BaseButton>
     </div>
 
@@ -167,50 +167,48 @@ function showMessage(text: string, type: string) {
 
     <BaseTable :columns="columns" :data="tags" :loading="loading">
       <template #name="{ row }">
-        <strong>{{ row.name }}</strong>
+        <strong>{{ row.name.toLowerCase() }}</strong>
       </template>
 
       <template #slug="{ row }">
-        <span class="text-tertiary">{{ row.slug }}</span>
+        <span class="text-tertiary">{{ row.slug.toLowerCase() }}</span>
       </template>
 
       <template #actions="{ row }">
         <div class="action-buttons">
-          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="Edit">
+          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="edit">
             <PhPencilSimple weight="fill" />
           </button>
-          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="Delete">
+          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="delete">
             <PhTrash weight="fill" />
           </button>
         </div>
       </template>
     </BaseTable>
 
-    <!-- Create/Edit Modal -->
     <BaseModal
       :show="showModal"
-      :title="isEditing ? 'Edit Tag' : 'Add New Tag'"
+      :title="isEditing ? 'edit tag' : 'add tag'"
       :loading="modalLoading"
       @close="showModal = false"
       @confirm="handleSave"
     >
       <div class="form-container">
-        <BaseInput id="name" label="Tag Name" v-model="form.name" @input="handleNameChange" required />
-        <BaseInput id="slug" label="Tag Slug" v-model="form.slug" placeholder="e.g. web-app" required />
+        <BaseInput id="name" label="tag name" v-model="form.name" @input="handleNameChange" required />
+        <BaseInput id="slug" label="tag slug" v-model="form.slug" placeholder="e.g. web-app" required />
       </div>
     </BaseModal>
 
-    <!-- Delete Confirm Modal -->
     <BaseModal
       :show="showDeleteConfirm"
-      title="Confirm Delete"
-      confirmText="Delete"
+      title="confirm delete"
+      confirmText="delete"
       danger
       :loading="modalLoading"
       @close="showDeleteConfirm = false"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this tag? This action cannot be undone.</p>
+      <p>are you sure you want to delete this tag? this action cannot be undone.</p>
     </BaseModal>
   </div>
 </template>
@@ -223,10 +221,6 @@ function showMessage(text: string, type: string) {
   margin-bottom: 2rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
 
 .action-buttons {
   display: flex;

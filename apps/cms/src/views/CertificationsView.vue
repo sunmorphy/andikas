@@ -243,9 +243,9 @@ function showMessage(text: string, type: string) {
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-title">Certifications</h1>
+      <h1 class="page-title">certifications</h1>
       <BaseButton variant="primary" @click="openCreateModal">
-        <PhPlus weight="bold" /> Add Certification
+        <PhPlus weight="bold" /> add certification
       </BaseButton>
     </div>
 
@@ -256,15 +256,15 @@ function showMessage(text: string, type: string) {
     <BaseTable :columns="columns" :data="certifications" :loading="loading">
       <template #name="{ row }">
         <div class="cert-name">
-          <strong>{{ getDisplayLocal(row.name) }}</strong>
-          <a v-if="row.certificateLink" :href="row.certificateLink" target="_blank" rel="noopener noreferrer" class="cert-link" title="View Certificate">
+          <strong>{{ getDisplayLocal(row.name).toLowerCase() }}</strong>
+          <a v-if="row.certificateLink" :href="row.certificateLink" target="_blank" rel="noopener noreferrer" class="cert-link" title="view certificate">
             <PhLink weight="bold" />
           </a>
         </div>
       </template>
 
       <template #issuingOrganization="{ row }">
-        {{ getDisplayLocal(row.issuingOrganization) }}
+        {{ getDisplayLocal(row.issuingOrganization).toLowerCase() }}
       </template>
 
       <template #skills="{ row }">
@@ -272,47 +272,46 @@ function showMessage(text: string, type: string) {
           <span v-for="skill in (row.skills || [])" :key="skill.id" class="skill-tag" :title="skill.name">
             <img :src="skill.icon" :alt="skill.name" />
           </span>
-          <span v-if="!(row.skills?.length)" class="text-tertiary">None</span>
+          <span v-if="!(row.skills?.length)" class="text-tertiary">none</span>
         </div>
       </template>
 
       <template #actions="{ row }">
         <div class="action-buttons">
-          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="Edit">
+          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="edit">
             <PhPencilSimple weight="fill" />
           </button>
-          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="Delete">
+          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="delete">
             <PhTrash weight="fill" />
           </button>
         </div>
       </template>
     </BaseTable>
 
-    <!-- Create/Edit Modal -->
     <BaseModal
       :show="showModal"
-      :title="isEditing ? 'Edit Certification' : 'Add Certification'"
+      :title="isEditing ? 'edit certification' : 'add certification'"
       :loading="modalLoading"
       @close="showModal = false"
       @confirm="handleSave"
     >
       <div class="form-container">
         <LanguageSelector v-model="currentLang" :translating="translating" @translate="handleAutoTranslate" />
-        <BaseInput id="name" label="Certification Name" v-model="form.name[currentLang]" :required="currentLang === defaultLang" />
-        <BaseInput id="org" label="Issuing Organization" v-model="form.issuingOrganization[currentLang]" :required="currentLang === defaultLang" />
+        <BaseInput id="name" label="certification name" v-model="form.name[currentLang]" :required="currentLang === defaultLang" />
+        <BaseInput id="org" label="issuing organization" v-model="form.issuingOrganization[currentLang]" :required="currentLang === defaultLang" />
         
         <div class="form-grid mt-4">
-          <BaseInput id="year" label="Year" type="number" v-model.number="form.year" required />
-          <BaseInput id="link" label="Certificate Link (URL)" v-model="form.certificateLink" placeholder="https://..." />
+          <BaseInput id="year" label="year" type="number" v-model.number="form.year" required />
+          <BaseInput id="link" label="certificate link (url)" v-model="form.certificateLink" placeholder="https://..." />
         </div>
 
         <div class="form-group mb-4">
-          <label>Description</label>
+          <label>description</label>
           <textarea v-model="form.description[currentLang]" rows="3" class="textarea"></textarea>
         </div>
 
         <div class="form-group">
-          <label>Related Skills</label>
+          <label>related skills</label>
           <div class="skills-grid">
             <div 
               v-for="skill in availableSkills" 
@@ -325,24 +324,23 @@ function showMessage(text: string, type: string) {
               <span>{{ skill.name }}</span>
             </div>
             <div v-if="availableSkills.length === 0" class="text-tertiary text-sm">
-              No skills available.
+              no skills available.
             </div>
           </div>
         </div>
       </div>
     </BaseModal>
 
-    <!-- Delete Confirm Modal -->
     <BaseModal
       :show="showDeleteConfirm"
-      title="Confirm Delete"
-      confirmText="Delete"
+      title="confirm delete"
+      confirmText="delete"
       danger
       :loading="modalLoading"
       @close="showDeleteConfirm = false"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this certification?</p>
+      <p>are you sure you want to delete this certification?</p>
     </BaseModal>
   </div>
 </template>
@@ -355,10 +353,6 @@ function showMessage(text: string, type: string) {
   margin-bottom: 2rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
 
 .cert-name {
   display: flex;

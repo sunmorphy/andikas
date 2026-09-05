@@ -4,8 +4,8 @@
         "journey": "Perjalanan Saya",
         "academic": "Akar Akademis",
         "professional": "Jalur Profesional",
-        "selectedWorks": "Karya Pilihan",
-        "seeAllWorks": "Lihat Semua Karya",
+        "selectedWorks": "Karya",
+        "seeAllWorks": "Lihat Semua",
         "letsTalk": "Mari Berbincang.",
         "freelance": "Saya saat ini terbuka untuk proyek dan kolaborasi.",
         "skills": "Keahlian",
@@ -15,13 +15,21 @@
         "hireMe": "Rekrut Saya",
         "downloadResume": "CV"
     },
+    "nav": {
+        "home": "Beranda",
+        "works": "Karya",
+        "projects": "Proyek"
+    },
     "projects": {
-        "allWorks": "Semua Karya",
+        "allWorks": "Karya",
         "noProjects": "Tidak ada proyek yang cocok dengan kriteria pencarian Anda.",
         "project": "PROYEK",
         "uiDesign": "DESAIN UI",
         "frontend": "FRONTEND",
         "backToProjects": "Kembali ke proyek",
+        "backToHome": "Kembali ke beranda",
+        "searchPlaceholder": "Cari proyek...",
+        "all": "Semua",
         "type": "Tipe",
         "personalProject": "Proyek Pribadi",
         "groupProject": "Proyek Kelompok",
@@ -30,10 +38,12 @@
         "noCoverImage": "Gambar sampul tidak tersedia.",
         "content": "Konten",
         "interestedTitle": "Tertarik untuk bekerja sama?",
-        "letsTalk": "Mari Berbincang"
+        "letsTalk": "Mari Berbincang",
+        "github": "GitHub",
+        "live": "Live"
     },
     "footer": {
-        "rights": "Andikas. Seluruh hak cipta dilindungi."
+        "rights": "andikas. Seluruh hak cipta dilindungi."
     },
     "notFound": {
         "heading": "Halaman tidak ditemukan.",
@@ -44,5 +54,13 @@
         "role": "Software Engineer",
         "location": "Surabaya, Indonesia",
         "description": "Software engineer berpengalaman yang berspesialisasi dalam pengembangan mobile lintas platform untuk fintech dan perbankan, dengan fondasi yang terus berkembang dalam sistem backend, infrastruktur cloud, dan desain API yang skalabel."
+    },
+    "common": {
+        "loading": "Memuat",
+        "noImage": "Tidak ada gambar",
+        "zoomIn": "Perbesar",
+        "zoomOut": "Perkecil",
+        "resetZoom": "Atur ulang zoom",
+        "close": "Tutup"
     }
 }

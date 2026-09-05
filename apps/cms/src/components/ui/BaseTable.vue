@@ -55,7 +55,7 @@ function onDragEnd() {
         <tr>
           <th v-if="draggable" class="drag-handle-col"></th>
           <th v-for="col in columns" :key="col.key">{{ col.label }}</th>
-          <th v-if="$slots.actions" class="actions-col">Actions</th>
+          <th v-if="$slots.actions" class="actions-col">actions</th>
         </tr>
       </thead>
       <tbody>
@@ -93,7 +93,7 @@ function onDragEnd() {
     
     <div v-else class="empty-state">
       <slot name="empty">
-        <p>No records found.</p>
+        <p>no records found.</p>
       </slot>
     </div>
   </div>
@@ -125,10 +125,10 @@ function onDragEnd() {
   background-color: var(--color-bg-surface);
   color: var(--color-text-primary);
   font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  border-bottom: 2px solid var(--color-text-primary); /* Stark separator */
+  text-transform: lowercase;
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+  border-bottom: 2px solid var(--color-text-primary);
 }
 
 .base-table tr:hover td {

@@ -208,9 +208,9 @@ function showMessage(text: string, type: string) {
 <template>
   <div>
     <div class="page-header">
-      <h1 class="page-title">Education</h1>
+      <h1 class="page-title">education</h1>
       <BaseButton variant="primary" @click="openCreateModal">
-        <PhPlus weight="bold" /> Add Education
+        <PhPlus weight="bold" /> add education
       </BaseButton>
     </div>
 
@@ -220,56 +220,54 @@ function showMessage(text: string, type: string) {
 
     <BaseTable :columns="columns" :data="educationList" :loading="loading">
       <template #institutionName="{ row }">
-        <strong>{{ getDisplayLocal(row.institutionName) }}</strong>
+        <strong>{{ getDisplayLocal(row.institutionName).toLowerCase() }}</strong>
       </template>
 
       <template #degree="{ row }">
-        <span class="text-secondary">{{ getDisplayLocal(row.degree) }}</span>
+        <span class="text-secondary">{{ getDisplayLocal(row.degree).toLowerCase() }}</span>
       </template>
 
       <template #actions="{ row }">
         <div class="action-buttons">
-          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="Edit">
+          <button class="icon-btn edit-btn" @click="openEditModal(row)" title="edit">
             <PhPencilSimple weight="fill" />
           </button>
-          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="Delete">
+          <button class="icon-btn delete-btn" @click="openDeleteConfirm(row.id)" title="delete">
             <PhTrash weight="fill" />
           </button>
         </div>
       </template>
     </BaseTable>
 
-    <!-- Create/Edit Modal -->
     <BaseModal
       :show="showModal"
-      :title="isEditing ? 'Edit Education' : 'Add Education'"
+      :title="isEditing ? 'edit education' : 'add education'"
       :loading="modalLoading"
       @close="showModal = false"
       @confirm="handleSave"
     >
       <div class="form-container">
         <LanguageSelector v-model="currentLang" :translating="translating" @translate="handleAutoTranslate" />
-        <BaseInput id="institutionName" label="Institution Name" v-model="form.institutionName[currentLang]" :required="currentLang === defaultLang" />
-        <BaseInput id="degree" label="Degree / Program" v-model="form.degree[currentLang]" :required="currentLang === defaultLang" />
-        <BaseInput id="year" label="Year (e.g. 2015-2019)" v-model="form.year" required />
+        <BaseInput id="institutionName" label="institution name" v-model="form.institutionName[currentLang]" :required="currentLang === defaultLang" />
+        <BaseInput id="degree" label="degree / program" v-model="form.degree[currentLang]" :required="currentLang === defaultLang" />
+        <BaseInput id="year" label="year (e.g. 2015-2019)" v-model="form.year" required />
         <div class="form-group mb-4">
-          <label>Description</label>
+          <label>description</label>
           <textarea v-model="form.description[currentLang]" rows="4" class="textarea"></textarea>
         </div>
       </div>
     </BaseModal>
 
-    <!-- Delete Confirm Modal -->
     <BaseModal
       :show="showDeleteConfirm"
-      title="Confirm Delete"
-      confirmText="Delete"
+      title="confirm delete"
+      confirmText="delete"
       danger
       :loading="modalLoading"
       @close="showDeleteConfirm = false"
       @confirm="handleDelete"
     >
-      <p>Are you sure you want to delete this education record?</p>
+      <p>are you sure you want to delete this education record?</p>
     </BaseModal>
   </div>
 </template>
@@ -282,10 +280,6 @@ function showMessage(text: string, type: string) {
   margin-bottom: 2rem;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
 
 .action-buttons {
   display: flex;
