@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const apiKey = process.env.GEMINI_API_KEY;
-
-let genAI: GoogleGenerativeAI | null = null;
-
-if (apiKey) {
-    genAI = new GoogleGenerativeAI(apiKey);
+function getGenAI(): GoogleGenerativeAI {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey.trim() === '') {
+        throw new Error('GEMINI_API_KEY is not configured in the backend environment.');
+    }
+    return new GoogleGenerativeAI(apiKey);
 }
 
 export async function translateText(text: string, targetLangs: string[] = ['id', 'de', 'ja', 'nl']): Promise<Record<string, string>> {
@@ -16,17 +16,25 @@ export async function translateText(text: string, targetLangs: string[] = ['id',
         }, {} as Record<string, string>);
     }
 
-    if (!genAI) {
-        throw new Error('GEMINI_API_KEY is not configured in the backend environment.');
+    const genAI = getGenAI();
+
+    const modelName = process.env.GEMINI_TRANSLATE_MODEL || process.env.GEMINI_MODEL;
+    if (!modelName || modelName.trim() === '') {
+        throw new Error('Gemini translation model is not configured. Please set GEMINI_TRANSLATE_MODEL or GEMINI_MODEL in the backend environment.');
+    }
+
+    const systemInstruction = process.env.GEMINI_TRANSLATE_SYSTEM_INSTRUCTION || process.env.GEMINI_TRANSLATE_PROMPT;
+    if (!systemInstruction || systemInstruction.trim() === '') {
+        throw new Error('Gemini translation prompt is not configured. Please set GEMINI_TRANSLATE_SYSTEM_INSTRUCTION in the backend environment.');
     }
 
     try {
         const model = genAI.getGenerativeModel({
-            model: 'gemini-3.5-flash',
+            model: modelName.trim(),
             generationConfig: {
                 responseMimeType: 'application/json',
             },
-            systemInstruction: 'You are a professional translator and localization assistant. Translate the user provided English text into the specified languages. Return exactly a JSON object mapping the language codes to the translated text. Preserve all markdown formatting, line breaks, HTML markup, and placeholders exactly.'
+            systemInstruction: systemInstruction.trim(),
         });
 
         const prompt = `Translate the following English text into these target languages: ${targetLangs.join(', ')}.
@@ -66,33 +74,22 @@ export async function generateProjectStory(params: {
         mimetype: string;
     }>;
 }): Promise<string> {
-    if (!genAI) {
-        throw new Error('GEMINI_API_KEY is not configured in the backend environment.');
+    const genAI = getGenAI();
+
+    const modelName = process.env.GEMINI_STORY_MODEL || process.env.GEMINI_MODEL;
+    if (!modelName || modelName.trim() === '') {
+        throw new Error('Gemini story generation model is not configured. Please set GEMINI_STORY_MODEL or GEMINI_MODEL in the backend environment.');
+    }
+
+    const systemInstruction = process.env.GEMINI_STORY_SYSTEM_INSTRUCTION || process.env.GEMINI_STORY_PROMPT;
+    if (!systemInstruction || systemInstruction.trim() === '') {
+        throw new Error('Gemini story generation prompt is not configured. Please set GEMINI_STORY_SYSTEM_INSTRUCTION in the backend environment.');
     }
 
     try {
         const model = genAI.getGenerativeModel({
-            model: 'gemini-3.5-flash',
-            systemInstruction: `You are a professional project manager and senior product owner with deep technical expertise about the your products, you are also a professional content writer that knows how to attract people to read your writings. Your task is to generate a comprehensive, premium portfolio project case study in Markdown format.
-
-The entire text MUST be written in a literal, engaging, first-person storytelling case study format:
-- Structure the text around standard research and product design case study phases (e.g., Context & Origin, The Core Problem, The Technical Strategy, Outcomes & Deliverables, and Takeaways).
-- Use natural, flowing paragraphs. Write in an authentic, personal first-person voice (using "I" for individual projects or "we" for group projects).
-- Use engaging, conversational headers that frame a story (e.g., '## Setting the Scene: The Project Origin', '## The Challenge: Privacy vs. Convenience', '## The Technical Strategy: Offline-First Security', '## Outcomes & Current State', '## Key Takeaways & Lessons').
-- Do NOT use dry bulleted lists, technical tables, tree structure diagrams, or formal checklists. Turn all technical descriptions and features into narrative prose.
-
-Image Placement Suggestions:
-- You must suggest to the user where to put images/illustrations to make the case study visually engaging.
-- Place a clear, descriptive placeholder where it would be beneficial to add an image.
-- Format the image suggestion exactly like this:
-  ![[SUGGESTION: Describe what type of screenshot, diagram, or mock-up should go here to illustrate this section of the case study]]
-
-If a Product Requirement Document (PRD), specification, or notes outline (including uploaded PDFs or text files) is provided:
-- Analyze it thoroughly as a project manager to extract the technical context, goals, features, and constraints.
-- Synthesize all raw specifications and design parameters into cohesive narrative paragraphs without list structures.
-- Detail the exact technologies and libraries used (e.g., SQLCipher, Room, Jetpack Compose) and describe their strategic choices.
-
-Keep the length comprehensive and professional (about 700 to 1500 words).`
+            model: modelName.trim(),
+            systemInstruction: systemInstruction.trim(),
         });
 
         const projectTypeStr = params.type === 'group' ? 'group project' : 'individual personal project';
