@@ -83,10 +83,10 @@ const haasGrotesk = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: "Andika Sultanrafli - Portfolio",
+    default: "Andika Sultanrafli",
     template: "%s - Andika Sultanrafli",
   },
-  description: "Independent product designer and full-stack engineer building digital experiences.",
+  description: "Experienced software engineer.",
   metadataBase: new URL(siteConfig.url),
   alternates: {
     canonical: "/",
