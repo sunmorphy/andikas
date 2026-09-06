@@ -33,6 +33,16 @@ async function run() {
     stderr: "inherit",
   });
 
+  await delay(1000);
+
+  // 4. Start Writings
+  console.log("\n⚡ [writings] Starting Next.js writings app (port 3002)...");
+  const writings = Bun.spawn(["bun", "run", "dev"], {
+    cwd: "./apps/writings",
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
   // Handle clean exit on Ctrl+C (SIGINT) or SIGTERM
   const cleanup = () => {
     console.log("\n Shutting down all dev servers...");
@@ -40,6 +50,7 @@ async function run() {
       backend.kill();
       cms.kill();
       frontend.kill();
+      writings.kill();
     } catch (e) {
       // Ignore errors if processes are already terminated
     }
@@ -50,7 +61,7 @@ async function run() {
   process.on("SIGTERM", cleanup);
 
   // Keep the process alive and wait for all spawned processes
-  await Promise.all([backend.exited, cms.exited, frontend.exited]);
+  await Promise.all([backend.exited, cms.exited, frontend.exited, writings.exited]);
 }
 
 run();

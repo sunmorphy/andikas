@@ -22,6 +22,7 @@ import tagsRouter from './routes/tags.js';
 import uploadRouter from './routes/upload.js';
 import translateRouter from './routes/translate.js';
 import generateRouter from './routes/generate.js';
+import articlesRouter from './routes/articles.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -106,6 +107,7 @@ app.use('/api/experience', experienceRouter);
 app.use('/api/education', educationRouter);
 app.use('/api/certifications', certificationsRouter);
 app.use('/api/projects', projectsRouter);
+app.use('/api/articles', articlesRouter);
 app.use('/api/tags', tagsRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/translate', translateRouter);

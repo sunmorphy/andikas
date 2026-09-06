@@ -24,7 +24,7 @@ export function ProjectCard({
 
   return (
     <Link
-      href={`/${lang}/projects/${project.slug}`}
+      href={lang === "en" ? `/projects/${project.slug}` : `/projects/${project.slug}?lang=${lang}`}
       className={`group flex flex-col items-start block ${className}`}
     >
       <span className="text-xs md:text-sm font-medium text-ink lowercase mb-2.5 truncate max-w-full select-none group-hover:text-brand-900 transition-colors">

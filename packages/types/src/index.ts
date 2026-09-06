@@ -27,6 +27,7 @@ export interface Tag {
     id: number;
     name: string;
     slug: string;
+    type?: 'project' | 'writing' | string;
 }
 
 export interface Experience {
@@ -95,6 +96,29 @@ export interface Project {
 export interface ProjectTag {
     id: string;
     projectId: string;
+    tagId: number;
+    createdAt: string;
+    tag: Tag;
+}
+
+export interface Article {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    content: string;
+    coverImage?: string | null;
+    published: boolean;
+    publishedAt?: string | null;
+    readingTime?: number;
+    articleTags?: ArticleTag[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ArticleTag {
+    id: string;
+    articleId: string;
     tagId: number;
     createdAt: string;
     tag: Tag;

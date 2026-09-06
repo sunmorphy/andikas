@@ -15,6 +15,12 @@ const languageNames: Record<Locale, string> = {
     nl: "Nederlands"
 };
 
+function setLocaleCookie(locale: Locale) {
+    if (typeof document !== "undefined") {
+        document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; SameSite=Lax`;
+    }
+}
+
 export default function LanguageSwitcher({ currentLang }: { currentLang: Locale }) {
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
@@ -35,13 +41,17 @@ export default function LanguageSwitcher({ currentLang }: { currentLang: Locale 
         setIsOpen(false);
         if (currentLang === locale) return;
 
-        // pathname starts with `/${currentLang}` 
-        // Example: /en/projects -> /id/projects
-        const segments = pathname.split('/');
-        segments[1] = locale; // Assuming the first path segment is always the locale due to middleware
-        const newPath = segments.join('/');
+        setLocaleCookie(locale);
 
-        router.push(newPath);
+        const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+        if (locale === "en") {
+            params.delete("lang");
+        } else {
+            params.set("lang", locale);
+        }
+        const query = params.toString() ? `?${params.toString()}` : "";
+        router.push(`${pathname}${query}`);
+        router.refresh();
     };
 
     return (

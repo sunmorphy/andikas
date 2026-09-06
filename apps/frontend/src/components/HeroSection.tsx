@@ -8,6 +8,8 @@ interface Props {
   profilePhoto: string | null;
   email: string;
   socialMedias: string[];
+  writingsUrl?: string;
+  lang?: string;
   noImageText?: string;
 }
 
@@ -17,12 +19,31 @@ export function HeroSection({
   profilePhoto,
   email,
   socialMedias,
+  writingsUrl,
+  lang,
   noImageText = "no image",
 }: Props) {
   const photoUrl = getMediaUrl(profilePhoto);
   const nameParts = name.trim().split(" ");
   const firstName = nameParts[0] || "andika";
   const restOfName = nameParts.slice(1).join(" ") || "sultanrafli";
+
+  const normalizedWritingsUrl = writingsUrl
+    ? writingsUrl.startsWith("http://") || writingsUrl.startsWith("https://")
+      ? writingsUrl
+      : `https://${writingsUrl}`
+    : "";
+
+  const writingsHref = normalizedWritingsUrl
+    ? `${normalizedWritingsUrl.replace(/\/$/, "")}${lang && lang !== "en" ? `${normalizedWritingsUrl.includes("?") ? "&" : "?"}lang=${lang}` : ""}`
+    : "";
+
+  const writingsDisplay = normalizedWritingsUrl
+    ? normalizedWritingsUrl
+        .replace(/^https?:\/\//i, "")
+        .replace(/^www\./i, "")
+        .replace(/\/$/, "")
+    : "";
 
   return (
     <section className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-8 md:pt-16 pb-20">
@@ -56,6 +77,12 @@ export function HeroSection({
                   </UnderlineLink>
                 );
               })}
+
+              {writingsHref && (
+                <UnderlineLink href={writingsHref} external>
+                  {writingsDisplay.toLowerCase()}
+                </UnderlineLink>
+              )}
             </div>
           </div>
         </div>

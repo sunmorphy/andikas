@@ -135,6 +135,7 @@ export const tags = pgTable('tags', {
     userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
     slug: varchar('slug', { length: 255 }).notNull().unique(),
+    type: varchar('type', { length: 50 }).default('project').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -150,6 +151,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     experienceSkills: many(experienceSkills),
     certifications: many(certifications),
     projects: many(projects),
+    articles: many(articles),
     tags: many(tags),
 }));
 
@@ -211,6 +213,7 @@ export const tagsRelations = relations(tags, ({ one, many }) => ({
         references: [users.id],
     }),
     projectTags: many(projectTags),
+    articleTags: many(articleTags),
 }));
 
 export const projectTagsRelations = relations(projectTags, ({ one }) => ({
@@ -223,3 +226,46 @@ export const projectTagsRelations = relations(projectTags, ({ one }) => ({
         references: [tags.id],
     }),
 }));
+
+// Articles Table (Blog posts / essays)
+export const articles = pgTable('articles', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    title: json('title').notNull().$type<Record<string, string | undefined>>(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    description: json('description').$type<Record<string, string | undefined>>(),
+    content: text('content').notNull(),
+    coverImage: text('cover_image'),
+    published: boolean('published').default(false).notNull(),
+    publishedAt: timestamp('published_at'),
+    readingTime: integer('reading_time').default(5).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const articleTags = pgTable('article_tags', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    articleId: uuid('article_id').references(() => articles.id, { onDelete: 'cascade' }).notNull(),
+    tagId: integer('tag_id').references(() => tags.id, { onDelete: 'cascade' }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const articlesRelations = relations(articles, ({ one, many }) => ({
+    user: one(users, {
+        fields: [articles.userId],
+        references: [users.id],
+    }),
+    articleTags: many(articleTags),
+}));
+
+export const articleTagsRelations = relations(articleTags, ({ one }) => ({
+    article: one(articles, {
+        fields: [articleTags.articleId],
+        references: [articles.id],
+    }),
+    tag: one(tags, {
+        fields: [articleTags.tagId],
+        references: [tags.id],
+    }),
+}));
+

@@ -12,9 +12,18 @@ interface Props {
     title: string;
     seeAllWorksText: string;
     lang: string;
+    noImageText?: string;
+    noProjectsText?: string;
 }
 
-export default function WorksScrollSection({ projects, title, seeAllWorksText, lang }: Props) {
+export default function WorksScrollSection({
+    projects,
+    title,
+    seeAllWorksText,
+    lang,
+    noImageText = "No Image",
+    noProjectsText = "No Projects",
+}: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const rowRef = useRef<HTMLDivElement>(null);
     const [maxTranslate, setMaxTranslate] = useState(0);
@@ -107,10 +116,11 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
                             {projects.map((project, idx) => {
                                 const layout = projectLayouts[idx % projectLayouts.length] || projectLayouts[0]!;
 
+                                const projectHref = lang === "en" ? `/projects/${project.slug}` : `/projects/${project.slug}?lang=${lang}`;
                                 return (
                                     <div key={project.id} className={`${layout.containerClass} flex flex-col group`}>
                                         <div className="flex items-center gap-2 mb-3.5">
-                                            <Link href={`/${lang}/projects/${project.slug}`}>
+                                            <Link href={projectHref}>
                                                 <h3 className="text-[11px] font-extrabold uppercase tracking-wider text-neutral-900 group-hover:text-brand-900 transition-colors">
                                                     {project.title}
                                                 </h3>
@@ -118,7 +128,7 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
                                         </div>
 
                                         <Link
-                                            href={`/${lang}/projects/${project.slug}`}
+                                            href={projectHref}
                                             className={`block relative w-full ${layout.aspectClass} overflow-hidden bg-neutral-100`}
                                         >
                                             <div className="w-full h-full relative">
@@ -132,7 +142,7 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full bg-neutral-200 flex items-center justify-center text-xs text-neutral-450 font-bold tracking-wider">
-                                                        No Image
+                                                        {noImageText}
                                                     </div>
                                                 )}
                                             </div>
@@ -141,12 +151,12 @@ export default function WorksScrollSection({ projects, title, seeAllWorksText, l
                                 );
                             })}
                             {projects.length === 0 && (
-                                <div className="py-20 text-center text-neutral-500 w-full">No Projects</div>
+                                <div className="py-20 text-center text-neutral-500 w-full">{noProjectsText}</div>
                             )}
                         </motion.div>
                     </div>
 
-                    <Link href={`/${lang}/projects`} className="inline-flex self-end items-center gap-2 text-xl md:text-sm font-bold tracking-widest uppercase text-neutral-900 hover:text-brand-900 transition-colors border-b-2 border-neutral-950 pb-1 mt-4 z-10">
+                    <Link href={lang === "en" ? "/projects" : `/projects?lang=${lang}`} className="inline-flex self-end items-center gap-2 text-xl md:text-sm font-bold tracking-widest uppercase text-neutral-900 hover:text-brand-900 transition-colors border-b-2 border-neutral-950 pb-1 mt-4 z-10">
                         {seeAllWorksText} <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>

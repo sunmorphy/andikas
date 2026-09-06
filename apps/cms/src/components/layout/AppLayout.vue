@@ -47,6 +47,7 @@ function closeMenu() {
         <router-link to="/education" class="nav-link" exact-active-class="active" @click="closeMenu">education</router-link>
         <router-link to="/certifications" class="nav-link" exact-active-class="active" @click="closeMenu">certifications</router-link>
         <router-link to="/projects" class="nav-link" exact-active-class="active" @click="closeMenu">projects</router-link>
+        <router-link to="/writings" class="nav-link" exact-active-class="active" @click="closeMenu">writings</router-link>
       </nav>
       <div class="sidebar-footer">
         <button class="btn btn-secondary logout-btn" @click="logout">logout</button>

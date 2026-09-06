@@ -64,6 +64,7 @@ export type SkillInput = z.infer<typeof skillSchema>;
 export const tagSchema = z.object({
     name: z.string().min(1, 'Name is required').max(255),
     slug: z.string().min(1, 'Slug is required').max(255).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens only'),
+    type: z.enum(['project', 'writing']).default('project'),
 });
 
 export type TagInput = z.infer<typeof tagSchema>;
@@ -171,3 +172,38 @@ export const projectSchema = z.object({
 });
 
 export type ProjectInput = z.infer<typeof projectSchema>;
+
+// Articles Validation
+export const articleSchema = z.object({
+    title: localizedStringSchema,
+    slug: z.string().min(1, 'Slug is required').max(255).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens only'),
+    description: localizedStringSchema.optional().nullable(),
+    content: z.string().min(1, 'Content is required'),
+    coverImage: z.string().optional().nullable(),
+    published: z.preprocess(
+        (val) => val === 'true' || val === true,
+        z.boolean()
+    ).default(false),
+    publishedAt: z.preprocess(
+        (val) => (typeof val === 'string' && val.trim() === '') ? null : val,
+        z.string().datetime().optional().nullable()
+    ),
+    readingTime: z.preprocess((val) => {
+        if (typeof val === 'string') {
+            if (val.trim() === '') return 5;
+            const parsed = parseInt(val, 10);
+            return isNaN(parsed) ? 5 : parsed;
+        }
+        return val ?? 5;
+    }, z.number().int().min(1).default(5)),
+    tagIds: z.preprocess((val) => {
+        if (typeof val === 'string') {
+            if (val.trim() === '') return [];
+            try { return JSON.parse(val); } catch (e) { return val; }
+        }
+        return val;
+    }, z.array(z.number().int())).default([]),
+});
+
+export type ArticleInput = z.infer<typeof articleSchema>;
+

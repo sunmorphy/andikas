@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "works": "Werke",
+    "writings": "Schriften"
+  },
+  "writings": {
+    "title": "Schriften",
+    "subtitle": "Ja, ich schreibe",
+    "backToHome": "Zurück zu andikas.dev",
+    "backToWritings": "Zurück zu den Schriften",
+    "searchPlaceholder": "Schriften suchen...",
+    "all": "Alle",
+    "noArticles": "Keine Schriften gefunden.",
+    "readArticle": "Artikel lesen",
+    "minRead": "Min. Lesezeit",
+    "publishedOn": "Veröffentlicht am",
+    "articleNotFound": "Schrift nicht gefunden",
+    "contentComingSoon": "Inhalt folgt in Kürze.",
+    "heroDescription": "Meine Recherchen, Blogbeiträge oder einfach ein paar Gedanken, die ich teilen möchte.",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite",
+    "of": "von"
+  },
+  "notFound": {
+    "heading": "Seite nicht gefunden.",
+    "description": "Die von Ihnen gesuchte Seite existiert nicht oder wurde verschoben.",
+    "goHome": "Zurück zur Startseite",
+    "error": "Fehler"
+  },
+  "footer": {
+    "rights": "andikas. Alle Rechte vorbehalten."
+  },
+  "common": {
+    "loading": "Wird geladen",
+    "noImage": "Kein Bild"
+  }
+}

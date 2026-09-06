@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import api from '../utils/api'
 import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
@@ -8,9 +8,10 @@ import BaseInput from '../components/ui/BaseInput.vue'
 import { PhPlus, PhPencilSimple, PhTrash } from '@phosphor-icons/vue'
 
 interface Tag {
-  id: string
+  id: string | number
   name: string
   slug: string
+  type: 'project' | 'writing'
   createdAt: string
   updatedAt: string
 }
@@ -18,22 +19,30 @@ interface Tag {
 const tags = ref<Tag[]>([])
 const loading = ref(true)
 const message = ref({ text: '', type: '' })
+const activeTypeFilter = ref<'all' | 'project' | 'writing'>('all')
+
+const filteredTags = computed(() => {
+  if (activeTypeFilter.value === 'all') return tags.value
+  return tags.value.filter((t) => (t.type || 'project') === activeTypeFilter.value)
+})
 
 // Modal states
 const showModal = ref(false)
 const showDeleteConfirm = ref(false)
 const modalLoading = ref(false)
 const isEditing = ref(false)
-const currentTagId = ref('')
+const currentTagId = ref<string | number>('')
 
 const form = ref({
   name: '',
-  slug: ''
+  slug: '',
+  type: 'project' as 'project' | 'writing',
 })
 
 const columns = [
   { key: 'name', label: 'Name' },
-  { key: 'slug', label: 'Slug' }
+  { key: 'slug', label: 'Slug' },
+  { key: 'type', label: 'Type' },
 ]
 
 async function fetchTags() {
@@ -59,6 +68,7 @@ function openCreateModal() {
   currentTagId.value = ''
   form.value.name = ''
   form.value.slug = ''
+  form.value.type = activeTypeFilter.value === 'writing' ? 'writing' : 'project'
   showModal.value = true
 }
 
@@ -67,10 +77,11 @@ function openEditModal(tag: Tag) {
   currentTagId.value = tag.id
   form.value.name = tag.name
   form.value.slug = tag.slug
+  form.value.type = tag.type || 'project'
   showModal.value = true
 }
 
-function openDeleteConfirm(id: string) {
+function openDeleteConfirm(id: string | number) {
   currentTagId.value = id
   showDeleteConfirm.value = true
 }
@@ -102,7 +113,8 @@ async function handleSave() {
   try {
     const payload = {
       name: form.value.name,
-      slug: form.value.slug
+      slug: form.value.slug,
+      type: form.value.type,
     }
 
     let result
@@ -165,13 +177,43 @@ function showMessage(text: string, type: string) {
       {{ message.text }}
     </div>
 
-    <BaseTable :columns="columns" :data="tags" :loading="loading">
+    <div class="filter-bar">
+      <button
+        type="button"
+        :class="['filter-btn', { active: activeTypeFilter === 'all' }]"
+        @click="activeTypeFilter = 'all'"
+      >
+        all ({{ tags.length }})
+      </button>
+      <button
+        type="button"
+        :class="['filter-btn', { active: activeTypeFilter === 'project' }]"
+        @click="activeTypeFilter = 'project'"
+      >
+        projects ({{ tags.filter((t) => (t.type || 'project') === 'project').length }})
+      </button>
+      <button
+        type="button"
+        :class="['filter-btn', { active: activeTypeFilter === 'writing' }]"
+        @click="activeTypeFilter = 'writing'"
+      >
+        writings ({{ tags.filter((t) => t.type === 'writing').length }})
+      </button>
+    </div>
+
+    <BaseTable :columns="columns" :data="filteredTags" :loading="loading">
       <template #name="{ row }">
         <strong>{{ row.name.toLowerCase() }}</strong>
       </template>
 
       <template #slug="{ row }">
         <span class="text-tertiary">{{ row.slug.toLowerCase() }}</span>
+      </template>
+
+      <template #type="{ row }">
+        <span :class="['type-badge', `type-${row.type || 'project'}`]">
+          {{ row.type || 'project' }}
+        </span>
       </template>
 
       <template #actions="{ row }">
@@ -196,6 +238,13 @@ function showMessage(text: string, type: string) {
       <div class="form-container">
         <BaseInput id="name" label="tag name" v-model="form.name" @input="handleNameChange" required />
         <BaseInput id="slug" label="tag slug" v-model="form.slug" placeholder="e.g. web-app" required />
+        <div class="form-group">
+          <label class="form-label" for="tag-type">tag type</label>
+          <select id="tag-type" v-model="form.type" class="form-select">
+            <option value="project">project (works)</option>
+            <option value="writing">writing</option>
+          </select>
+        </div>
       </div>
     </BaseModal>
 
@@ -218,9 +267,88 @@ function showMessage(text: string, type: string) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-btn {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+}
+
+.filter-btn.active {
+  background: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+  color: var(--color-bg-base);
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  border-radius: var(--radius-sm);
+}
+
+.type-project {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.type-writing {
+  background-color: rgba(225, 29, 72, 0.1);
+  color: #e11d48;
+  border: 1px solid rgba(225, 29, 72, 0.25);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  color: var(--color-text-secondary);
+}
+
+.form-select {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.875rem;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.form-select:focus {
+  border-color: var(--color-primary);
+}
 
 .action-buttons {
   display: flex;

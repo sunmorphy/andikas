@@ -39,6 +39,7 @@ export const uploadToR2 = async (file: Buffer, fileName: string, username?: stri
             Key: sanitizedFileName,
             Body: file,
             ContentType: contentType,
+            CacheControl: 'public, max-age=31536000, immutable',
         });
 
         await r2Client.send(command);

@@ -6,6 +6,7 @@ import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import BaseInput from '../components/ui/BaseInput.vue'
+import MarkdownEditor from '../components/ui/MarkdownEditor.vue'
 import {
   PhBracketsCurly,
   PhCode,
@@ -120,7 +121,7 @@ async function fetchData() {
     const [projRes, skillsRes, tagsRes] = await Promise.all([
       api.get('/projects'),
       api.get('/skills'),
-      api.get('/tags'),
+      api.get('/tags?type=project'),
     ])
     if (projRes.data.success) {
       projects.value = projRes.data.data.map((proj: any) => ({
@@ -182,7 +183,6 @@ function openCreateModal() {
   existingContentImages.value = []
   if (contentImagesInput.value) contentImagesInput.value.value = ''
 
-  activeEditorTab.value = 'write'
   showModal.value = true
 }
 
@@ -219,7 +219,6 @@ function openEditModal(proj: Project) {
   existingContentImages.value = proj.contentImages || []
   if (contentImagesInput.value) contentImagesInput.value.value = ''
 
-  activeEditorTab.value = 'write'
   showModal.value = true
 }
 
@@ -499,83 +498,7 @@ async function copyMarkdownToClipboard(url: string) {
   }
 }
 
-const markdownTextarea = ref<HTMLTextAreaElement | null>(null)
-
-function insertMarkdown(format: string) {
-  const textarea = markdownTextarea.value
-  if (!textarea) return
-
-  const start = textarea.selectionStart
-  const end = textarea.selectionEnd
-  const text = textarea.value
-  const selectedText = text.substring(start, end)
-
-  let replacement = ''
-  let cursorOffset = 0
-
-  switch (format) {
-    case 'bold':
-      replacement = `**${selectedText || 'bold text'}**`
-      cursorOffset = selectedText ? 0 : 2
-      break
-    case 'italic':
-      replacement = `*${selectedText || 'italic text'}*`
-      cursorOffset = selectedText ? 0 : 1
-      break
-    case 'heading':
-      replacement = `\n# ${selectedText || 'Heading'}\n`
-      cursorOffset = selectedText ? 0 : 2
-      break
-    case 'link':
-      replacement = `[${selectedText || 'link text'}](https://example.com)`
-      cursorOffset = selectedText ? 12 : 1
-      break
-    case 'code':
-      replacement = `\`${selectedText || 'code'}\``
-      cursorOffset = selectedText ? 0 : 1
-      break
-    case 'codeblock':
-      replacement = `\n\`\`\`\n${selectedText || 'code'}\n\`\`\`\n`
-      cursorOffset = selectedText ? 0 : 4
-      break
-    case 'list':
-      replacement = `\n- ${selectedText || 'item'}`
-      cursorOffset = selectedText ? 0 : 2
-      break
-    case 'numlist':
-      replacement = `\n1. ${selectedText || 'item'}`
-      cursorOffset = selectedText ? 0 : 3
-      break
-    case 'quote':
-      replacement = `\n> ${selectedText || 'quote'}`
-      cursorOffset = selectedText ? 0 : 2
-      break
-  }
-
-  textarea.focus()
-
-  let success = false
-  try {
-    success = document.execCommand('insertText', false, replacement)
-  } catch (err) {
-    console.error('execCommand failed', err)
-  }
-
-  if (!success) {
-    const newContent = text.substring(0, start) + replacement + text.substring(end)
-    formContent.value[currentLang.value] = newContent
-  }
-
-  setTimeout(() => {
-    textarea.focus()
-    if (selectedText) {
-      textarea.setSelectionRange(start, start + replacement.length)
-    } else {
-      const pos = start + replacement.length - cursorOffset
-      textarea.setSelectionRange(pos, pos)
-    }
-  }, 0)
-}
+// Markdown editing is handled by MarkdownEditor component
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString()
@@ -697,14 +620,6 @@ async function handleGenerateStory() {
     generatingStory.value = false
   }
 }
-
-// Markdown preview tab state
-const activeEditorTab = ref<'write' | 'preview'>('write')
-
-const renderedMarkdown = computed(() => {
-  const content = formContent.value[currentLang.value as SupportedLanguage] || ''
-  return marked.parse(content) as string
-})
 </script>
 
 <template>
@@ -915,149 +830,18 @@ const renderedMarkdown = computed(() => {
           </div>
         </div>
 
-        <!-- Markdown Editor -->
+        <!-- Markdown Content -->
         <div class="form-group mt-4 borders-top pt-4">
-          <div
-            class="editor-header-tabs"
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 0.5rem;
-            "
+          <label style="margin-bottom: 0.5rem">
+            Markdown Content <span class="required" style="color: var(--color-danger)">*</span>
+          </label>
+          <MarkdownEditor
+            v-model="formContent[currentLang]"
+            placeholder="# My Project&#10;&#10;Write your content here..."
+            :required="currentLang === defaultLang"
+            min-height="320px"
           >
-            <label style="margin-bottom: 0"
-              >Markdown Content
-              <span class="required" style="color: var(--color-danger)">*</span></label
-            >
-            <div
-              class="segmented-tabs"
-              style="
-                display: flex;
-                gap: 0.25rem;
-                background-color: var(--color-bg-surface-hover);
-                padding: 0.2rem;
-                border-radius: 4px;
-                border: 1px solid var(--color-border);
-              "
-            >
-              <button
-                type="button"
-                class="tab-btn"
-                :class="activeEditorTab === 'write' ? 'active' : ''"
-                @click="activeEditorTab = 'write'"
-                style="
-                  padding: 0.2rem 0.6rem;
-                  border: none;
-                  border-radius: 3px;
-                  font-size: 0.75rem;
-                  cursor: pointer;
-                  transition: all 0.15s ease;
-                  background: none;
-                  font-weight: 600;
-                  color: var(--color-text-secondary);
-                "
-              >
-                Write
-              </button>
-              <button
-                type="button"
-                class="tab-btn"
-                :class="activeEditorTab === 'preview' ? 'active' : ''"
-                @click="activeEditorTab = 'preview'"
-                style="
-                  padding: 0.2rem 0.6rem;
-                  border: none;
-                  border-radius: 3px;
-                  font-size: 0.75rem;
-                  cursor: pointer;
-                  transition: all 0.15s ease;
-                  background: none;
-                  font-weight: 600;
-                  color: var(--color-text-secondary);
-                "
-              >
-                Preview
-              </button>
-            </div>
-          </div>
-
-          <div v-show="activeEditorTab === 'write'">
-            <div class="markdown-toolbar">
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('heading')"
-                title="Heading"
-              >
-                <PhTextH size="16" />
-              </button>
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('bold')"
-                title="Bold"
-              >
-                <PhTextB size="16" />
-              </button>
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('italic')"
-                title="Italic"
-              >
-                <PhTextItalic size="16" />
-              </button>
-              <div class="toolbar-separator"></div>
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('link')"
-                title="Insert Link"
-              >
-                <PhLink size="16" />
-              </button>
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('code')"
-                title="Inline Code"
-              >
-                <PhCode size="16" />
-              </button>
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('codeblock')"
-                title="Code Block"
-              >
-                <PhBracketsCurly size="16" />
-              </button>
-              <div class="toolbar-separator"></div>
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('list')"
-                title="Bullet List"
-              >
-                <PhListDashes size="16" />
-              </button>
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('numlist')"
-                title="Numbered List"
-              >
-                <PhListNumbers size="16" />
-              </button>
-              <button
-                type="button"
-                class="toolbar-btn"
-                @click.prevent="insertMarkdown('quote')"
-                title="Blockquote"
-              >
-                <PhQuotes size="16" />
-              </button>
+            <template #toolbar-extra>
               <div class="toolbar-separator"></div>
               <button
                 type="button"
@@ -1065,28 +849,15 @@ const renderedMarkdown = computed(() => {
                 @click.prevent="openGeneratePromptModal"
                 title="AI Generate Story Content (Gemini)"
               >
-                <PhSparkle size="16" />
+                <PhSparkle :size="16" />
                 <span class="btn-text">AI Story</span>
               </button>
-            </div>
-
-            <textarea
-              ref="markdownTextarea"
-              v-model="formContent[currentLang]"
-              rows="10"
-              class="textarea markdown-editor"
-              placeholder="# My Project\n\nWrite your content here..."
-              :required="currentLang === defaultLang"
-            ></textarea>
-            <p class="help-text text-sm">
-              You can embed images in markdown later by using the URLs returned after saving content
-              images.
-            </p>
-          </div>
-
-          <div v-show="activeEditorTab === 'preview'">
-            <div class="markdown-preview-container" v-html="renderedMarkdown"></div>
-          </div>
+            </template>
+          </MarkdownEditor>
+          <p class="help-text text-sm" style="margin-top: 0.5rem">
+            You can embed images in markdown later by using the URLs returned after saving content
+            images.
+          </p>
         </div>
 
         <!-- Content Images -->
@@ -1774,51 +1545,7 @@ const renderedMarkdown = computed(() => {
   color: var(--color-text-tertiary);
 }
 
-/* Markdown Toolbar Styles */
-.markdown-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-bottom: none;
-  border-top-left-radius: var(--radius-md);
-  border-top-right-radius: var(--radius-md);
-  padding: 6px 12px;
-  flex-wrap: wrap;
-}
-
-.markdown-editor {
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-}
-
-.toolbar-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.toolbar-btn:hover {
-  background-color: var(--color-bg-surface-hover);
-  color: var(--color-text-primary);
-}
-
-.toolbar-separator {
-  width: 1px;
-  height: 16px;
-  background-color: var(--color-border);
-  margin: 0 4px;
-}
-
+/* AI Story Button in MarkdownEditor slot */
 .ai-btn {
   width: auto !important;
   padding: 0 8px !important;
@@ -1836,131 +1563,5 @@ const renderedMarkdown = computed(() => {
 
 .ai-btn .btn-text {
   font-family: inherit;
-}
-
-.segmented-tabs .tab-btn.active {
-  background-color: var(--color-bg-surface) !important;
-  color: var(--color-primary) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.markdown-preview-container {
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 1rem;
-  min-height: 250px;
-  max-height: 400px;
-  overflow-y: auto;
-  background-color: var(--color-bg-surface);
-  color: var(--color-text-primary);
-}
-
-.markdown-preview-container :deep(h1),
-.markdown-preview-container :deep(h2),
-.markdown-preview-container :deep(h3),
-.markdown-preview-container :deep(h4) {
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  font-weight: 700;
-  line-height: 1.25;
-  color: var(--color-text-primary);
-}
-
-.markdown-preview-container :deep(h1) {
-  font-size: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.3rem;
-}
-.markdown-preview-container :deep(h2) {
-  font-size: 1.25rem;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.3rem;
-}
-.markdown-preview-container :deep(h3) {
-  font-size: 1.1rem;
-}
-
-.markdown-preview-container :deep(p) {
-  margin-bottom: 1rem;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-}
-
-.markdown-preview-container :deep(ul),
-.markdown-preview-container :deep(ol) {
-  margin-bottom: 1rem;
-  padding-left: 2rem;
-  color: var(--color-text-secondary);
-}
-
-.markdown-preview-container :deep(ul) {
-  list-style-type: disc;
-}
-
-.markdown-preview-container :deep(ol) {
-  list-style-type: decimal;
-}
-
-.markdown-preview-container :deep(li) {
-  margin-bottom: 0.25rem;
-}
-
-.markdown-preview-container :deep(strong) {
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.markdown-preview-container :deep(em) {
-  font-style: italic;
-}
-
-.markdown-preview-container :deep(code) {
-  background-color: var(--color-bg-surface-hover);
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.85rem;
-  color: var(--color-primary);
-}
-
-.markdown-preview-container :deep(pre) {
-  background-color: var(--color-bg-surface-hover);
-  padding: 1rem;
-  border-radius: 6px;
-  overflow-x: auto;
-  margin-bottom: 1rem;
-  border: 1px solid var(--color-border);
-}
-
-.markdown-preview-container :deep(pre code) {
-  background: none;
-  padding: 0;
-  border-radius: 0;
-  font-size: 0.85rem;
-  color: var(--color-text-primary);
-}
-
-.markdown-preview-container :deep(a) {
-  color: var(--color-primary);
-  text-decoration: underline;
-}
-
-.markdown-preview-container :deep(a:hover) {
-  color: var(--color-primary-hover);
-}
-
-.markdown-preview-container :deep(img) {
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
-  margin: 1rem 0;
-}
-
-.markdown-preview-container :deep(blockquote) {
-  border-left: 4px solid var(--color-primary);
-  padding-left: 1rem;
-  color: var(--color-text-tertiary);
-  margin-bottom: 1rem;
-  font-style: italic;
 }
 </style>

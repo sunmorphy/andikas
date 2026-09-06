@@ -11,10 +11,18 @@ const router = Router();
 
 router.get('/', asyncHandler(async (req, res) => {
     const userId = req.user?.userId;
+    const type = req.query.type as string | undefined;
 
-    const allTags = userId
-        ? await db.select().from(tags).where(eq(tags.userId, userId))
-        : [];
+    if (!userId) {
+        return res.json({ success: true, data: [] });
+    }
+
+    const conditions = [eq(tags.userId, userId)];
+    if (type) {
+        conditions.push(eq(tags.type, type));
+    }
+
+    const allTags = await db.select().from(tags).where(and(...conditions));
 
     res.json({
         success: true,
@@ -24,6 +32,7 @@ router.get('/', asyncHandler(async (req, res) => {
 
 router.get('/user/:username', asyncHandler(async (req, res) => {
     const { username } = req.params;
+    const type = req.query.type as string | undefined;
 
     const [user] = await db.select().from(users).where(eq(users.username, username!));
 
@@ -31,7 +40,12 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
         throw new NotFoundError('User not found');
     }
 
-    const userTags = await db.select().from(tags).where(eq(tags.userId, user.id));
+    const conditions = [eq(tags.userId, user.id)];
+    if (type) {
+        conditions.push(eq(tags.type, type));
+    }
+
+    const userTags = await db.select().from(tags).where(and(...conditions));
 
     res.json({
         success: true,
@@ -41,8 +55,14 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
 
 router.get('/userId/:userId', asyncHandler(async (req, res) => {
     const { userId } = req.params;
+    const type = req.query.type as string | undefined;
 
-    const userTags = await db.select().from(tags).where(eq(tags.userId, userId!));
+    const conditions = [eq(tags.userId, userId!)];
+    if (type) {
+        conditions.push(eq(tags.type, type));
+    }
+
+    const userTags = await db.select().from(tags).where(and(...conditions));
 
     res.json({
         success: true,
@@ -92,6 +112,7 @@ router.post('/', requireAuth, asyncHandler(async (req, res) => {
 
     triggerRevalidation('tags');
     triggerRevalidation('projects');
+    triggerRevalidation('articles');
 
     res.status(201).json({
         success: true,
@@ -120,6 +141,7 @@ router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
 
     triggerRevalidation('tags');
     triggerRevalidation('projects');
+    triggerRevalidation('articles');
 
     res.json({
         success: true,
@@ -143,6 +165,7 @@ router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {
 
     triggerRevalidation('tags');
     triggerRevalidation('projects');
+    triggerRevalidation('articles');
 
     res.json({
         success: true,

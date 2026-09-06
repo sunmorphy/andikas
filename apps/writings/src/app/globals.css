@@ -1,0 +1,178 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-neutral-50: #FCFCFC;
+  --color-neutral-100: #F6F5F2;
+  --color-neutral-250: #E7E6E2;
+  --color-neutral-200: #E2E1DD;
+  --color-neutral-300: #CECDC9;
+  --color-neutral-400: #9E9D99;
+  --color-neutral-550: #50504D;
+  --color-neutral-500: #787773;
+  --color-neutral-600: #5D5C58;
+  --color-neutral-700: #42413E;
+  --color-neutral-800: #21201E;
+  --color-neutral-900: #0C0C0B;
+
+  --color-surface: #F6F7EB;
+  --color-surface-dark: #F6F7EB;
+
+  --color-card: #F6F7EB;
+  --color-card-dark: #F6F7EB;
+
+  --color-ink: #393E41;
+  --color-ink-dark: #393E41;
+  --color-ink-muted: #6F7477;
+  --color-ink-muted-dark: #6F7477;
+
+  --color-brand-100: #FDECE9;
+  --color-brand-900: #E94F37;
+  --color-brand: #E94F37;
+
+  --font-sans: var(--font-haas), "Neue Haas Grotesk Text Pro", "Neue Haas Grotesk Disp Pro", "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    font-size: 16px;
+  }
+
+  @media (max-width: 1440px) {
+    html {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    html {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 992px) {
+    html {
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    html {
+      font-size: 12.5px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    html {
+      font-size: 11.5px;
+    }
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-haas), var(--font-sans);
+    letter-spacing: -0.04em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: #ffffff;
+  }
+}
+
+/* Swiss typography prose styling */
+.prose {
+  color: var(--color-ink);
+  max-width: 68ch;
+  line-height: 1.7;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: var(--color-ink);
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose h1 {
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.prose h2 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--color-neutral-300);
+  padding-bottom: 0.4rem;
+}
+
+.prose h3 {
+  font-size: 1.25rem;
+}
+
+.prose p {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.prose a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.prose a:hover {
+  color: var(--color-brand);
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--color-brand);
+  padding-left: 1.25rem;
+  font-style: italic;
+  color: var(--color-ink-muted);
+  margin: 1.5rem 0;
+}
+
+.prose pre {
+  background-color: #21201E;
+  color: #F6F5F2;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border: 1px solid var(--color-neutral-300);
+}
+
+.prose code {
+  font-family: monospace;
+  font-size: 0.875em;
+  background-color: var(--color-neutral-250);
+  padding: 0.15rem 0.35rem;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.prose img {
+  border: 1px solid var(--color-neutral-300);
+  max-width: 100%;
+  height: auto;
+  margin: 1.75rem 0;
+}
+
+.prose ul, .prose ol {
+  padding-left: 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.prose li {
+  margin: 0.35rem 0;
+}

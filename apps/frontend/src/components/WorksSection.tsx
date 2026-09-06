@@ -23,7 +23,7 @@ export function WorksSection({
         title={title}
         action={{
           label: seeAllText,
-          href: `/${lang}/projects`,
+          href: lang === "en" ? "/projects" : `/projects?lang=${lang}`,
         }}
         className="mb-12 md:mb-16"
       />

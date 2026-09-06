@@ -173,7 +173,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
     <article ref={containerRef} className="w-full max-w-5xl mx-auto px-6 md:px-12 pt-8 md:pt-16 pb-32">
       <div className="mb-8 md:mb-12">
         <Link
-          href={`/${lang}/projects`}
+          href={lang === "en" ? "/projects" : `/projects?lang=${lang}`}
           className="inline-flex items-center gap-2 text-xs font-bold text-ink hover:text-brand-900 transition-colors lowercase select-none"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -237,7 +237,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
       )}
 
       <div className="mt-20 pt-12 border-t border-ink/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <UnderlineLink href={`/${lang}/projects`}>
+        <UnderlineLink href={lang === "en" ? "/projects" : `/projects?lang=${lang}`}>
           {`← ${(dict.projects?.backToProjects || "back to projects").toLowerCase()}`}
         </UnderlineLink>
         <UnderlineLink href={`mailto:${userConfig.email || "hello@andikas.dev"}`}>

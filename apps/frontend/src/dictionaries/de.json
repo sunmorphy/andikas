@@ -18,7 +18,8 @@
     "nav": {
         "home": "Startseite",
         "works": "Werke",
-        "projects": "Projekte"
+        "projects": "Projekte",
+        "writings": "Schriften"
     },
     "projects": {
         "allWorks": "Werke",
@@ -40,15 +41,22 @@
         "interestedTitle": "Interesse an einer Zusammenarbeit?",
         "letsTalk": "Lass uns reden",
         "github": "GitHub",
-        "live": "Live"
+        "live": "Live",
+        "projectNotFound": "Projekt nicht gefunden",
+        "curatedWorksDescription": "Eine kuratierte Sammlung meiner Arbeiten.",
+        "previous": "Zurück",
+        "next": "Weiter",
+        "page": "Seite",
+        "of": "von"
     },
     "footer": {
         "rights": "andikas. Alle Rechte vorbehalten."
     },
     "notFound": {
         "heading": "Seite nicht gefunden.",
-        "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
-        "goHome": "Zurück zur Startseite"
+        "description": "Die von Ihnen gesuchte Seite existiert nicht oder wurde verschoben.",
+        "goHome": "Zurück zur Startseite",
+        "error": "Fehler"
     },
     "profile": {
         "role": "Softwareentwickler",
@@ -56,7 +64,7 @@
         "description": "Erfahrener Software-Engineer mit Spezialisierung auf plattformübergreifende Mobile-Entwicklung im Fintech- und Bankensektor, mit wachsender Expertise in Backend-Systemen, Cloud-Infrastruktur und skalierbarem API-Design."
     },
     "common": {
-        "loading": "Laden",
+        "loading": "Wird geladen",
         "noImage": "Kein Bild",
         "zoomIn": "Vergrößern",
         "zoomOut": "Verkleinern",

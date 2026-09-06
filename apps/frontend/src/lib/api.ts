@@ -28,9 +28,10 @@ export async function fetchSkills(username: string = USERNAME): Promise<Skill[]>
     }
 }
 
-export async function fetchTags(username: string = USERNAME): Promise<Tag[]> {
+export async function fetchTags(username: string = USERNAME, type: string = 'project'): Promise<Tag[]> {
     try {
-        const res = await fetch(`${API_BASE_URL}/tags/user/${username}`, { next: { revalidate: 86400, tags: ['tags'] } });
+        const url = `${API_BASE_URL}/tags/user/${username}${type ? `?type=${type}` : ''}`;
+        const res = await fetch(url, { next: { revalidate: 86400, tags: ['tags'] } });
         if (!res.ok) return [];
         const json: ApiResponse<Tag[]> = await res.json();
         return json.success ? json.data : [];

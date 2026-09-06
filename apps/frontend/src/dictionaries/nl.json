@@ -16,9 +16,10 @@
         "downloadResume": "CV"
     },
     "nav": {
-        "home": "Home",
+        "home": "Startpagina",
         "works": "Werken",
-        "projects": "Projecten"
+        "projects": "Projecten",
+        "writings": "Artikelen"
     },
     "projects": {
         "allWorks": "Werken",
@@ -27,7 +28,7 @@
         "uiDesign": "UI-ONTWERP",
         "frontend": "FRONTEND",
         "backToProjects": "Terug naar projecten",
-        "backToHome": "Terug naar home",
+        "backToHome": "Terug naar startpagina",
         "searchPlaceholder": "Projecten zoeken...",
         "all": "Alle",
         "type": "Type",
@@ -40,7 +41,13 @@
         "interestedTitle": "Interesse in samenwerken?",
         "letsTalk": "Laten we praten",
         "github": "GitHub",
-        "live": "Live"
+        "live": "Live",
+        "projectNotFound": "Project niet gevonden",
+        "curatedWorksDescription": "Een samengestelde verzameling van mijn werk.",
+        "previous": "Vorige",
+        "next": "Volgende",
+        "page": "Pagina",
+        "of": "van"
     },
     "footer": {
         "rights": "andikas. Alle rechten voorbehouden."
@@ -48,7 +55,8 @@
     "notFound": {
         "heading": "Pagina niet gevonden.",
         "description": "De pagina die u zoekt bestaat niet of is verplaatst.",
-        "goHome": "Terug naar home"
+        "goHome": "Terug naar startpagina",
+        "error": "Fout"
     },
     "profile": {
         "role": "Software Engineer",

@@ -18,7 +18,8 @@
     "nav": {
         "home": "ホーム",
         "works": "作品",
-        "projects": "プロジェクト"
+        "projects": "プロジェクト",
+        "writings": "記事"
     },
     "projects": {
         "allWorks": "作品",
@@ -40,7 +41,13 @@
         "interestedTitle": "一緒に仕事をしませんか？",
         "letsTalk": "話しましょう",
         "github": "GitHub",
-        "live": "Live"
+        "live": "デモを見る",
+        "projectNotFound": "作品が見つかりません",
+        "curatedWorksDescription": "厳選された実績とプロジェクト。",
+        "previous": "前へ",
+        "next": "次へ",
+        "page": "ページ",
+        "of": "/"
     },
     "footer": {
         "rights": "andikas. 無断転載を禁じます。"
@@ -48,7 +55,8 @@
     "notFound": {
         "heading": "ページが見つかりません。",
         "description": "お探しのページは存在しないか、移動された可能性があります。",
-        "goHome": "ホームに戻る"
+        "goHome": "ホームに戻る",
+        "error": "エラー"
     },
     "profile": {
         "role": "ソフトウェアエンジニア",

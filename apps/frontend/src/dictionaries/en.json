@@ -18,7 +18,8 @@
     "nav": {
         "home": "Home",
         "works": "Works",
-        "projects": "Projects"
+        "projects": "Projects",
+        "writings": "Writings"
     },
     "projects": {
         "allWorks": "Works",
@@ -40,7 +41,13 @@
         "interestedTitle": "Interested in working together?",
         "letsTalk": "Let's Talk",
         "github": "GitHub",
-        "live": "Live"
+        "live": "Live",
+        "projectNotFound": "Project not found",
+        "curatedWorksDescription": "A curated collection of work by me.",
+        "previous": "Previous",
+        "next": "Next",
+        "page": "Page",
+        "of": "of"
     },
     "footer": {
         "rights": "andikas. All rights reserved."
@@ -48,7 +55,8 @@
     "notFound": {
         "heading": "Page not found.",
         "description": "The page you're looking for doesn't exist or has been moved.",
-        "goHome": "Go back home"
+        "goHome": "Go back home",
+        "error": "Error"
     },
     "profile": {
         "role": "Software Engineer",

@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "Home",
+    "works": "Works",
+    "writings": "Writings"
+  },
+  "writings": {
+    "title": "Writings",
+    "subtitle": "Yes, I write",
+    "backToHome": "Back to andikas.dev",
+    "backToWritings": "Back to writings",
+    "searchPlaceholder": "Search writings...",
+    "all": "All",
+    "noArticles": "No writings match your search criteria.",
+    "readArticle": "Read article",
+    "minRead": "min read",
+    "publishedOn": "Published on",
+    "articleNotFound": "Article not found",
+    "contentComingSoon": "Content coming soon.",
+    "heroDescription": "My research, blogs, or just sharing my thoughts.",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
+  },
+  "notFound": {
+    "heading": "Page not found.",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "goHome": "Go back home",
+    "error": "Error"
+  },
+  "footer": {
+    "rights": "andikas. All rights reserved."
+  },
+  "common": {
+    "loading": "Loading",
+    "noImage": "No image"
+  }
+}

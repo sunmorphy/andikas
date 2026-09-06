@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "Startpagina",
+    "works": "Werken",
+    "writings": "Artikelen"
+  },
+  "writings": {
+    "title": "Artikelen",
+    "subtitle": "Ja, ik schrijf",
+    "backToHome": "Terug naar andikas.dev",
+    "backToWritings": "Terug naar artikelen",
+    "searchPlaceholder": "Zoek artikelen...",
+    "all": "Alles",
+    "noArticles": "Geen artikelen gevonden.",
+    "readArticle": "Lees artikel",
+    "minRead": "min leestijd",
+    "publishedOn": "Gepubliceerd op",
+    "articleNotFound": "Artikel niet gevonden",
+    "contentComingSoon": "Inhoud volgt binnenkort.",
+    "heroDescription": "Mijn onderzoek, blogposts of gewoon wat gedachten die ik graag deel.",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "page": "Pagina",
+    "of": "van"
+  },
+  "notFound": {
+    "heading": "Pagina niet gevonden.",
+    "description": "De pagina die u zoekt bestaat niet of is verplaatst.",
+    "goHome": "Terug naar startpagina",
+    "error": "Fout"
+  },
+  "footer": {
+    "rights": "andikas. Alle rechten voorbehouden."
+  },
+  "common": {
+    "loading": "Laden",
+    "noImage": "Geen afbeelding"
+  }
+}

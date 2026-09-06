@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "Beranda",
+    "works": "Karya",
+    "writings": "Tulisan"
+  },
+  "writings": {
+    "title": "Tulisan",
+    "subtitle": "Ya, saya menulis",
+    "backToHome": "Kembali ke andikas.dev",
+    "backToWritings": "Kembali ke tulisan",
+    "searchPlaceholder": "Cari tulisan...",
+    "all": "Semua",
+    "noArticles": "Tidak ada tulisan yang cocok dengan kriteria pencarian Anda.",
+    "readArticle": "Baca tulisan",
+    "minRead": "menit baca",
+    "publishedOn": "Dipublikasikan pada",
+    "articleNotFound": "Tulisan tidak ditemukan",
+    "contentComingSoon": "Konten segera hadir.",
+    "heroDescription": "Riset, tulisan blog, atau sekadar berbagi isi pikiran saya.",
+    "previous": "Sebelumnya",
+    "next": "Berikutnya",
+    "page": "Halaman",
+    "of": "dari"
+  },
+  "notFound": {
+    "heading": "Halaman tidak ditemukan.",
+    "description": "Halaman yang Anda cari tidak ada atau telah dipindahkan.",
+    "goHome": "Kembali ke beranda",
+    "error": "Galat"
+  },
+  "footer": {
+    "rights": "andikas. Seluruh hak cipta dilindungi."
+  },
+  "common": {
+    "loading": "Memuat",
+    "noImage": "Tidak ada gambar"
+  }
+}

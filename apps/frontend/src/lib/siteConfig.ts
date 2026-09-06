@@ -22,4 +22,7 @@ export const siteConfig = {
       return "andikas.dev";
     }
   },
+  get writingsUrl() {
+    return process.env.NEXT_PUBLIC_WRITINGS_URL || "https://writings.andikas.dev";
+  },
 };
