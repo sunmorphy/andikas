@@ -34,7 +34,7 @@ export async function translateText(text: string, targetLangs: string[] = ['id',
             generationConfig: {
                 responseMimeType: 'application/json',
             },
-            systemInstruction: systemInstruction.trim(),
+            systemInstruction: systemInstruction.replace(/\\n/g, '\n').trim(),
         });
 
         const prompt = `Translate the following English text into these target languages: ${targetLangs.join(', ')}.
@@ -89,7 +89,7 @@ export async function generateProjectStory(params: {
     try {
         const model = genAI.getGenerativeModel({
             model: modelName.trim(),
-            systemInstruction: systemInstruction.trim(),
+            systemInstruction: systemInstruction.replace(/\\n/g, '\n').trim(),
         });
 
         const projectTypeStr = params.type === 'group' ? 'group project' : 'individual personal project';
