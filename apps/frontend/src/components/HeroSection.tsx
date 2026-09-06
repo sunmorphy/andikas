@@ -23,7 +23,7 @@ export function HeroSection({
   lang,
   noImageText = "no image",
 }: Props) {
-  const photoUrl = getMediaUrl(profilePhoto);
+  const photoUrl = getMediaUrl(profilePhoto, 'users');
   const nameParts = name.trim().split(" ");
   const firstName = nameParts[0] || "andika";
   const restOfName = nameParts.slice(1).join(" ") || "sultanrafli";

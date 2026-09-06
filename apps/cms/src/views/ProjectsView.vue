@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { marked } from 'marked'
 import api, { generateProjectStory, translateText } from '../utils/api'
+import { resolveMediaUrl, setPublicImageHost } from '../utils/media'
 import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
@@ -146,6 +147,7 @@ const fetchUploadConfig = async () => {
     const res = await api.get('/upload/config')
     if (res.data.success) {
       publicUrl.value = res.data.data.publicUrl
+      setPublicImageHost(res.data.data.publicUrl)
     }
   } catch (err) {
     console.error('Failed to load upload config', err)
@@ -453,26 +455,12 @@ function showMessage(text: string, type: string) {
 
 async function copyToClipboard(text: string) {
   try {
-    await navigator.clipboard.writeText(text)
+    const fullUrl = resolveMediaUrl(text, 'projects')
+    await navigator.clipboard.writeText(fullUrl)
     showMessage('Copied URL to clipboard!', 'success')
   } catch (err) {
     showMessage('Failed to copy URL', 'error')
   }
-}
-
-function resolveMediaUrl(urlOrName?: string | null): string {
-  if (!urlOrName) return ''
-  if (
-    urlOrName.startsWith('http://') ||
-    urlOrName.startsWith('https://') ||
-    urlOrName.startsWith('data:') ||
-    urlOrName.startsWith('blob:')
-  ) {
-    return urlOrName
-  }
-  const host = (publicUrl.value || '').replace(/\/+$/, '')
-  const clean = urlOrName.replace(/^\/+/, '')
-  return host ? `${host}/${clean}` : `/${clean}`
 }
 
 function getExpectedUrl(file: File): string {
@@ -484,12 +472,12 @@ function getExpectedUrl(file: File): string {
     .replace(/[^\w\-.]/g, '')
     .replace(/-+/g, '-')
     .toLowerCase()
-  const host = (publicUrl.value || '').replace(/\/+$/, '')
-  return host ? `${host}/${sanitized}` : sanitized
+  return resolveMediaUrl(sanitized, 'projects')
 }
 
 async function copyMarkdownToClipboard(url: string) {
-  const mdString = `![Project Image](${url})`
+  const fullUrl = resolveMediaUrl(url, 'projects')
+  const mdString = `![Project Image](${fullUrl})`
   try {
     await navigator.clipboard.writeText(mdString)
     showMessage('Copied Markdown image code to clipboard!', 'success')
@@ -638,7 +626,7 @@ async function handleGenerateStory() {
     <BaseTable :columns="columns" :data="projects" :loading="loading">
       <template #coverImage="{ row }">
         <div class="cover-thumb">
-          <img v-if="row.coverImage" :src="resolveMediaUrl(row.coverImage)" :alt="row.title" />
+          <img v-if="row.coverImage" :src="resolveMediaUrl(row.coverImage, 'projects')" :alt="row.title" />
           <div v-else class="no-thumb"><PhImageIcon /></div>
         </div>
       </template>
@@ -688,7 +676,7 @@ async function handleGenerateStory() {
           <label>Cover Image</label>
           <div class="cover-preview-container">
             <div class="cover-preview">
-              <img v-if="previewCover" :src="resolveMediaUrl(previewCover)" alt="Preview" />
+              <img v-if="previewCover" :src="resolveMediaUrl(previewCover, 'projects')" alt="Preview" />
               <div v-else class="no-photo"><PhImageIcon size="32" /></div>
             </div>
             <div>
@@ -808,7 +796,7 @@ async function handleGenerateStory() {
               :class="{ selected: formSkillIds.includes(skill.id) }"
               @click="toggleSkill(skill.id)"
             >
-              <img :src="skill.icon" :alt="skill.name" class="chip-icon" />
+              <img :src="resolveMediaUrl(skill.icon, 'skills')" :alt="skill.name" class="chip-icon" />
               <span>{{ skill.name }}</span>
             </div>
           </div>
@@ -871,7 +859,7 @@ async function handleGenerateStory() {
               :key="'ex-' + idx"
               class="gallery-item"
             >
-              <img :src="resolveMediaUrl(imgUrl)" alt="Content Image" />
+              <img :src="resolveMediaUrl(imgUrl, 'projects')" alt="Content Image" />
               <button class="remove-img-btn" @click.prevent="removeExistingContentImage(idx)">
                 &times;
               </button>

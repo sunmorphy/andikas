@@ -8,7 +8,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
 import { Project } from "@andikas/types";
-import { getMediaUrl } from "@/lib/media";
+import { getMediaUrl, isMediaUrl, replaceMediaUrlsInContent } from "@/lib/media";
 import { SlashList, SlashListItem } from "@/components/ui/SlashList";
 import { UnderlineLink } from "@/components/ui/UnderlineLink";
 import { userConfig } from "@/lib/userConfig";
@@ -81,7 +81,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
     };
   }, [previewImage, closePreview]);
 
-  const coverImageUrl = getMediaUrl(project.coverImage);
+  const coverImageUrl = getMediaUrl(project.coverImage, 'projects');
 
   const metadataItems: SlashListItem[] = [
     ...(project.year ? [String(project.year)] : []),
@@ -103,7 +103,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
 
   const markdownComponents = {
     img: ({ ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
-      const resolvedSrc = getMediaUrl(props.src);
+      const resolvedSrc = getMediaUrl(props.src, 'projects');
       return (
         <span
           className="block my-8 cursor-zoom-in overflow-hidden bg-neutral-200/40 group relative select-none"
@@ -123,11 +123,16 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
       );
     },
     a: ({ ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+      const href = props.href || "";
+      const isMedia = isMediaUrl(href);
+      const resolvedHref = isMedia ? getMediaUrl(href, 'projects') : href;
+      const isExternal = isMedia || resolvedHref.startsWith("http");
       return (
         <a
           {...props}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={resolvedHref}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
           className="text-brand-900 underline underline-offset-4 decoration-1 font-bold hover:opacity-80 transition-opacity"
         />
       );
@@ -231,7 +236,7 @@ export default function ProjectDetailClient({ project, dict, lang }: Props) {
             remarkPlugins={[remarkGfm]}
             components={markdownComponents}
           >
-            {project.content}
+            {replaceMediaUrlsInContent(project.content)}
           </ReactMarkdown>
         </div>
       )}

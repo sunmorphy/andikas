@@ -20,7 +20,7 @@ export function ProjectCard({
   priority = false,
   noImageText = "no image",
 }: Props) {
-  const imageUrl = getMediaUrl(project.coverImage);
+  const imageUrl = getMediaUrl(project.coverImage, 'projects');
 
   return (
     <Link

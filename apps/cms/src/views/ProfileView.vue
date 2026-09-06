@@ -7,6 +7,7 @@ import LanguageSelector from '../components/ui/LanguageSelector.vue'
 import { PhPlusCircle, PhTrash } from '@phosphor-icons/vue'
 import { parseLocal, stringifyLocal, defaultLang, getEmptyLocalized } from '../utils/i18n'
 import { PDFDocument } from 'pdf-lib'
+import { resolveMediaUrl } from '../utils/media'
 
 const loading = ref(true)
 const saving = ref(false)
@@ -239,7 +240,7 @@ function showMessage(text: string, type: string) {
       <form @submit.prevent="saveProfile">
         <div class="header-photo">
           <div class="photo-preview">
-            <img v-if="previewUrl || form.profilePhotoUrl" :src="previewUrl || form.profilePhotoUrl" alt="Profile" />
+            <img v-if="previewUrl || form.profilePhotoUrl" :src="previewUrl || resolveMediaUrl(form.profilePhotoUrl, 'users')" alt="Profile" />
             <div v-else class="no-photo">no photo</div>
           </div>
           <div class="photo-upload">
@@ -250,7 +251,7 @@ function showMessage(text: string, type: string) {
 
         <div class="header-photo">
           <div class="photo-preview">
-            <a v-if="previewResumeUrl" :href="previewResumeUrl" target="_blank" class="preview-link">view</a>
+            <a v-if="previewResumeUrl" :href="resolveMediaUrl(previewResumeUrl, 'users')" target="_blank" class="preview-link">view</a>
             <div v-else class="no-photo">no resume</div>
           </div>
           <div class="photo-upload">

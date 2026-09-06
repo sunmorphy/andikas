@@ -33,7 +33,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const description = project.description;
   const url = `${siteConfig.url}/projects/${slug}`;
   const ogImageUrl = project.coverImage
-    ? getMediaUrl(project.coverImage)
+    ? getMediaUrl(project.coverImage, "projects")
     : `${siteConfig.url}/og.png`;
 
   return {
@@ -85,7 +85,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Props)
   }
 
   const ogImageUrl = project.coverImage
-    ? getMediaUrl(project.coverImage)
+    ? getMediaUrl(project.coverImage, "projects")
     : `${siteConfig.url}/og.png`;
 
   const structuredData = {

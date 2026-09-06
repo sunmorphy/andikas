@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import api from '../utils/api'
 import router from '../router'
+import { setPublicMediaPrefix } from '../utils/media'
 
 export interface User {
     id: string
@@ -26,6 +27,9 @@ export const useAuthStore = defineStore('auth', () => {
                 token.value = data.data.token
                 isAuthenticated.value = true
                 localStorage.setItem('cms_token', data.data.token)
+                if (data.data.user?.username) {
+                    setPublicMediaPrefix(data.data.user.username)
+                }
                 return true
             }
             return false
@@ -45,6 +49,9 @@ export const useAuthStore = defineStore('auth', () => {
             if (data.success && data.data) {
                 user.value = data.data
                 isAuthenticated.value = true
+                if (data.data.username) {
+                    setPublicMediaPrefix(data.data.username)
+                }
                 return true
             }
             logout()
@@ -62,6 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = null
         token.value = null
         isAuthenticated.value = false
+        setPublicMediaPrefix('')
         localStorage.removeItem('cms_token')
         router.push('/login')
     }

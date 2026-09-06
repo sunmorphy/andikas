@@ -10,7 +10,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { uploadToR2 } from '../services/r2.js';
 import { localizeData } from '../utils/localize.js';
 import { triggerRevalidation } from '../utils/revalidate.js';
-import { extractFileName, getMediaUrl } from '../utils/media.js';
+import { extractFileName, formatArticleMedia } from '../utils/media.js';
 
 const router = Router();
 
@@ -69,14 +69,6 @@ const upload = multer({
     },
 });
 
-function formatArticleMedia(article: any) {
-    if (!article) return article;
-    return {
-        ...article,
-        coverImage: getMediaUrl(article.coverImage),
-    };
-}
-
 router.get('/user/:username', asyncHandler(async (req, res) => {
     const username = req.params.username as string;
     const lang = req.query.lang as string || 'en';
@@ -120,7 +112,7 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
         },
     });
 
-    const localized = userArticles.map((art) => formatArticleMedia(localizeData(art, lang)));
+    const localized = userArticles.map((art) => formatArticleMedia(localizeData(art, lang), user?.username || username));
 
     res.json({
         success: true,
@@ -166,7 +158,7 @@ router.get('/user/:username/:slug', asyncHandler(async (req, res) => {
         throw new NotFoundError('Article not found');
     }
 
-    const localized = formatArticleMedia(localizeData(article, lang));
+    const localized = formatArticleMedia(localizeData(article, lang), user?.username || username);
 
     res.json({
         success: true,
@@ -207,7 +199,8 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
         },
     });
 
-    const formatted = userArticles.map(formatArticleMedia);
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    const formatted = userArticles.map((art) => formatArticleMedia(art, user?.username));
 
     res.json({
         success: true,
@@ -224,6 +217,7 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
 router.get('/:id', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.userId;
     const id = req.params.id as string;
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
 
     const article = await db.query.articles.findFirst({
         where: and(
@@ -245,12 +239,13 @@ router.get('/:id', requireAuth, asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: formatArticleMedia(article),
+        data: formatArticleMedia(article, user?.username),
     });
 }));
 
 router.post('/', requireAuth, upload.single('coverImage'), asyncHandler(async (req, res) => {
     const userId = req.user!.userId;
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
 
     const parseJsonField = (val: any) => {
         if (typeof val === 'string') {
@@ -276,13 +271,16 @@ router.post('/', requireAuth, upload.single('coverImage'), asyncHandler(async (r
     if (req.file) {
         const optimizedBuffer = await sharp(req.file.buffer)
             .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
-            .webp({ quality: 85 })
+            .png({ quality: 80 })
             .toBuffer();
 
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const coverName = `cover_${validated.slug}_${date}.png`;
         const uploadResult = await uploadToR2(
             optimizedBuffer,
-            `articles/cover_${validated.slug}_${Date.now()}.webp`,
-            'image/webp'
+            coverName,
+            user?.username,
+            'articles'
         );
         coverImage = uploadResult.name;
     }
@@ -346,13 +344,14 @@ router.post('/', requireAuth, upload.single('coverImage'), asyncHandler(async (r
 
     res.status(201).json({
         success: true,
-        data: formatArticleMedia(created),
+        data: formatArticleMedia(created, user?.username),
     });
 }));
 
 router.put('/:id', requireAuth, upload.single('coverImage'), asyncHandler(async (req, res) => {
     const userId = req.user!.userId;
     const id = req.params.id as string;
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
 
     const existingArticle = await db.query.articles.findFirst({
         where: and(
@@ -389,13 +388,16 @@ router.put('/:id', requireAuth, upload.single('coverImage'), asyncHandler(async 
     if (req.file) {
         const optimizedBuffer = await sharp(req.file.buffer)
             .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
-            .webp({ quality: 85 })
+            .png({ quality: 80 })
             .toBuffer();
 
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const coverName = `cover_${validated.slug}_${date}.png`;
         const uploadResult = await uploadToR2(
             optimizedBuffer,
-            `articles/cover_${validated.slug}_${Date.now()}.webp`,
-            'image/webp'
+            coverName,
+            user?.username,
+            'articles'
         );
         coverImage = uploadResult.name;
     }
@@ -449,7 +451,7 @@ router.put('/:id', requireAuth, upload.single('coverImage'), asyncHandler(async 
 
     res.json({
         success: true,
-        data: formatArticleMedia(updated),
+        data: formatArticleMedia(updated, user?.username),
     });
 }));
 

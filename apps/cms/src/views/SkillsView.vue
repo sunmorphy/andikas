@@ -6,6 +6,7 @@ import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import BaseInput from '../components/ui/BaseInput.vue'
 import { PhPlus, PhPencilSimple, PhTrash } from '@phosphor-icons/vue'
+import { resolveMediaUrl } from '../utils/media'
 
 interface Skill {
   id: string
@@ -205,7 +206,7 @@ function formatDate(dateString: string) {
     <BaseTable :columns="columns" :data="skills" :loading="loading" :draggable="true" @reorder="handleReorder">
       <template #icon="{ row }">
         <div class="skill-icon-wrap">
-          <img :src="row.icon" :alt="row.name" class="skill-icon" />
+          <img :src="resolveMediaUrl(row.icon, 'skills')" :alt="row.name" class="skill-icon" />
         </div>
       </template>
 
@@ -243,7 +244,7 @@ function formatDate(dateString: string) {
           <label>skill icon <span v-if="!isEditing" class="required">*</span></label>
           <div class="photo-upload-container">
             <div class="icon-preview">
-              <img v-if="previewUrl" :src="previewUrl" alt="Preview" />
+              <img v-if="previewUrl" :src="resolveMediaUrl(previewUrl, 'skills')" alt="Preview" />
               <div v-else class="no-photo">no icon</div>
             </div>
             <div>

@@ -30,13 +30,15 @@ export interface R2UploadResult {
 export const uploadToR2 = async (file: Buffer, fileName: string, username?: string, subFolder?: string): Promise<R2UploadResult> => {
     try {
         const sanitizedFileName = sanitizeFileName(fileName);
-        const bucketName = process.env.R2_BUCKET_NAME!;
+        const bucketName = process.env.R2_BUCKET_NAME || '';
+        const userFolder = (username || process.env.MEDIA_PREFIX || '').trim();
+        const key = [userFolder, subFolder, sanitizedFileName].filter(Boolean).join('/');
 
         const contentType = getContentType(fileName);
 
         const command = new PutObjectCommand({
             Bucket: bucketName,
-            Key: sanitizedFileName,
+            Key: key,
             Body: file,
             ContentType: contentType,
             CacheControl: 'public, max-age=31536000, immutable',
@@ -44,17 +46,17 @@ export const uploadToR2 = async (file: Buffer, fileName: string, username?: stri
 
         await r2Client.send(command);
 
-        const url = getMediaUrl(sanitizedFileName) || sanitizedFileName;
+        const url = getMediaUrl(key) || key;
 
         return {
-            fileId: generateFileId(sanitizedFileName),
-            name: sanitizedFileName,
+            fileId: generateFileId(key),
+            name: key,
             url: url,
             thumbnailUrl: url,
             height: 0,
             width: 0,
             size: file.length,
-            filePath: sanitizedFileName,
+            filePath: key,
             tags: null,
             isPrivateFile: false,
             customCoordinates: null,

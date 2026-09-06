@@ -50,7 +50,8 @@ router.post('/', requireAuth, upload.single('image'), asyncHandler(async (req, r
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const baseName = req.file.originalname.replace(/\.[^.]+$/, '');
     const originalName = `${baseName}_${date}.png`;
-    const result = await uploadToR2(compressed, originalName, user.username, 'uploads');
+    const subFolder = (req.body.folder || req.query.folder || 'uploads') as string;
+    const result = await uploadToR2(compressed, originalName, user?.username, subFolder);
 
     res.json({
         success: true,
@@ -65,15 +66,20 @@ router.post('/', requireAuth, upload.single('image'), asyncHandler(async (req, r
     });
 }));
 
-router.get('/config', requireAuth, (req, res) => {
+router.get('/config', requireAuth, asyncHandler(async (req, res) => {
     const host = process.env.IMAGE_HOST || process.env.R2_PUBLIC_URL || '';
+    const [user] = req.user?.userId
+        ? await db.select({ username: users.username }).from(users).where(eq(users.id, req.user.userId))
+        : [];
+    const mediaPrefix = user?.username || process.env.MEDIA_PREFIX || '';
     res.json({
         success: true,
         data: {
             publicUrl: host,
             imageHost: host,
+            mediaPrefix,
         },
     });
-});
+}));
 
 export default router;

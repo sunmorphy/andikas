@@ -47,12 +47,12 @@ router.get('/', asyncHandler(async (req, res) => {
         throw new NotFoundError('User details not found');
     }
 
-    const [user] = await db.select({email: users.email}).from(users).where(eq(users.id, userId));
+    const [user] = await db.select({email: users.email, username: users.username}).from(users).where(eq(users.id, userId));
 
     res.json({
         success: true,
         data: {
-            ...formatUserMedia(localizeData(userDetail, req.query.lang as string)),
+            ...formatUserMedia(localizeData(userDetail, req.query.lang as string), user?.username),
             email: user?.email,
         },
     });
@@ -78,7 +78,7 @@ router.get('/:username', asyncHandler(async (req, res) => {
     res.json({
         success: true,
         data: {
-            ...formatUserMedia(localizeData(userDetail, req.query.lang as string)),
+            ...formatUserMedia(localizeData(userDetail, req.query.lang as string), user?.username || username),
             email: user.email,
         },
     });
@@ -95,12 +95,12 @@ router.get('/userId/:userId', asyncHandler(async (req, res) => {
         throw new NotFoundError('User details not found');
     }
 
-    const [user] = await db.select({email: users.email}).from(users).where(eq(users.id, userId!));
+    const [user] = await db.select({email: users.email, username: users.username}).from(users).where(eq(users.id, userId!));
 
     res.json({
         success: true,
         data: {
-            ...formatUserMedia(localizeData(userDetail, req.query.lang as string)),
+            ...formatUserMedia(localizeData(userDetail, req.query.lang as string), user?.username),
             email: user?.email,
         },
     });
@@ -147,7 +147,7 @@ router.post('/', requireAuth, upload.fields([{name: 'profilePhoto', maxCount: 1}
                 photoName = `${file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
             }
 
-            const result = await uploadToR2(photoBuffer, photoName, user.username, 'users');
+            const result = await uploadToR2(photoBuffer, photoName, user?.username, 'users');
             profilePhotoName = result.name;
         }
 
@@ -156,7 +156,7 @@ router.post('/', requireAuth, upload.fields([{name: 'profilePhoto', maxCount: 1}
             const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
             const ext = file.originalname.split('.').pop() || 'pdf';
             const resName = `${file.originalname.replace(/\.[^.]+$/, '')}_${date}.${ext}`;
-            const result = await uploadToR2(file.buffer, resName, user.username, 'users');
+            const result = await uploadToR2(file.buffer, resName, user?.username, 'users');
             resumeName = result.name;
         }
     }
@@ -173,7 +173,7 @@ router.post('/', requireAuth, upload.fields([{name: 'profilePhoto', maxCount: 1}
     res.status(201).json({
         success: true,
         data: {
-            ...formatUserMedia(localizeData(newUser, req.query.lang as string)),
+            ...formatUserMedia(localizeData(newUser, req.query.lang as string), user?.username),
             email: user.email,
         },
     });
@@ -217,7 +217,7 @@ router.put('/', requireAuth, upload.fields([{name: 'profilePhoto', maxCount: 1},
                 photoName = `${file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
             }
 
-            const result = await uploadToR2(photoBuffer, photoName, user.username, 'users');
+            const result = await uploadToR2(photoBuffer, photoName, user?.username, 'users');
             profilePhotoName = result.name;
         }
 
@@ -226,7 +226,7 @@ router.put('/', requireAuth, upload.fields([{name: 'profilePhoto', maxCount: 1},
             const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
             const ext = file.originalname.split('.').pop() || 'pdf';
             const resName = `${file.originalname.replace(/\.[^.]+$/, '')}_${date}.${ext}`;
-            const result = await uploadToR2(file.buffer, resName, user.username, 'users');
+            const result = await uploadToR2(file.buffer, resName, user?.username, 'users');
             resumeName = result.name;
         }
     }
@@ -242,7 +242,7 @@ router.put('/', requireAuth, upload.fields([{name: 'profilePhoto', maxCount: 1},
     res.json({
         success: true,
         data: {
-            ...formatUserMedia(localizeData(updated, req.query.lang as string)),
+            ...formatUserMedia(localizeData(updated, req.query.lang as string), user?.username),
             email: user.email,
         },
     });

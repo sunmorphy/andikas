@@ -75,6 +75,8 @@ router.get('/', asyncHandler(async (req, res) => {
         return res.json({success: true, data: []});
     }
 
+    const [user] = await db.select({ username: users.username }).from(users).where(eq(users.id, userId));
+
     const {page, limit, offset} = extractPagination(req.query);
     const filters = extractFilters(req.query);
     const whereClause = and(eq(projects.userId, userId), ...filters);
@@ -103,7 +105,7 @@ router.get('/', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: (localizeData(allProjects, req.query.lang as string) || []).map(formatProjectMedia),
+        data: (localizeData(allProjects, req.query.lang as string) || []).map((p: any) => formatProjectMedia(p, user?.username)),
         meta: {
             total,
             page,
@@ -167,7 +169,7 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: (localizeData(userProjects, req.query.lang as string) || []).map(formatProjectMedia),
+        data: (localizeData(userProjects, req.query.lang as string) || []).map((p: any) => formatProjectMedia(p, user?.username || username)),
         meta: {
             total,
             page,
@@ -179,6 +181,8 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
 
 router.get('/userId/:userId', asyncHandler(async (req, res) => {
     const {userId} = req.params;
+
+    const [user] = await db.select({ username: users.username }).from(users).where(eq(users.id, userId!));
 
     const {page, limit, offset} = extractPagination(req.query);
     const filterConditions: any[] = [eq(projects.userId, userId!), eq(projects.published, true)];
@@ -225,7 +229,7 @@ router.get('/userId/:userId', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: (localizeData(userProjects, req.query.lang as string) || []).map(formatProjectMedia),
+        data: (localizeData(userProjects, req.query.lang as string) || []).map((p: any) => formatProjectMedia(p, user?.username)),
         meta: {
             total,
             page,
@@ -266,12 +270,14 @@ router.get('/user/:username/:slug', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: formatProjectMedia(localizeData(project, req.query.lang as string)),
+        data: formatProjectMedia(localizeData(project, req.query.lang as string), user?.username || username),
     });
 }));
 
 router.get('/userId/:userId/:slug', asyncHandler(async (req, res) => {
     const {userId, slug} = req.params;
+
+    const [user] = await db.select().from(users).where(eq(users.id, userId!));
 
     const project = await db.query.projects.findFirst({
         where: and(eq(projects.slug, slug!), eq(projects.userId, userId!)),
@@ -295,7 +301,7 @@ router.get('/userId/:userId/:slug', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: formatProjectMedia(localizeData(project, req.query.lang as string)),
+        data: formatProjectMedia(localizeData(project, req.query.lang as string), user?.username),
     });
 }));
 
@@ -306,6 +312,8 @@ router.get('/:slug', asyncHandler(async (req, res) => {
     if (!userId) {
         throw new NotFoundError('Project not found');
     }
+
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
 
     const project = await db.query.projects.findFirst({
         where: and(eq(projects.slug, slug!), eq(projects.userId, userId)),
@@ -329,7 +337,7 @@ router.get('/:slug', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: formatProjectMedia(localizeData(project, req.query.lang as string)),
+        data: formatProjectMedia(localizeData(project, req.query.lang as string), user?.username),
     });
 }));
 
@@ -360,7 +368,7 @@ router.post('/', requireAuth, upload.fields([
             withoutEnlargement: true
         }).png({quality: 80}).toBuffer();
         const coverName = `${files.coverImage[0].originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
-        const result = await uploadToR2(coverBuffer, coverName, user.username, 'projects');
+        const result = await uploadToR2(coverBuffer, coverName, user?.username, 'projects');
 
         coverImageName = result.name;
     }
@@ -374,8 +382,7 @@ router.post('/', requireAuth, upload.fields([
                 withoutEnlargement: true
             }).png({quality: 80}).toBuffer();
             const imgName = `${file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
-            const result = await uploadToR2(imgBuffer, imgName, user.username, 'projects');
-
+            const result = await uploadToR2(imgBuffer, imgName, user?.username, 'projects');
             contentImageNames.push(result.name);
         }
     }
@@ -431,7 +438,7 @@ router.post('/', requireAuth, upload.fields([
 
     res.status(201).json({
         success: true,
-        data: formatProjectMedia(result),
+        data: formatProjectMedia(result, user?.username),
     });
 }));
 
@@ -485,7 +492,7 @@ router.put('/:id', requireAuth, upload.fields([
             withoutEnlargement: true
         }).png({quality: 80}).toBuffer();
         const coverName = `${files.coverImage[0].originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
-        const result = await uploadToR2(coverBuffer, coverName, user.username, 'projects');
+        const result = await uploadToR2(coverBuffer, coverName, user?.username, 'projects');
 
         coverImageName = result.name;
     }
@@ -498,7 +505,7 @@ router.put('/:id', requireAuth, upload.fields([
                 withoutEnlargement: true
             }).png({quality: 80}).toBuffer();
             const imgName = `${file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
-            const result = await uploadToR2(imgBuffer, imgName, user.username, 'projects');
+            const result = await uploadToR2(imgBuffer, imgName, user?.username, 'projects');
             contentImageNames.push(result.name);
         }
     }
@@ -561,7 +568,7 @@ router.put('/:id', requireAuth, upload.fields([
 
     res.json({
         success: true,
-        data: formatProjectMedia(result),
+        data: formatProjectMedia(result, user?.username),
     });
 }));
 

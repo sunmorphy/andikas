@@ -31,6 +31,7 @@ const upload = multer({
 
 router.get('/', asyncHandler(async (req, res) => {
     const userId = req.user?.userId;
+    const [user] = userId ? await db.select().from(users).where(eq(users.id, userId)) : [undefined];
 
     const allSkills = userId
         ? await db.select().from(skills).where(eq(skills.userId, userId)).orderBy(asc(skills.order))
@@ -38,7 +39,7 @@ router.get('/', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: allSkills.map(formatSkillMedia),
+        data: allSkills.map((s) => formatSkillMedia(s, user?.username)),
     });
 }));
 
@@ -55,26 +56,26 @@ router.get('/user/:username', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: userSkills.map(formatSkillMedia),
+        data: userSkills.map((s) => formatSkillMedia(s, user?.username || username)),
     });
 }));
 
 router.get('/userId/:userId', asyncHandler(async (req, res) => {
     const {userId} = req.params;
+    const [user] = await db.select().from(users).where(eq(users.id, userId!));
 
     const userSkills = await db.select().from(skills).where(eq(skills.userId, userId!)).orderBy(asc(skills.order));
 
     res.json({
         success: true,
-        data: userSkills.map(formatSkillMedia),
+        data: userSkills.map((s) => formatSkillMedia(s, user?.username)),
     });
 }));
 
 router.get('/:id', asyncHandler(async (req, res) => {
     const skillId = parseInt(req.params.id!, 10);
     const userId = req.user?.userId;
-
-    if (isNaN(skillId)) throw new NotFoundError('Invalid skill ID');
+    const [user] = userId ? await db.select().from(users).where(eq(users.id, userId)) : [undefined];
 
     const query = userId
         ? db.select().from(skills).where(and(eq(skills.id, skillId), eq(skills.userId, userId)))
@@ -88,7 +89,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 
     res.json({
         success: true,
-        data: formatSkillMedia(skill),
+        data: formatSkillMedia(skill, user?.username),
     });
 }));
 
@@ -114,7 +115,7 @@ router.post('/', requireAuth, upload.single('icon'), asyncHandler(async (req, re
     const iconBuffer = await sharp(req.file.buffer).png({quality: 80}).toBuffer();
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const iconName = `${req.file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
-    const result = await uploadToR2(iconBuffer, iconName, user.username, 'skills');
+    const result = await uploadToR2(iconBuffer, iconName, user?.username, 'skills');
 
     const [maxOrderResult] = await db
         .select({
@@ -139,7 +140,7 @@ router.post('/', requireAuth, upload.single('icon'), asyncHandler(async (req, re
 
     res.status(201).json({
         success: true,
-        data: formatSkillMedia(newSkill),
+        data: formatSkillMedia(newSkill, user?.username),
     });
 }));
 
@@ -198,12 +199,14 @@ router.put('/:id', requireAuth, upload.single('icon'), asyncHandler(async (req, 
         const iconBuffer = await sharp(req.file.buffer).png({quality: 80}).toBuffer();
         const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
         const baseIconName = `${req.file.originalname.replace(/\.[^.]+$/, '')}_${date}.png`;
-        const result = await uploadToR2(iconBuffer, baseIconName, user.username, 'skills');
+        const result = await uploadToR2(iconBuffer, baseIconName, user?.username, 'skills');
 
         iconName = result.name;
     } else if (validated.icon) {
         iconName = extractFileName(validated.icon) || existing.icon;
     }
+
+    const [user] = await db.select().from(users).where(eq(users.id, req.user!.userId));
 
     const [updated] = await db
         .update(skills)
@@ -220,7 +223,7 @@ router.put('/:id', requireAuth, upload.single('icon'), asyncHandler(async (req, 
 
     res.json({
         success: true,
-        data: formatSkillMedia(updated),
+        data: formatSkillMedia(updated, user?.username),
     });
 }));
 

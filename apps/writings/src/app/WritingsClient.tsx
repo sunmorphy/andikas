@@ -183,7 +183,7 @@ export default function WritingsClient({
                 })
               : "";
 
-            const coverUrl = getMediaUrl(art.coverImage);
+            const coverUrl = getMediaUrl(art.coverImage, "articles");
             const articleHref = `/${art.slug}${lang === "en" ? "" : `?lang=${lang}`}`;
 
             return (

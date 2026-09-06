@@ -8,6 +8,7 @@ import BaseInput from '../components/ui/BaseInput.vue'
 import { PhPlus, PhPencilSimple, PhTrash, PhLink } from '@phosphor-icons/vue'
 import LanguageSelector from '../components/ui/LanguageSelector.vue'
 import { parseLocal, stringifyLocal, getDisplayLocal, defaultLang, getEmptyLocalized } from '../utils/i18n'
+import { resolveMediaUrl } from '../utils/media'
 
 interface Skill {
   id: string
@@ -270,7 +271,7 @@ function showMessage(text: string, type: string) {
       <template #skills="{ row }">
         <div class="skill-tags">
           <span v-for="skill in (row.skills || [])" :key="skill.id" class="skill-tag" :title="skill.name">
-            <img :src="skill.icon" :alt="skill.name" />
+            <img :src="resolveMediaUrl(skill.icon, 'skills')" :alt="skill.name" />
           </span>
           <span v-if="!(row.skills?.length)" class="text-tertiary">none</span>
         </div>
@@ -320,7 +321,7 @@ function showMessage(text: string, type: string) {
               :class="{ selected: form.skillIds.includes(skill.id) }"
               @click="toggleSkill(skill.id)"
             >
-              <img :src="skill.icon" :alt="skill.name" class="chip-icon" />
+              <img :src="resolveMediaUrl(skill.icon, 'skills')" :alt="skill.name" class="chip-icon" />
               <span>{{ skill.name }}</span>
             </div>
             <div v-if="availableSkills.length === 0" class="text-tertiary text-sm">

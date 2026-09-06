@@ -1,11 +1,12 @@
 import { ApiResponse, PaginatedMeta, User, Experience, Education, Certification, Project, Skill, Tag } from '@andikas/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-const USERNAME = 'andikas';
+const USERNAME = (process.env.NEXT_PUBLIC_USERNAME || process.env.NEXT_PUBLIC_MEDIA_PREFIX || '').trim();
 
 export async function fetchUser(username: string = USERNAME, lang: string = 'en'): Promise<User | null> {
     try {
-        const url = `${API_BASE_URL}/user/${username}${lang ? `?lang=${lang}` : ''}`;
+        const path = username ? `/user/${username}` : '/user';
+        const url = `${API_BASE_URL}${path}${lang ? `?lang=${lang}` : ''}`;
         const res = await fetch(url, { next: { revalidate: 86400, tags: ['user'] } });
         if (!res.ok) return null;
         const json: ApiResponse<User> = await res.json();
@@ -18,7 +19,8 @@ export async function fetchUser(username: string = USERNAME, lang: string = 'en'
 
 export async function fetchSkills(username: string = USERNAME): Promise<Skill[]> {
     try {
-        const res = await fetch(`${API_BASE_URL}/skills/user/${username}`, { next: { revalidate: 86400, tags: ['skills'] } });
+        const path = username ? `/skills/user/${username}` : '/skills';
+        const res = await fetch(`${API_BASE_URL}${path}`, { next: { revalidate: 86400, tags: ['skills'] } });
         if (!res.ok) return [];
         const json: ApiResponse<Skill[]> = await res.json();
         return json.success ? json.data : [];
@@ -30,7 +32,8 @@ export async function fetchSkills(username: string = USERNAME): Promise<Skill[]>
 
 export async function fetchTags(username: string = USERNAME, type: string = 'project'): Promise<Tag[]> {
     try {
-        const url = `${API_BASE_URL}/tags/user/${username}${type ? `?type=${type}` : ''}`;
+        const path = username ? `/tags/user/${username}` : '/tags';
+        const url = `${API_BASE_URL}${path}${type ? `?type=${type}` : ''}`;
         const res = await fetch(url, { next: { revalidate: 86400, tags: ['tags'] } });
         if (!res.ok) return [];
         const json: ApiResponse<Tag[]> = await res.json();
@@ -43,7 +46,8 @@ export async function fetchTags(username: string = USERNAME, type: string = 'pro
 
 export async function fetchExperience(username: string = USERNAME, lang: string = 'en'): Promise<Experience[]> {
     try {
-        const url = `${API_BASE_URL}/experience/user/${username}${lang ? `?lang=${lang}` : ''}`;
+        const path = username ? `/experience/user/${username}` : '/experience';
+        const url = `${API_BASE_URL}${path}${lang ? `?lang=${lang}` : ''}`;
         const res = await fetch(url, { next: { revalidate: 86400, tags: ['experience'] } });
         if (!res.ok) return [];
         const json: ApiResponse<Experience[]> = await res.json();
@@ -56,7 +60,8 @@ export async function fetchExperience(username: string = USERNAME, lang: string 
 
 export async function fetchEducation(username: string = USERNAME, lang: string = 'en'): Promise<Education[]> {
     try {
-        const url = `${API_BASE_URL}/education/user/${username}${lang ? `?lang=${lang}` : ''}`;
+        const path = username ? `/education/user/${username}` : '/education';
+        const url = `${API_BASE_URL}${path}${lang ? `?lang=${lang}` : ''}`;
         const res = await fetch(url, { next: { revalidate: 86400, tags: ['education'] } });
         if (!res.ok) return [];
         const json: ApiResponse<Education[]> = await res.json();
@@ -69,7 +74,8 @@ export async function fetchEducation(username: string = USERNAME, lang: string =
 
 export async function fetchCertifications(username: string = USERNAME, lang: string = 'en'): Promise<Certification[]> {
     try {
-        const url = `${API_BASE_URL}/certifications/user/${username}${lang ? `?lang=${lang}` : ''}`;
+        const path = username ? `/certifications/user/${username}` : '/certifications';
+        const url = `${API_BASE_URL}${path}${lang ? `?lang=${lang}` : ''}`;
         const res = await fetch(url, { next: { revalidate: 86400, tags: ['certifications'] } });
         if (!res.ok) return [];
         const json: ApiResponse<Certification[]> = await res.json();
@@ -101,7 +107,8 @@ export async function fetchProjects(username: string = USERNAME, params?: Projec
         if (lang) urlParams.append('lang', lang);
 
         const queryString = urlParams.toString();
-        const url = `${API_BASE_URL}/projects/user/${username}${queryString ? `?${queryString}` : ''}`;
+        const path = username ? `/projects/user/${username}` : '/projects';
+        const url = `${API_BASE_URL}${path}${queryString ? `?${queryString}` : ''}`;
 
         const res = await fetch(url, { next: { revalidate: 86400, tags: ['projects'] } });
         if (!res.ok) return { data: [] };
@@ -121,7 +128,8 @@ export async function fetchProjects(username: string = USERNAME, params?: Projec
 
 export async function fetchProjectBySlug(slug: string, username: string = USERNAME, lang: string = 'en'): Promise<Project | null> {
     try {
-        const url = `${API_BASE_URL}/projects/user/${username}/${slug}${lang ? `?lang=${lang}` : ''}`;
+        const path = username ? `/projects/user/${username}/${slug}` : `/projects/${slug}`;
+        const url = `${API_BASE_URL}${path}${lang ? `?lang=${lang}` : ''}`;
         const res = await fetch(url, { next: { revalidate: 86400, tags: ['projects', `project-${slug}`] } });
         if (!res.ok) return null;
         const json: ApiResponse<Project> = await res.json();

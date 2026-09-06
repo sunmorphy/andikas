@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/siteConfig";
 import { getDictionary } from "@/get-dictionary";
 import { resolveLocale } from "@/lib/locale";
 import { getBcp47Locale } from "@/i18n-config";
-import { getMediaUrl } from "@/lib/media";
+import { getMediaUrl, isMediaUrl, replaceMediaUrlsInContent } from "@/lib/media";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -47,7 +47,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const titleStr = getLocalizedText(article.title, lang) || "";
   const descStr = getLocalizedText(article.description, lang);
   const ogImageUrl = article.coverImage
-    ? getMediaUrl(article.coverImage)
+    ? getMediaUrl(article.coverImage, "articles")
     : `${siteConfig.url}/og.png`;
   const url = `${siteConfig.url}/${slug}`;
 
@@ -102,7 +102,9 @@ export default async function ArticlePage({ params, searchParams }: Props) {
 
   const titleStr = getLocalizedText(article.title, lang) || "Untitled";
   const descStr = getLocalizedText(article.description, lang);
-  const contentStr = getLocalizedText(article.content, lang);
+  const contentStr = replaceMediaUrlsInContent(
+    getLocalizedText(article.content, lang)
+  );
   const readMinutes = calculateReadingTime(contentStr || descStr);
   const pubDate = article.publishedAt || article.createdAt;
   const dateFormatted = pubDate
@@ -113,8 +115,40 @@ export default async function ArticlePage({ params, searchParams }: Props) {
       })
     : "";
 
+  const markdownComponents = {
+    img: ({ ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+      const resolvedSrc = getMediaUrl(props.src, "articles");
+      return (
+        <span className="block my-8 overflow-hidden bg-neutral-200/40 select-none">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            {...props}
+            src={resolvedSrc}
+            className="w-full h-auto object-cover"
+            alt={props.alt || titleStr}
+          />
+        </span>
+      );
+    },
+    a: ({ ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+      const href = props.href || "";
+      const isMedia = isMediaUrl(href);
+      const resolvedHref = isMedia ? getMediaUrl(href, "articles") : href;
+      const isExternal = isMedia || resolvedHref.startsWith("http");
+      return (
+        <a
+          {...props}
+          href={resolvedHref}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
+          className="text-brand-900 underline underline-offset-4 decoration-1 font-bold hover:opacity-80 transition-opacity"
+        />
+      );
+    },
+  };
+
   const ogImageUrl = article.coverImage
-    ? getMediaUrl(article.coverImage)
+    ? getMediaUrl(article.coverImage, "articles")
     : `${siteConfig.url}/og.png`;
 
   const structuredData = {
@@ -206,7 +240,7 @@ export default async function ArticlePage({ params, searchParams }: Props) {
       {article.coverImage && (
         <div className="relative w-full aspect-[16/9] mb-12 overflow-hidden bg-neutral-200">
           <Image
-            src={getMediaUrl(article.coverImage)}
+            src={getMediaUrl(article.coverImage, "articles")}
             alt={titleStr}
             fill
             priority
@@ -218,7 +252,10 @@ export default async function ArticlePage({ params, searchParams }: Props) {
 
       {/* Markdown Content */}
       <div className="prose prose-neutral max-w-none text-ink text-sm md:text-base leading-relaxed">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={markdownComponents}
+        >
           {contentStr || (dict.writings?.contentComingSoon ? `*(${dict.writings.contentComingSoon})*` : "")}
         </ReactMarkdown>
       </div>

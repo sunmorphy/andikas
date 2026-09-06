@@ -40,7 +40,7 @@ export default function HeroScrollSection({description, role, profilePhoto, name
         offset: isFreeScroll ? ["start start", "end start"] : ["start start", "end end"],
     });
 
-    const photoUrl = getMediaUrl(profilePhoto);
+    const photoUrl = getMediaUrl(profilePhoto, "users");
     const isGif = photoUrl ? photoUrl.split("?")[0].toLowerCase().endsWith(".gif") : false;
 
     // Map scroll progress to horizontal translation and opacity for the title split

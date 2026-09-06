@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import api, { translateText } from '../utils/api'
+import { resolveMediaUrl } from '../utils/media'
 import BaseTable from '../components/ui/BaseTable.vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
@@ -401,7 +402,7 @@ onMounted(() => {
       <BaseTable :columns="columns" :data="filteredArticles" :loading="loading">
         <template #cover="{ row }">
           <div class="cover-thumb">
-            <img v-if="row.coverImage" :src="row.coverImage" :alt="getTitleString(row.title)" />
+            <img v-if="row.coverImage" :src="resolveMediaUrl(row.coverImage, 'articles')" :alt="getTitleString(row.title)" />
             <div v-else class="no-thumb">
               <PhArticle :size="20" />
             </div>
@@ -533,7 +534,7 @@ onMounted(() => {
           <label>Cover Image (Optional)</label>
           <div class="cover-uploader">
             <div v-if="previewCover" class="preview-box">
-              <img :src="previewCover" alt="Cover Preview" />
+              <img :src="resolveMediaUrl(previewCover, 'articles')" alt="Cover Preview" />
             </div>
             <label class="btn-file-label">
               <PhImageIcon :size="16" />

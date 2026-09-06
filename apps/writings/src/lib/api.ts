@@ -1,7 +1,7 @@
 import { ApiResponse, PaginatedApiResponse, Article, Tag } from '@andikas/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-const USERNAME = process.env.NEXT_PUBLIC_USERNAME || 'andikas';
+const USERNAME = (process.env.NEXT_PUBLIC_USERNAME || process.env.NEXT_PUBLIC_MEDIA_PREFIX || '').trim();
 
 export async function fetchArticles(
   options: { page?: number; limit?: number; search?: string; tag?: number } = {},
@@ -15,7 +15,8 @@ export async function fetchArticles(
     if (options.search) params.set('search', options.search);
     if (options.tag) params.set('tag', String(options.tag));
 
-    const url = `${API_BASE_URL}/articles/user/${USERNAME}?${params.toString()}`;
+    const path = USERNAME ? `/articles/user/${USERNAME}` : '/articles';
+    const url = `${API_BASE_URL}${path}?${params.toString()}`;
     const res = await fetch(url, {
       next: { revalidate: 86400, tags: ['articles'] },
     });
@@ -45,7 +46,8 @@ export async function fetchArticleBySlug(
   lang: string = 'en'
 ): Promise<Article | null> {
   try {
-    const url = `${API_BASE_URL}/articles/user/${USERNAME}/${slug}${lang ? `?lang=${lang}` : ''}`;
+    const path = USERNAME ? `/articles/user/${USERNAME}/${slug}` : `/articles/${slug}`;
+    const url = `${API_BASE_URL}${path}${lang ? `?lang=${lang}` : ''}`;
     const res = await fetch(url, {
       next: { revalidate: 86400, tags: ['articles', `article-${slug}`] },
     });
@@ -61,7 +63,8 @@ export async function fetchArticleBySlug(
 
 export async function fetchTags(type: string = 'writing'): Promise<Tag[]> {
   try {
-    const url = `${API_BASE_URL}/tags/user/${USERNAME}${type ? `?type=${type}` : ''}`;
+    const path = USERNAME ? `/tags/user/${USERNAME}` : '/tags';
+    const url = `${API_BASE_URL}${path}${type ? `?type=${type}` : ''}`;
     const res = await fetch(url, {
       next: { revalidate: 86400, tags: ['tags'] },
     });
