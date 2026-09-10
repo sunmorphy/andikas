@@ -1,4 +1,4 @@
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { i18n, Locale } from "@/i18n-config";
 
 export async function resolveLocale(
@@ -16,12 +16,6 @@ export async function resolveLocale(
     const headerLang = headerList.get("x-locale");
     if (headerLang && (i18n.locales as readonly string[]).includes(headerLang)) {
       return headerLang as Locale;
-    }
-
-    const cookieStore = await cookies();
-    const cookieLang = cookieStore.get("NEXT_LOCALE")?.value;
-    if (cookieLang && (i18n.locales as readonly string[]).includes(cookieLang)) {
-      return cookieLang as Locale;
     }
   } catch {
     // Fallback if called outside request context

@@ -63,7 +63,7 @@ export function HeaderNav({ lang: initialLang, dict: initialDict }: Props) {
       >
         {(currentDict?.works || "works").toLowerCase()}
       </Link>
-      <LanguageSwitcher currentLang={activeLang} />
+      <LanguageSwitcher currentLang={activeLang} className="hidden" />
     </nav>
   );
 }

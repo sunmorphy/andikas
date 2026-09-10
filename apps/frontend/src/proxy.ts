@@ -55,8 +55,6 @@ export function proxy(request: NextRequest) {
 
   if (queryLang && (i18n.locales as readonly string[]).includes(queryLang)) {
     activeLocale = queryLang as Locale;
-  } else {
-    activeLocale = getPreferredLocale(request);
   }
 
   const requestHeaders = new Headers(request.headers);
