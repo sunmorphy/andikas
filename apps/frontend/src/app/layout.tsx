@@ -77,7 +77,7 @@ const haasGrotesk = localFont({
     },
   ],
   variable: "--font-haas",
-  display: "block",
+  display: "swap",
   preload: true,
 });
 
