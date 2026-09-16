@@ -17,11 +17,6 @@ function getClientLocale(): Locale {
   if (lang && (i18n.locales as readonly string[]).includes(lang)) {
     return lang as Locale;
   }
-  const match = document.cookie.match(/(^|;)\s*NEXT_LOCALE=([^;]+)/);
-  const val = match ? match[2] : null;
-  if (val && (i18n.locales as readonly string[]).includes(val)) {
-    return val as Locale;
-  }
   return i18n.defaultLocale;
 }
 

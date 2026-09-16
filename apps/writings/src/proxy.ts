@@ -24,28 +24,18 @@ function getPreferredLocale(request: NextRequest): Locale {
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // 1. Redirect legacy path-based locale URLs: e.g. /id/slug -> /slug?lang=id, /en -> /
+  // 1. Redirect legacy path-based locale URLs: e.g. /id/slug -> /slug, /en -> /
   for (const locale of i18n.locales) {
     if (pathname === `/${locale}`) {
       const url = request.nextUrl.clone();
       url.pathname = "/";
-      if (locale !== i18n.defaultLocale) {
-        url.searchParams.set("lang", locale);
-      }
-      const response = NextResponse.redirect(url, 301);
-      response.cookies.set("NEXT_LOCALE", locale, { path: "/", maxAge: 31536000 });
-      return response;
+      return NextResponse.redirect(url, 301);
     }
     if (pathname.startsWith(`/${locale}/`)) {
       const cleanPath = pathname.replace(`/${locale}`, "");
       const url = request.nextUrl.clone();
       url.pathname = cleanPath || "/";
-      if (locale !== i18n.defaultLocale) {
-        url.searchParams.set("lang", locale);
-      }
-      const response = NextResponse.redirect(url, 301);
-      response.cookies.set("NEXT_LOCALE", locale, { path: "/", maxAge: 31536000 });
-      return response;
+      return NextResponse.redirect(url, 301);
     }
   }
 
@@ -55,8 +45,6 @@ export function proxy(request: NextRequest) {
 
   if (queryLang && (i18n.locales as readonly string[]).includes(queryLang)) {
     activeLocale = queryLang as Locale;
-  } else {
-    activeLocale = getPreferredLocale(request);
   }
 
   const requestHeaders = new Headers(request.headers);

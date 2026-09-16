@@ -46,7 +46,7 @@ export function HeaderNav({ lang: initialLang, dict: initialDict }: Props) {
       <Link href={writingsHref} className="text-brand-900 hover:text-brand-900 transition-colors">
         {(currentDict?.writings || "writings").toLowerCase()}
       </Link>
-      <LanguageSwitcher currentLang={activeLang} />
+      <LanguageSwitcher currentLang={activeLang} className="hidden" />
     </nav>
   );
 }

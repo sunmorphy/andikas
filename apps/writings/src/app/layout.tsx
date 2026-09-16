@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { headers, cookies } from "next/headers";
+import { headers } from "next/headers";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -75,7 +75,7 @@ const haasGrotesk = localFont({
     },
   ],
   variable: "--font-haas",
-  display: "block",
+  display: "swap",
   preload: true,
 });
 
@@ -141,12 +141,6 @@ export default async function RootLayout({
     const headerLang = headerList.get("x-locale");
     if (headerLang && (i18n.locales as readonly string[]).includes(headerLang)) {
       lang = headerLang as Locale;
-    } else {
-      const cookieStore = await cookies();
-      const cookieLang = cookieStore.get("NEXT_LOCALE")?.value;
-      if (cookieLang && (i18n.locales as readonly string[]).includes(cookieLang)) {
-        lang = cookieLang as Locale;
-      }
     }
   } catch {
     // Fallback if rendered statically

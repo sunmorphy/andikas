@@ -20,7 +20,13 @@ function setLocaleCookie(locale: Locale) {
   }
 }
 
-export default function LanguageSwitcher({ currentLang }: { currentLang: Locale }) {
+export default function LanguageSwitcher({
+  currentLang,
+  className,
+}: {
+  currentLang: Locale;
+  className?: string;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -54,7 +60,7 @@ export default function LanguageSwitcher({ currentLang }: { currentLang: Locale 
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={cn("hidden relative", className)} ref={dropdownRef}>
       <button
         type="button"
         aria-label="Toggle language"
